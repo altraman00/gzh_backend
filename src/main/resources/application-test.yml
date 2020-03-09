@@ -56,10 +56,20 @@ spring:
                     config:
                         multi-statement-allow: true
 # 公众号配置
+# zhangbin
+#wx:
+#    mp:
+#        configs:
+#            - appId: wx9047d074c6a5a211
+#              secret: 180ac29acee722e1f82862100eb85bcf
+#              token: smallprogram
+#              aesKey:
+
+# 丁爽
 wx:
     mp:
         configs:
-            - appId: wx9047d074c6a5a211
-              secret: 180ac29acee722e1f82862100eb85bcf
+            - appId: wx1ae5569fd1bd1e3e
+              secret: 22437a698a6bac6837a866d723c9a261
               token: smallprogram
               aesKey:
