@@ -70,6 +70,6 @@ wx:
     mp:
         configs:
             - appId: wx1ae5569fd1bd1e3e
-              secret: 557bde04449922d2cc254b09e01430f0
+              secret: 22437a698a6bac6837a866d723c9a261
               token: smallprogram
               aesKey:
