@@ -1,6 +1,6 @@
 package com.ruoyi.project.weixin.service;
 
-import com.ruoyi.project.weixin.entity.WxMpTemplate;
+import com.ruoyi.project.weixin.entity.WxMp;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author zhangbin
  * @since 2020-03-11
  */
-public interface IWxMpTemplateService extends IService<WxMpTemplate> {
+public interface IWxMpService extends IService<WxMp> {
 
+    WxMp getByAppId(String appId);
 }

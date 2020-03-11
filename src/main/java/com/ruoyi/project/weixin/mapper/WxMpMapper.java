@@ -1,6 +1,6 @@
 package com.ruoyi.project.weixin.mapper;
 
-import com.ruoyi.project.weixin.entity.WxMpTemplate;
+import com.ruoyi.project.weixin.entity.WxMp;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author zhangbin
  * @since 2020-03-11
  */
-public interface WxMpTemplateMapper extends BaseMapper<WxMpTemplate> {
+public interface WxMpMapper extends BaseMapper<WxMp> {
 
 }

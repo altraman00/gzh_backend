@@ -2,6 +2,7 @@ package com.ruoyi.project.common;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -37,5 +38,6 @@ public class BaseEntity {
     /**
      * 逻辑删除标记（0：显示；1：隐藏）
      */
+    @TableLogic
     private String delFlag;
 }
