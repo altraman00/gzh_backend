@@ -44,6 +44,9 @@ public class HelpActivityServiceImpl implements ActivityService {
         List<WxMpTemplateMessage> list = wxMpTemplateMessageService.list(queryWrapper);
         WxUser wxUser = wxUserService.getByOpenId(openId);
         String wxUserId = wxUser.getId();
+        String inviterOpenId = eventKey.substring(eventKey.lastIndexOf(":") + 1);
+        WxUser inviter = wxUserService.getByOpenId(inviterOpenId);
+        String inviterId = inviter.getId();
         // 首先判断是不是扫活动码进入的
         if (StringUtils.isNotBlank(eventKey) && eventKey.contains(HelpActivityConstant.SCENE_EVENT_KEY)) {
             //查找助力记录
@@ -52,26 +55,25 @@ public class HelpActivityServiceImpl implements ActivityService {
             if (records.isEmpty()) {
                 // 未助力过，开始执行助力
                 // 获取推荐人的openId
-                String inviterOpenId = eventKey.substring(eventKey.lastIndexOf(":") + 1);
-                WxUser inviter = wxUserService.getByOpenId(inviterOpenId);
                 WxTaskHelp wxTaskHelp = wxTaskHelpService.getOne(Wrappers.<WxTaskHelp>lambdaQuery()
                         .eq(WxTaskHelp::getWxUserId, wxUserId)) ;
                 if (wxTaskHelp == null) {
                     wxTaskHelp = new WxTaskHelp();
                     wxTaskHelp.setHelpNum(0);
                     wxTaskHelp.setTaskStatus(ConfigConstant.TASK_DOING);
-                    wxTaskHelp.setWxUserId(inviter.getId());
+                    wxTaskHelp.setWxUserId(inviterId);
                     wxTaskHelpService.save(wxTaskHelp);
                 }
                 // 邀请人完成人数+1
                 wxTaskHelp.setHelpNum(wxTaskHelp.getHelpNum() + 1);
                 if (wxTaskHelp.getHelpNum() >= HelpActivityConstant.TASK_COMPLETE_NEED_NUM) {
                     wxTaskHelp.setTaskStatus(ConfigConstant.TASK_COMPLETE);
+                    wxTaskHelpService.updateById(wxTaskHelp);
                 }
                 // 存储助力记录
                 WxTaskHelpRecord wxTaskHelpRecord = new WxTaskHelpRecord();
                 wxTaskHelpRecord.setHelpWxUserId(wxUserId);
-                wxTaskHelpRecord.setInviteWxUserId(inviter.getId());
+                wxTaskHelpRecord.setInviteWxUserId(inviterId);
                 wxTaskHelpRecordService.save(wxTaskHelpRecord);
                 // 推送助力成功消息
                 WxMpTemplateMessage message = list.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_HELP_SUCCESS)).findFirst().orElse(null);
