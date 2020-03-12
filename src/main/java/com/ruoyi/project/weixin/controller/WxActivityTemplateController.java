@@ -83,7 +83,7 @@ public class WxActivityTemplateController extends BaseController {
             @ApiImplicitParam(name="appId",value="appId",required=true,paramType="String")
     })
     @GetMapping("/template/message/list")
-    public AjaxResult getMpTemplateMessage(String appId) {
+    public AjaxResult getMpTemplateMessage(@RequestParam(value = "appId") String appId) {
         // 查询出公众号绑定的活动消息
         WxMp wxMp = iWxMpService.getByAppId(appId);
         String templateId = wxMp.getTemplateId();

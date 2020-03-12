@@ -58,7 +58,7 @@ public class WxMpTemplateMessage extends BaseEntity {
     /**
      * 公众号id
      */
-    private String mpAppId;
+    private String appId;
 
 
 }
