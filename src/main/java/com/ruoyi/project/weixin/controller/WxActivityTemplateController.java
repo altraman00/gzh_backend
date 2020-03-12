@@ -63,7 +63,7 @@ public class WxActivityTemplateController extends BaseController {
     public AjaxResult bindWxActivityTemplate(@RequestParam(value = "templateId") String templateId,@RequestParam(value = "appId") String appId){
         WxMp wxMp = iWxMpService.getByAppId(appId);
         wxMp.setTemplateId(templateId);
-        iWxMpService.save(wxMp);
+        iWxMpService.updateById(wxMp);
         // 查询出模板详细信息
         QueryWrapper<WxActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("template_id",templateId);
@@ -104,7 +104,7 @@ public class WxActivityTemplateController extends BaseController {
         query.setRemark(editWxTemplateVO.getRemark());
         query.setRepMediaId(editWxTemplateVO.getRepMediaId());
         query.setRepContent(editWxTemplateVO.getRepContent());
-        iWxMpTemplateMessageService.save(query);
+        iWxMpTemplateMessageService.updateById(query);
         return AjaxResult.success(query);
     }
 }
