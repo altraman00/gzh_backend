@@ -90,7 +90,7 @@ public class WxMpController extends BaseController {
     public AjaxResult getWxMpQrCodeTicket(){
        WxMpQrCodeTicket ticket;
         try {
-            ticket = wxMpService.getQrcodeService().qrCodeCreateLastTicket("helpActivity:om_6Xszdb4pEGd2aZm3zi72w5NUw");
+            ticket = wxMpService.getQrcodeService().qrCodeCreateLastTicket("helpActivity:om_6Xs3gPhfGxNOrdh6jVCr8Y4jI");
             File file = wxMpService.getQrcodeService().qrCodePicture(ticket);
             FileUtils.copyFileToDirectory(file,new File("C:\\Users\\VingKing\\Desktop"));
         } catch (Exception e) {

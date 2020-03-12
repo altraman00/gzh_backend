@@ -31,6 +31,8 @@ public class HelpActivityServiceImpl implements ActivityService {
 
     private final WxMpService wxMpService;
 
+    private final WxMsgService wxMsgService;
+
     @Override
     public void execute(WxMpXmlMessage inMessage, WxMp wxMp, WxActivityTemplate template, String openId) {
         // 先判断是不是对应的扫码带参进入
@@ -49,47 +51,57 @@ public class HelpActivityServiceImpl implements ActivityService {
         String inviterId = inviter.getId();
         // 首先判断是不是扫活动码进入的
         if (StringUtils.isNotBlank(eventKey) && eventKey.contains(HelpActivityConstant.SCENE_EVENT_KEY)) {
-            //查找助力记录
-            List<WxTaskHelpRecord> records = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery()
-                    .eq(WxTaskHelpRecord::getHelpWxUserId, wxUserId));
-            if (records.isEmpty()) {
-                // 未助力过，开始执行助力
-                // 获取推荐人的openId
-                WxTaskHelp wxTaskHelp = wxTaskHelpService.getOne(Wrappers.<WxTaskHelp>lambdaQuery()
-                        .eq(WxTaskHelp::getWxUserId, wxUserId)) ;
-                if (wxTaskHelp == null) {
-                    wxTaskHelp = new WxTaskHelp();
-                    wxTaskHelp.setHelpNum(0);
-                    wxTaskHelp.setTaskStatus(ConfigConstant.TASK_DOING);
-                    wxTaskHelp.setWxUserId(inviterId);
-                    wxTaskHelpService.save(wxTaskHelp);
-                }
-                // 邀请人完成人数+1
-                wxTaskHelp.setHelpNum(wxTaskHelp.getHelpNum() + 1);
-                if (wxTaskHelp.getHelpNum() >= HelpActivityConstant.TASK_COMPLETE_NEED_NUM) {
-                    wxTaskHelp.setTaskStatus(ConfigConstant.TASK_COMPLETE);
-                    wxTaskHelpService.updateById(wxTaskHelp);
-                }
-                // 存储助力记录
-                WxTaskHelpRecord wxTaskHelpRecord = new WxTaskHelpRecord();
-                wxTaskHelpRecord.setHelpWxUserId(wxUserId);
-                wxTaskHelpRecord.setInviteWxUserId(inviterId);
-                wxTaskHelpRecordService.save(wxTaskHelpRecord);
-                // 推送助力成功消息
-                WxMpTemplateMessage message = list.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_HELP_SUCCESS)).findFirst().orElse(null);
-                boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
-                if (hasAvailableMessage) {
-                    String content = message.getRepContent();
-                    if (content.contains(HelpActivityConstant.PLACEHOLDER_INVITER_NICKNAME)) {
-                        content = content.replace(HelpActivityConstant.PLACEHOLDER_INVITER_NICKNAME,inviter.getNickName());
-                    }
-                    sendTextMessage(openId, content);
+            // 不是自己扫自己的玛进入的
+            if (!inviterId.equals(wxUserId)) {
+                //查找助力记录
+                List<WxTaskHelpRecord> records = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery()
+                        .eq(WxTaskHelpRecord::getHelpWxUserId, wxUserId));
+                if (records.isEmpty()) {
+                    // 未助力过，可以执行助力流程
+                    executeHelpSuccess(list, wxUser, inviter);
                 }
             }
         }
     }
 
-    private void sendTextMessage(String openId, String content) {
+    private void executeHelpSuccess(List<WxMpTemplateMessage> list, WxUser wxUser, WxUser inviter) {
+        log.info("开始执行助理活动流程：{}",HelpActivityConstant.SCENE_HELP_SUCCESS);
+        String wxUserId = wxUser.getId();
+        String inviterId = inviter.getId();
+        String openId = wxUser.getOpenId();
+        // 未助力过，开始执行助力
+        // 获取推荐人的openId
+        WxTaskHelp wxTaskHelp = wxTaskHelpService.getOne(Wrappers.<WxTaskHelp>lambdaQuery()
+                .eq(WxTaskHelp::getWxUserId, wxUserId)) ;
+        if (wxTaskHelp == null) {
+            wxTaskHelp = new WxTaskHelp();
+            wxTaskHelp.setHelpNum(0);
+            wxTaskHelp.setTaskStatus(ConfigConstant.TASK_DOING);
+            wxTaskHelp.setWxUserId(inviterId);
+            wxTaskHelpService.save(wxTaskHelp);
+        }
+        // 邀请人完成人数+1
+        wxTaskHelp.setHelpNum(wxTaskHelp.getHelpNum() + 1);
+        if (wxTaskHelp.getHelpNum() >= HelpActivityConstant.TASK_COMPLETE_NEED_NUM) {
+            wxTaskHelp.setTaskStatus(ConfigConstant.TASK_COMPLETE);
+            wxTaskHelpService.updateById(wxTaskHelp);
+        }
+        // 存储助力记录
+        WxTaskHelpRecord wxTaskHelpRecord = new WxTaskHelpRecord();
+        wxTaskHelpRecord.setHelpWxUserId(wxUserId);
+        wxTaskHelpRecord.setInviteWxUserId(inviterId);
+        wxTaskHelpRecordService.save(wxTaskHelpRecord);
+        // 推送助力成功消息
+        WxMpTemplateMessage message = list.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_HELP_SUCCESS)).findFirst().orElse(null);
+        boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
+        if (hasAvailableMessage) {
+            String content = message.getRepContent();
+            content = content.replace(HelpActivityConstant.PLACEHOLDER_INVITER_NICKNAME,inviter.getNickName());
+            sendTextMessage(openId, content,wxUser);
+        }
+    }
+
+    private void sendTextMessage(String openId, String content,WxUser wxUser) {
         try {
             WxMpKefuMessage wxMpKefuMessage = WxMpKefuMessage
                     .TEXT()
@@ -100,6 +112,12 @@ public class HelpActivityServiceImpl implements ActivityService {
         } catch (Exception e) {
             log.error("发送客服消息失败，openId：{}",openId);
         }
-
+        // 记录数据库
+        WxMsg wxMsg = new WxMsg();
+        wxMsg.setNickName(wxUser.getNickName());
+        wxMsg.setHeadimgUrl(wxUser.getHeadimgUrl());
+        wxMsg.setType(ConfigConstant.WX_MSG_TYPE_2);
+        wxMsg.setRepContent(wxMsg.getRepContent());
+        wxMsgService.save(wxMsg);
     }
 }
