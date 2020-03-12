@@ -1,5 +1,6 @@
 package com.ruoyi.project.aop;
 
+import com.ruoyi.common.utils.SpringBeanUtil;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.project.weixin.constant.WxEvenConstant;
 import com.ruoyi.project.weixin.entity.WxActivityTemplate;
@@ -59,8 +60,7 @@ public class PortalAspect {
             String openId= (String) args[5];
             WxActivityTemplate template = iWxActivityTemplateService.getById(templateId);
             String templateClass = template.getTemplateClass();
-            ActivityService activityService = (ActivityService) ContextLoader.getCurrentWebApplicationContext()
-                    .getBean(templateClass);
+            ActivityService activityService  = (ActivityService) SpringBeanUtil.getBean(templateClass);
             activityService.execute(inMessage,wxMp,template,openId);
         }
     }

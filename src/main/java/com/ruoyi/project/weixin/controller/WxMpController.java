@@ -1,14 +1,17 @@
 package com.ruoyi.project.weixin.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.ruoyi.common.utils.SpringBeanUtil;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.weixin.entity.WxActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMp;
 import com.ruoyi.project.weixin.entity.WxMpTemplateMessage;
+import com.ruoyi.project.weixin.service.ActivityService;
 import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
 import com.ruoyi.project.weixin.service.IWxMpService;
+import com.ruoyi.project.weixin.service.impl.HelpActivityServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.ContextLoader;
 
 import java.io.File;
 import java.util.HashMap;
@@ -87,14 +91,17 @@ public class WxMpController extends BaseController {
 
     @GetMapping("/qrcode")
     public AjaxResult getWxMpQrCodeTicket(){
-        WxMpQrCodeTicket ticket = null;
+       /* WxMpQrCodeTicket ticket = null;
         try {
             ticket = wxMpService.getQrcodeService().qrCodeCreateLastTicket("1236827846062092289");
             File file = wxMpService.getQrcodeService().qrCodePicture(ticket);
             FileUtils.copyFileToDirectory(file,new File("C:\\Users\\VingKing\\Desktop"));
         } catch (Exception e) {
             log.error("生成带参二维码异常",e);
-        }
-        return AjaxResult.success(ticket);
+        }*/
+
+        ActivityService activityService = (ActivityService) SpringBeanUtil.getBean("helpActivityServiceImpl");
+        activityService.execute(null,null,null,null);
+        return AjaxResult.success(activityService);
     }
 }
