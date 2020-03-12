@@ -6,7 +6,7 @@ package com.ruoyi.project.weixin.constant;
  * 2019年1月21日
  */
 public interface ConfigConstant {
-	
+
 	//订阅状态（0：已订阅；1：未订阅；2：网页授权用户）
 	/**
 	 * 0：未订阅，取消订阅
@@ -70,4 +70,10 @@ public interface ConfigConstant {
 	 */
 	String WX_MENU_TYPE_1 = "1";
 	String WX_MENU_TYPE_2 = "2";
+
+	/**
+	 * 任务进行状态
+	 */
+	int TASK_DOING = 0;
+	int TASK_COMPLETE = 1;
 }

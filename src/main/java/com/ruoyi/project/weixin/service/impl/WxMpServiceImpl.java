@@ -21,7 +21,7 @@ public class WxMpServiceImpl extends ServiceImpl<WxMpMapper, WxMp> implements IW
     @Override
     public WxMp getByAppId(String appId) {
         QueryWrapper<WxMp> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("app_id",appId);
+        queryWrapper.lambda().eq(WxMp::getAppId,appId);
         return this.getOne(queryWrapper);
     }
 }

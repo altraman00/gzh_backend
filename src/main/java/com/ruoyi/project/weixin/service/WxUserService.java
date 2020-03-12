@@ -33,4 +33,5 @@ public interface WxUserService extends IService<WxUser> {
 	 */
 	void tagging(String taggingType, Long tagId, String[] openIds) throws WxErrorException;
 
+	WxUser getByOpenId(String openId);
 }

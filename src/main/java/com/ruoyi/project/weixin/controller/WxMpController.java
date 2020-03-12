@@ -7,11 +7,9 @@ import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.weixin.entity.WxActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMp;
-import com.ruoyi.project.weixin.entity.WxMpTemplateMessage;
 import com.ruoyi.project.weixin.service.ActivityService;
 import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
 import com.ruoyi.project.weixin.service.IWxMpService;
-import com.ruoyi.project.weixin.service.impl.HelpActivityServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -26,7 +24,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.ContextLoader;
 
 import java.io.File;
 import java.util.HashMap;
@@ -47,9 +44,9 @@ import java.util.Map;
 @Slf4j
 public class WxMpController extends BaseController {
 
-    private final IWxMpService iWxMpService;
+    private final IWxMpService myWxMpService;
 
-    private final IWxActivityTemplateService iWxActivityTemplateService;
+    private final IWxActivityTemplateService wxActivityTemplateService;
 
     private final WxMpService wxMpService;
 
@@ -61,12 +58,12 @@ public class WxMpController extends BaseController {
         // 根据定义好的公众号标识查找公众号
         QueryWrapper<WxMp> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("app_identify",appIdentify);
-        WxMp wxMp = iWxMpService.getOne(queryWrapper);
+        WxMp wxMp = myWxMpService.getOne(queryWrapper);
         map.put("wxMp", wxMp);
         // 查询当前公众号配置的活动模板
         WxActivityTemplate wxActivityTemplate = null;
         if (StringUtils.isNotEmpty(wxMp.getTemplateId())) {
-            wxActivityTemplate = iWxActivityTemplateService.getById(wxMp.getTemplateId());
+            wxActivityTemplate = wxActivityTemplateService.getById(wxMp.getTemplateId());
         }
         map.put("template",wxActivityTemplate);
         return AjaxResult.success(map);
@@ -91,17 +88,14 @@ public class WxMpController extends BaseController {
 
     @GetMapping("/qrcode")
     public AjaxResult getWxMpQrCodeTicket(){
-       /* WxMpQrCodeTicket ticket = null;
+       WxMpQrCodeTicket ticket;
         try {
-            ticket = wxMpService.getQrcodeService().qrCodeCreateLastTicket("1236827846062092289");
+            ticket = wxMpService.getQrcodeService().qrCodeCreateLastTicket("helpActivity:om_6Xszdb4pEGd2aZm3zi72w5NUw");
             File file = wxMpService.getQrcodeService().qrCodePicture(ticket);
             FileUtils.copyFileToDirectory(file,new File("C:\\Users\\VingKing\\Desktop"));
         } catch (Exception e) {
             log.error("生成带参二维码异常",e);
-        }*/
-
-        ActivityService activityService = (ActivityService) SpringBeanUtil.getBean("helpActivityServiceImpl");
-        activityService.execute(null,null,null,null);
-        return AjaxResult.success(activityService);
+        }
+        return AjaxResult.success();
     }
 }

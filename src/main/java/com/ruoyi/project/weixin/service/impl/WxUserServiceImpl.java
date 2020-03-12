@@ -89,6 +89,12 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
 	}
 
 	@Override
+	public WxUser getByOpenId(String openId) {
+		return this.getOne(Wrappers.<WxUser>lambdaQuery()
+				.eq(WxUser::getOpenId,openId));
+	}
+
+	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void synchroWxUser() throws WxErrorException {
 		//先将已关注的用户取关

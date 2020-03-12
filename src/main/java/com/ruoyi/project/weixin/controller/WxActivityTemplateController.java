@@ -39,19 +39,19 @@ import java.util.List;
 public class WxActivityTemplateController extends BaseController {
 
 
-    private final IWxActivityTemplateService iWxActivityTemplateService;
+    private final IWxActivityTemplateService wxActivityTemplateService;
 
-    private final IWxActivityTemplateMessageService iWxActivityTemplateMessageService;
+    private final IWxActivityTemplateMessageService wxActivityTemplateMessageService;
 
-    private final IWxMpTemplateMessageService iWxMpTemplateMessageService;
+    private final IWxMpTemplateMessageService wxMpTemplateMessageService;
 
-    private final IWxMpService iWxMpService;
+    private final IWxMpService wxMpService;
 
 
     @ApiOperation("查询默认活动模板")
     @GetMapping("/template/list")
     public AjaxResult getWxActivityTemplateList(){
-        return AjaxResult.success(iWxActivityTemplateService.list());
+        return AjaxResult.success(wxActivityTemplateService.list());
     }
 
     @ApiOperation("绑定活动模板")
@@ -61,19 +61,19 @@ public class WxActivityTemplateController extends BaseController {
     })
     @GetMapping("/template/bind")
     public AjaxResult bindWxActivityTemplate(@RequestParam(value = "templateId") String templateId,@RequestParam(value = "appId") String appId){
-        WxMp wxMp = iWxMpService.getByAppId(appId);
+        WxMp wxMp = wxMpService.getByAppId(appId);
         wxMp.setTemplateId(templateId);
-        iWxMpService.updateById(wxMp);
+        wxMpService.updateById(wxMp);
         // 查询出模板详细信息
         QueryWrapper<WxActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("template_id",templateId);
-        List<WxActivityTemplateMessage> list = iWxActivityTemplateMessageService.list(queryWrapper);
+        queryWrapper.lambda().eq(WxActivityTemplateMessage::getTemplateId,templateId);
+        List<WxActivityTemplateMessage> list = wxActivityTemplateMessageService.list(queryWrapper);
         for (WxActivityTemplateMessage wxActivityTemplateMessage : list) {
             // 复制到公众号模板信息表
             WxMpTemplateMessage wxMpTemplateMessage = new WxMpTemplateMessage();
             wxMpTemplateMessage.setAppId(appId);
             BeanUtils.copyProperties(wxActivityTemplateMessage,wxMpTemplateMessage,"id","createId","createTime","updateId","updateTime","delFlag");
-            iWxMpTemplateMessageService.save(wxMpTemplateMessage);
+            wxMpTemplateMessageService.save(wxMpTemplateMessage);
         }
         return AjaxResult.success(wxMp);
     }
@@ -85,26 +85,27 @@ public class WxActivityTemplateController extends BaseController {
     @GetMapping("/template/message/list")
     public AjaxResult getMpTemplateMessage(@RequestParam(value = "appId") String appId) {
         // 查询出公众号绑定的活动消息
-        WxMp wxMp = iWxMpService.getByAppId(appId);
+        WxMp wxMp = wxMpService.getByAppId(appId);
         String templateId = wxMp.getTemplateId();
         if (StringUtils.isBlank(templateId)) {
             return AjaxResult.success();
         }
         QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("app_id",appId);
-        queryWrapper.eq("template_id",templateId);
-        List<WxMpTemplateMessage> list = iWxMpTemplateMessageService.list(queryWrapper);
+        queryWrapper.lambda()
+                .eq(WxMpTemplateMessage::getAppId,appId)
+                .eq(WxMpTemplateMessage::getTemplateId,templateId);
+        List<WxMpTemplateMessage> list = wxMpTemplateMessageService.list(queryWrapper);
         return AjaxResult.success(list);
     }
 
     @ApiOperation("编辑消息内容")
     @PatchMapping("/template/message/{id}")
     public AjaxResult updateMpTemplateMessage(@PathVariable("id") String id,@RequestBody EditWxTemplateVO editWxTemplateVO){
-        WxMpTemplateMessage query = iWxMpTemplateMessageService.getById(id);
+        WxMpTemplateMessage query = wxMpTemplateMessageService.getById(id);
         query.setRemark(editWxTemplateVO.getRemark());
         query.setRepMediaId(editWxTemplateVO.getRepMediaId());
         query.setRepContent(editWxTemplateVO.getRepContent());
-        iWxMpTemplateMessageService.updateById(query);
+        wxMpTemplateMessageService.updateById(query);
         return AjaxResult.success(query);
     }
 }
