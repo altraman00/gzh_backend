@@ -71,8 +71,8 @@ public class WxActivityTemplateController extends BaseController {
         for (WxActivityTemplateMessage wxActivityTemplateMessage : list) {
             // 复制到公众号模板信息表
             WxMpTemplateMessage wxMpTemplateMessage = new WxMpTemplateMessage();
-            wxMpTemplateMessage.setMpAppId(appId);
-            BeanUtils.copyProperties(wxActivityTemplateMessage,wxMpTemplateMessage,"id","createId","createTime","updateId","updateTime","remark","delFlag");
+            wxMpTemplateMessage.setAppId(appId);
+            BeanUtils.copyProperties(wxActivityTemplateMessage,wxMpTemplateMessage,"id","createId","createTime","updateId","updateTime","delFlag");
             iWxMpTemplateMessageService.save(wxMpTemplateMessage);
         }
         return AjaxResult.success(wxMp);
