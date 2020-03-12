@@ -39,7 +39,6 @@ public class SwaggerConfig
     public Docket createRestApi()
     {
         return new Docket(DocumentationType.SWAGGER_2)
-                .pathMapping("/api")
                 // 用来创建该API的基本信息，展示在文档的页面中（自定义展示的信息）
                 .apiInfo(apiInfo())
                 // 设置哪些接口暴露给Swagger展示
