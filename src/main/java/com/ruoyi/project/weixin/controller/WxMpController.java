@@ -59,7 +59,7 @@ public class WxMpController extends BaseController {
         // 查询当前公众号配置的活动模板
         WxActivityTemplate wxActivityTemplate = null;
         if (StringUtils.isNotEmpty(wxMp.getTemplateId())) {
-            wxActivityTemplate = iWxActivityTemplateService.getById(wxActivityTemplate.getId());
+            wxActivityTemplate = iWxActivityTemplateService.getById(wxMp.getTemplateId());
         }
         map.put("template",wxActivityTemplate);
         return AjaxResult.success(map);
