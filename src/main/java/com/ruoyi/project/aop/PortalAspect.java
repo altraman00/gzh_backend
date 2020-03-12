@@ -1,11 +1,22 @@
 package com.ruoyi.project.aop;
 
+import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.project.weixin.constant.WxEvenConstant;
+import com.ruoyi.project.weixin.entity.WxActivityTemplate;
+import com.ruoyi.project.weixin.entity.WxMp;
+import com.ruoyi.project.weixin.service.ActivityService;
+import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
+import com.ruoyi.project.weixin.service.IWxMpService;
+import com.ruoyi.project.weixin.service.impl.HelpActivityServiceImpl;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.ContextLoader;
 
 import java.util.Arrays;
 
@@ -15,7 +26,12 @@ import java.util.Arrays;
 @Component
 @Aspect
 @Slf4j
+@AllArgsConstructor
 public class PortalAspect {
+
+    private final IWxMpService iWxMpService;
+
+    private final IWxActivityTemplateService iWxActivityTemplateService;
 
     @Pointcut("execution(* com.ruoyi.project.weixin.controller.WxPortalController.post(..))")
     public void portal() {
@@ -24,6 +40,28 @@ public class PortalAspect {
 
     @AfterReturning("portal()")
     public void doAfterReturning(JoinPoint joinPoint) {
-        log.info("成功切向事件：{}",Arrays.toString(joinPoint.getArgs()));
+        Object[] args = joinPoint.getArgs();
+        log.info("成功切向事件：{}",Arrays.toString(args));
+        String requestBody = (String) args[1];
+        String appId= (String) args[0];
+        WxMpXmlMessage inMessage = WxMpXmlMessage.fromXml(requestBody);
+        if (WxEvenConstant.EVENT_SUBSCRIBE.equals(inMessage.getEvent())) {
+            log.info("此事件为关注事件，开始执行活动流程");
+            WxMp wxMp = iWxMpService.getByAppId(appId);
+            if (wxMp == null) {
+                throw new IllegalArgumentException(String.format("未找到对应appid=[%s]的配置，请核实！", appId));
+            }
+            String templateId = wxMp.getTemplateId();
+            if (StringUtils.isBlank(templateId)) {
+                log.info("appId:[{}]无绑定活动模板，流程结束",appId);
+                return;
+            }
+            String openId= (String) args[5];
+            WxActivityTemplate template = iWxActivityTemplateService.getById(templateId);
+            String templateClass = template.getTemplateClass();
+            ActivityService activityService = (ActivityService) ContextLoader.getCurrentWebApplicationContext()
+                    .getBean(templateClass);
+            activityService.execute(inMessage,wxMp,template,openId);
+        }
     }
 }
