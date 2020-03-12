@@ -16,12 +16,15 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.result.WxMpOAuth2AccessToken;
+import me.chanjar.weixin.mp.bean.result.WxMpQrCodeTicket;
 import me.chanjar.weixin.mp.bean.result.WxMpUser;
+import org.apache.commons.io.FileUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -80,5 +83,18 @@ public class WxMpController extends BaseController {
             log.error("调用微信授权异常",e);
         }
         return AjaxResult.success(map);
+    }
+
+    @GetMapping("/qrcode")
+    public AjaxResult getWxMpQrCodeTicket(){
+        WxMpQrCodeTicket ticket = null;
+        try {
+            ticket = wxMpService.getQrcodeService().qrCodeCreateLastTicket("1236827846062092289");
+            File file = wxMpService.getQrcodeService().qrCodePicture(ticket);
+            FileUtils.copyFileToDirectory(file,new File("C:\\Users\\VingKing\\Desktop"));
+        } catch (Exception e) {
+            log.error("生成带参二维码异常",e);
+        }
+        return AjaxResult.success(ticket);
     }
 }
