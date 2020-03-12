@@ -35,5 +35,10 @@ public class WxMp extends BaseEntity {
      */
     private String appName;
 
+    /**
+     * 公众号标识
+     */
+    private String appIdentify;
+
 
 }
