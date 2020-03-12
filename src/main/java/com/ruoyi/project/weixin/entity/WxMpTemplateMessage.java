@@ -31,7 +31,7 @@ public class WxMpTemplateMessage extends BaseEntity {
     private String repType;
 
     /**
-     * 回复类型文本保存文字
+     * 消息内容
      */
     private String repContent;
 

@@ -13,6 +13,11 @@ import com.ruoyi.project.weixin.service.IWxActivityTemplateMessageService;
 import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
 import com.ruoyi.project.weixin.service.IWxMpService;
 import com.ruoyi.project.weixin.service.IWxMpTemplateMessageService;
+import com.ruoyi.project.weixin.vo.EditWxTemplateVO;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +35,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/wxactivity")
 @AllArgsConstructor
+@Api("活动模板管理")
 public class WxActivityTemplateController extends BaseController {
 
 
@@ -41,36 +47,41 @@ public class WxActivityTemplateController extends BaseController {
 
     private final IWxMpService iWxMpService;
 
-    /**
-     * 查询默认活动模板
-     * @return
-     */
+
+    @ApiOperation("查询默认活动模板")
     @GetMapping("/template/list")
     public AjaxResult getWxActivityTemplateList(){
         return AjaxResult.success(iWxActivityTemplateService.list());
     }
 
-    /**
-     * 绑定活动模板
-     * @return
-     */
+    @ApiOperation("绑定活动模板")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="templateId",value="活动模板id",required=true,paramType="String"),
+            @ApiImplicitParam(name="appId",value="appId",required=true,paramType="String")
+    })
     @GetMapping("/template/bind")
-    public AjaxResult bindWxActivityTemplate(String templateId,String appId){
+    public AjaxResult bindWxActivityTemplate(@RequestParam(value = "templateId") String templateId,@RequestParam(value = "appId") String appId){
         WxMp wxMp = iWxMpService.getByAppId(appId);
         wxMp.setTemplateId(templateId);
         iWxMpService.save(wxMp);
         // 查询出模板详细信息
-        WxActivityTemplateMessage templateMessage = iWxActivityTemplateMessageService.getById(templateId);
-        // 复制到公众号模板信息表
-        WxMpTemplateMessage wxMpTemplateMessage = new WxMpTemplateMessage();
-        BeanUtils.copyProperties(templateMessage,wxMpTemplateMessage,"id","createId","createTime","updateId","updateTime","remark","delFlag");
-        iWxMpTemplateMessageService.save(wxMpTemplateMessage);
-        return AjaxResult.success();
+        QueryWrapper<WxActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("template_id",templateId);
+        List<WxActivityTemplateMessage> list = iWxActivityTemplateMessageService.list(queryWrapper);
+        for (WxActivityTemplateMessage wxActivityTemplateMessage : list) {
+            // 复制到公众号模板信息表
+            WxMpTemplateMessage wxMpTemplateMessage = new WxMpTemplateMessage();
+            wxMpTemplateMessage.setMpAppId(appId);
+            BeanUtils.copyProperties(wxActivityTemplateMessage,wxMpTemplateMessage,"id","createId","createTime","updateId","updateTime","remark","delFlag");
+            iWxMpTemplateMessageService.save(wxMpTemplateMessage);
+        }
+        return AjaxResult.success(wxMp);
     }
 
-    /**
-     * 查询公众号绑定的活动消息详情
-     */
+    @ApiOperation("查询公众号绑定的活动消息详情")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="appId",value="appId",required=true,paramType="String")
+    })
     @GetMapping("/template/message/list")
     public AjaxResult getMpTemplateMessage(String appId) {
         // 查询出公众号绑定的活动消息
@@ -86,18 +97,14 @@ public class WxActivityTemplateController extends BaseController {
         return AjaxResult.success(list);
     }
 
+    @ApiOperation("编辑消息内容")
     @PatchMapping("/template/message/{id}")
-    public AjaxResult updateMpTemplateMessage(@PathVariable("id") String id,@RequestBody WxMpTemplateMessage wxMpTemplateMessage){
+    public AjaxResult updateMpTemplateMessage(@PathVariable("id") String id,@RequestBody EditWxTemplateVO editWxTemplateVO){
         WxMpTemplateMessage query = iWxMpTemplateMessageService.getById(id);
-        query.setRemark(wxMpTemplateMessage.getRemark());
-        if (StringUtils.isNotBlank(wxMpTemplateMessage.getRepMediaId())) {
-            // 图片消息
-            wxMpTemplateMessage.setRepMediaId(wxMpTemplateMessage.getRepMediaId());
-            wxMpTemplateMessage.setRepUrl(wxMpTemplateMessage.getRepUrl());
-        } else {
-            // 文字消息
-            wxMpTemplateMessage.setRepContent(wxMpTemplateMessage.getRepContent());
-        }
-        return AjaxResult.success();
+        query.setRemark(editWxTemplateVO.getRemark());
+        query.setRepMediaId(editWxTemplateVO.getRepMediaId());
+        query.setRepContent(editWxTemplateVO.getRepContent());
+        iWxMpTemplateMessageService.save(query);
+        return AjaxResult.success(query);
     }
 }
