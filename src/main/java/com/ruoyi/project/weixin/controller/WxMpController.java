@@ -35,7 +35,7 @@ import java.util.Map;
  */
 @Api("公众号相关")
 @RestController
-@RequestMapping("/wxmp")
+@RequestMapping("/open/wxmp")
 @AllArgsConstructor
 @Slf4j
 public class WxMpController extends BaseController {

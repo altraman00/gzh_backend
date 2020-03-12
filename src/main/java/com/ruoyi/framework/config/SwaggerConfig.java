@@ -21,7 +21,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
  * Swagger2的接口配置
- * 
+ *
  * @author ruoyi
  */
 @Configuration
@@ -39,7 +39,7 @@ public class SwaggerConfig
     public Docket createRestApi()
     {
         return new Docket(DocumentationType.SWAGGER_2)
-                .pathMapping("/dev-api")
+                .pathMapping("/api")
                 // 用来创建该API的基本信息，展示在文档的页面中（自定义展示的信息）
                 .apiInfo(apiInfo())
                 // 设置哪些接口暴露给Swagger展示
@@ -65,7 +65,7 @@ public class SwaggerConfig
         apiKeyList.add(new ApiKey("Authorization", "Authorization", "header"));
         return apiKeyList;
     }
-    
+
     /**
      * 安全上下文
      */
@@ -79,7 +79,7 @@ public class SwaggerConfig
                         .build());
         return securityContexts;
     }
-    
+
     /**
      * 默认的安全上引用
      */
