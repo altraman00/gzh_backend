@@ -2,10 +2,10 @@ package com.ruoyi.project.weixin.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
-import com.ruoyi.project.weixin.entity.WxActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxActivityTemplateMessage;
 import com.ruoyi.project.weixin.entity.WxMp;
 import com.ruoyi.project.weixin.entity.WxMpTemplateMessage;
@@ -64,6 +64,11 @@ public class WxActivityTemplateController extends BaseController {
         WxMp wxMp = wxMpService.getByAppId(appId);
         wxMp.setTemplateId(templateId);
         wxMpService.updateById(wxMp);
+        // 判定是否已经复制过模板信息
+        List<WxMpTemplateMessage> mpTemplateMessages = wxMpTemplateMessageService.list(Wrappers.<WxMpTemplateMessage>lambdaQuery().eq(WxMpTemplateMessage::getTemplateId, templateId).eq(WxMpTemplateMessage::getAppId, appId));
+        if (!mpTemplateMessages.isEmpty()) {
+            return AjaxResult.success(wxMp);
+        }
         // 查询出模板详细信息
         QueryWrapper<WxActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(WxActivityTemplateMessage::getTemplateId,templateId);

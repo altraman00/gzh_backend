@@ -58,13 +58,19 @@ public class HelpActivityServiceImpl implements ActivityService {
                         .eq(WxTaskHelpRecord::getHelpWxUserId, wxUserId));
                 if (records.isEmpty()) {
                     // 未助力过，可以执行助力流程
-                    executeHelpSuccess(list, wxUser, inviter);
+                    WxTaskHelp wxTaskHelp = executeHelpSuccess(list, wxUser, inviter);
+                    // 为邀请人推送助力成功
+                    executeBeHelped(inviter,wxTaskHelp);
                 }
             }
         }
     }
 
-    private void executeHelpSuccess(List<WxMpTemplateMessage> list, WxUser wxUser, WxUser inviter) {
+    private void executeBeHelped(WxUser inviter, WxTaskHelp wxTaskHelp) {
+
+    }
+
+    private WxTaskHelp executeHelpSuccess(List<WxMpTemplateMessage> list, WxUser wxUser, WxUser inviter) {
         log.info("开始执行助理活动流程：{}",HelpActivityConstant.SCENE_HELP_SUCCESS);
         String wxUserId = wxUser.getId();
         String inviterId = inviter.getId();
@@ -84,8 +90,8 @@ public class HelpActivityServiceImpl implements ActivityService {
         wxTaskHelp.setHelpNum(wxTaskHelp.getHelpNum() + 1);
         if (wxTaskHelp.getHelpNum() >= HelpActivityConstant.TASK_COMPLETE_NEED_NUM) {
             wxTaskHelp.setTaskStatus(ConfigConstant.TASK_COMPLETE);
-            wxTaskHelpService.updateById(wxTaskHelp);
         }
+        wxTaskHelpService.updateById(wxTaskHelp);
         // 存储助力记录
         WxTaskHelpRecord wxTaskHelpRecord = new WxTaskHelpRecord();
         wxTaskHelpRecord.setHelpWxUserId(wxUserId);
@@ -99,6 +105,7 @@ public class HelpActivityServiceImpl implements ActivityService {
             content = content.replace(HelpActivityConstant.PLACEHOLDER_INVITER_NICKNAME,inviter.getNickName());
             sendTextMessage(openId, content,wxUser);
         }
+        return wxTaskHelp;
     }
 
     private void sendTextMessage(String openId, String content,WxUser wxUser) {
