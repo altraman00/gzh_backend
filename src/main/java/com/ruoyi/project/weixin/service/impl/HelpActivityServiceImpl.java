@@ -50,18 +50,31 @@ public class HelpActivityServiceImpl implements ActivityService {
         String inviterId = inviter.getId();
         // 首先判断是不是扫活动码进入的
         if (StringUtils.isNotBlank(eventKey) && eventKey.contains(HelpActivityConstant.SCENE_EVENT_KEY)) {
-            // 不是自己扫自己的玛进入的
+            // 不是自己扫自己的码进入的
             if (!inviterId.equals(wxUserId)) {
-                //查找助力记录
+                //查找助力记录,一个人可以对多个不同的好友助力一次
                 List<WxTaskHelpRecord> records = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery()
-                        .eq(WxTaskHelpRecord::getHelpWxUserId, wxUserId));
+                        .eq(WxTaskHelpRecord::getHelpWxUserId, wxUserId).eq(WxTaskHelpRecord::getInviteWxUserId,inviterId));
                 if (records.isEmpty()) {
                     // 未助力过，可以执行助力流程
                     WxTaskHelp wxTaskHelp = executeHelpSuccess(messages, wxUser, inviter);
                     // 为邀请人推送助力成功
                     executeBeHelped(messages,wxUser,inviter,wxTaskHelp);
+                } else {
+                    // 已经助力过了
+                    executeHasHelp(messages,wxUser,inviter);
                 }
             }
+        }
+    }
+
+    private void executeHasHelp(List<WxMpTemplateMessage> messages, WxUser wxUser, WxUser inviter) {
+        WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_HAS_HELP)).findFirst().orElse(null);
+        boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
+        if (hasAvailableMessage) {
+            String content = message.getRepContent();
+            content = content.replace(HelpActivityConstant.PLACEHOLDER_INVITER_NICKNAME,inviter.getNickName());
+            sendTextMessage(wxUser.getOpenId(), content,wxUser);
         }
     }
 
