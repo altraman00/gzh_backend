@@ -45,11 +45,11 @@ public class HelpActivityServiceImpl implements ActivityService {
         List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
         WxUser wxUser = wxUserService.getByOpenId(openId);
         String wxUserId = wxUser.getId();
-        String inviterOpenId = eventKey.substring(eventKey.lastIndexOf(":") + 1);
-        WxUser inviter = wxUserService.getByOpenId(inviterOpenId);
-        String inviterId = inviter.getId();
         // 首先判断是不是扫活动码进入的
         if (StringUtils.isNotBlank(eventKey) && eventKey.contains(HelpActivityConstant.SCENE_EVENT_KEY)) {
+            String inviterOpenId = eventKey.substring(eventKey.lastIndexOf(":") + 1);
+            WxUser inviter = wxUserService.getByOpenId(inviterOpenId);
+            String inviterId = inviter.getId();
             // 不是自己扫自己的码进入的
             if (!inviterId.equals(wxUserId)) {
                 //查找助力记录,一个人可以对多个不同的好友助力一次
