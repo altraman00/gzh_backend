@@ -99,18 +99,17 @@ public class WxMpController extends BaseController {
         try {
             ticket = wxMpService.getQrcodeService().qrCodeCreateLastTicket("helpActivity:om_6Xszdb4pEGd2aZm3zi72w5NUw");
             File qrCode = wxMpService.getQrcodeService().qrCodePicture(ticket);
-            BufferedImage qrCodeBuffer = Thumbnails.of(qrCode).size(160, 160).asBufferedImage();
-
+            BufferedImage qrCodeBuffer = Thumbnails.of(qrCode).size(320, 320).asBufferedImage();
             URL url = new URL("http://thirdwx.qlogo.cn/mmopen/wjIXhWEwjdY7o8RNHKBnkkWOVRweq5X0JLibYIPZIZl1wF8PiaibeXoQYHBaAGX3auOF7wgGr0SZVAargD3bHRuibeDLvSTrHHSv/132");
             BufferedImage roundHead = getRoundHead(url);
             Thumbnails.Builder<BufferedImage> headBuilder = Thumbnails.of(roundHead);
-            headBuilder.size(54,54);
+            headBuilder.size(108,108);
             BufferedImage bufferedImage = headBuilder.asBufferedImage();
 
-            File poster = new File("C:\\Users\\VingKing\\Downloads\\poster.png");
+            File poster = new File("C:\\Users\\VingKing\\Downloads\\编组 2备份 2_slices\\编组 2备份 2@2x.png");
             Thumbnails.Builder<? extends InputStream> builder = Thumbnails.of(new FileInputStream(poster)).scale(1.0);
-            builder.watermark(new Coordinate(36,158), bufferedImage,1.0f);
-            builder.watermark(new Coordinate(530,1114), qrCodeBuffer,1.0f).toFile("C:\\Users\\VingKing\\Desktop\\1.png");
+            builder.watermark(new Coordinate(72,60), bufferedImage,1.0f);
+            builder.watermark(new Coordinate(1060,1972), qrCodeBuffer,1.0f).toFile("C:\\Users\\VingKing\\Desktop\\1.png");
         } catch (Exception e) {
             log.error("生成带参二维码异常",e);
         }
