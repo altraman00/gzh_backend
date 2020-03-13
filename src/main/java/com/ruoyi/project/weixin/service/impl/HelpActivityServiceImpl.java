@@ -66,6 +66,18 @@ public class HelpActivityServiceImpl implements ActivityService {
                 }
             }
         }
+        // 推送后续消息
+        executeActivityRule(messages,wxUser);
+    }
+
+    private void executeActivityRule(List<WxMpTemplateMessage> messages, WxUser wxUser) {
+        WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_RULE)).findFirst().orElse(null);
+        boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
+        if (hasAvailableMessage) {
+            String content = message.getRepContent();
+            content = content.replace(HelpActivityConstant.PLACEHOLDER_SUBSCRIBE_NICKNAME,wxUser.getNickName());
+            sendTextMessage(wxUser.getOpenId(), content,wxUser);
+        }
     }
 
     private void executeHasHelp(List<WxMpTemplateMessage> messages, WxUser wxUser, WxUser inviter) {
