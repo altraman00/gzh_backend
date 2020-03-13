@@ -66,12 +66,19 @@ public class HelpActivityServiceImpl implements ActivityService {
     }
 
     private void executeBeHelped(List<WxMpTemplateMessage> messages, WxUser wxUser, WxUser inviter, WxTaskHelp wxTaskHelp) {
-        if (wxTaskHelp.getHelpNum() <= HelpActivityConstant.TASK_COMPLETE_NEED_NUM) {
+        if (wxTaskHelp.getHelpNum() < HelpActivityConstant.TASK_COMPLETE_NEED_NUM) {
             WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_BE_HELPED)).findFirst().orElse(null);
             boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
             if (hasAvailableMessage) {
                 String content = message.getRepContent();
                 content = content.replace(HelpActivityConstant.PLACEHOLDER_BE_RECOMMEND_NICKNAME,wxUser.getNickName()).replace(HelpActivityConstant.PLACEHOLDER_LACK_NUM,HelpActivityConstant.TASK_COMPLETE_NEED_NUM-wxTaskHelp.getHelpNum()+"");
+                sendTextMessage(inviter.getOpenId(), content,inviter);
+            }
+        } else {
+            WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_TASK_COMPLETE)).findFirst().orElse(null);
+            boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
+            if (hasAvailableMessage) {
+                String content = message.getRepContent();
                 sendTextMessage(inviter.getOpenId(), content,inviter);
             }
         }

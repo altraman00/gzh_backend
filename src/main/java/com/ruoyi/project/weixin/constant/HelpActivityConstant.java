@@ -17,6 +17,7 @@ public interface HelpActivityConstant {
      */
     String SCENE_HELP_SUCCESS = "help_success";
     String SCENE_BE_HELPED = "be_helped";
+    String SCENE_TASK_COMPLETE = "task_complete";
 
     /**
      * 占位信息
