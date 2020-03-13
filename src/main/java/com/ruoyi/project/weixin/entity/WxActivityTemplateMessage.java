@@ -55,5 +55,14 @@ public class WxActivityTemplateMessage extends BaseEntity {
      */
     private String scene;
 
+    /**
+     * 头像坐标
+     */
+    private String avatarCoordinate;
+
+    /**
+     * 二维码坐标
+     */
+    private String qrcodeCoordinate;
 
 }

@@ -1,13 +1,11 @@
 package com.ruoyi.project.weixin.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.ruoyi.common.utils.SpringBeanUtil;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.weixin.entity.WxActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMp;
-import com.ruoyi.project.weixin.service.ActivityService;
 import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
 import com.ruoyi.project.weixin.service.IWxMpService;
 import io.swagger.annotations.Api;
@@ -19,13 +17,22 @@ import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.result.WxMpOAuth2AccessToken;
 import me.chanjar.weixin.mp.bean.result.WxMpQrCodeTicket;
 import me.chanjar.weixin.mp.bean.result.WxMpUser;
-import org.apache.commons.io.FileUtils;
+import net.coobird.thumbnailator.Thumbnails;
+import net.coobird.thumbnailator.geometry.Coordinate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.geom.Ellipse2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -90,12 +97,59 @@ public class WxMpController extends BaseController {
     public AjaxResult getWxMpQrCodeTicket(){
        WxMpQrCodeTicket ticket;
         try {
-            ticket = wxMpService.getQrcodeService().qrCodeCreateLastTicket("helpActivity:om_6Xs3gPhfGxNOrdh6jVCr8Y4jI");
-            File file = wxMpService.getQrcodeService().qrCodePicture(ticket);
-            FileUtils.copyFileToDirectory(file,new File("C:\\Users\\VingKing\\Desktop"));
+            ticket = wxMpService.getQrcodeService().qrCodeCreateLastTicket("helpActivity:om_6Xszdb4pEGd2aZm3zi72w5NUw");
+            File qrCode = wxMpService.getQrcodeService().qrCodePicture(ticket);
+            BufferedImage qrCodeBuffer = Thumbnails.of(qrCode).size(160, 160).asBufferedImage();
+
+            URL url = new URL("http://thirdwx.qlogo.cn/mmopen/wjIXhWEwjdY7o8RNHKBnkkWOVRweq5X0JLibYIPZIZl1wF8PiaibeXoQYHBaAGX3auOF7wgGr0SZVAargD3bHRuibeDLvSTrHHSv/132");
+            BufferedImage roundHead = getRoundHead(url);
+            Thumbnails.Builder<BufferedImage> headBuilder = Thumbnails.of(roundHead);
+            headBuilder.size(54,54);
+            BufferedImage bufferedImage = headBuilder.asBufferedImage();
+
+            File poster = new File("C:\\Users\\VingKing\\Downloads\\poster.png");
+            Thumbnails.Builder<? extends InputStream> builder = Thumbnails.of(new FileInputStream(poster)).scale(1.0);
+            builder.watermark(new Coordinate(36,158), bufferedImage,1.0f);
+            builder.watermark(new Coordinate(530,1114), qrCodeBuffer,1.0f).toFile("C:\\Users\\VingKing\\Desktop\\1.png");
         } catch (Exception e) {
             log.error("生成带参二维码异常",e);
         }
         return AjaxResult.success();
     }
+
+    private BufferedImage getRoundHead(URL url) throws IOException {
+        BufferedImage avatarImage = ImageIO.read(url);
+        int width = avatarImage.getWidth();
+        // 透明底的图片
+        BufferedImage formatAvatarImage = new BufferedImage(width, width, BufferedImage.TYPE_4BYTE_ABGR);
+        Graphics2D graphics = formatAvatarImage.createGraphics();
+        //把图片切成一个圓
+
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        //留一个像素的空白区域，这个很重要，画圆的时候把这个覆盖
+        int border = 1;
+        //图片是一个圆型
+        Ellipse2D.Double shape = new Ellipse2D.Double(border, border, width - border * 2, width - border * 2);
+        //需要保留的区域
+        graphics.setClip(shape);
+        graphics.drawImage(avatarImage, border, border, width - border * 2, width - border * 2, null);
+        graphics.dispose();
+
+        //在圆图外面再画一个圆
+
+        //新创建一个graphics，这样画的圆不会有锯齿
+        graphics = formatAvatarImage.createGraphics();
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        int border1 = 3;
+        //画笔是4.5个像素，BasicStroke的使用可以查看下面的参考文档
+        //使画笔时基本会像外延伸一定像素，具体可以自己使用的时候测试
+        Stroke s = new BasicStroke(4.5F, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+        graphics.setStroke(s);
+        graphics.setColor(Color.WHITE);
+        graphics.drawOval(border1, border1, width - border1 * 2, width - border1 * 2);
+        graphics.dispose();
+        return formatAvatarImage;
+    }
+
+
 }

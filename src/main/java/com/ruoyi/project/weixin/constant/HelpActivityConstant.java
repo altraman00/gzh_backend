@@ -20,6 +20,7 @@ public interface HelpActivityConstant {
     String SCENE_ACTIVITY_RULE = "activity_rule";
     String SCENE_BE_HELPED = "be_helped";
     String SCENE_TASK_COMPLETE = "task_complete";
+    String SCENE_ACTIVITY_POSTER = "activity_poster";
 
     /**
      * 占位信息

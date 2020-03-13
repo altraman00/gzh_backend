@@ -60,5 +60,13 @@ public class WxMpTemplateMessage extends BaseEntity {
      */
     private String appId;
 
+    /**
+     * 头像坐标
+     */
+    private String avatarCoordinate;
 
+    /**
+     * 二维码坐标
+     */
+    private String qrcodeCoordinate;
 }
