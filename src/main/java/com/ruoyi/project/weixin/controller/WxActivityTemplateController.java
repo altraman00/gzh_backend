@@ -65,7 +65,9 @@ public class WxActivityTemplateController extends BaseController {
         wxMp.setTemplateId(templateId);
         wxMpService.updateById(wxMp);
         // 判定是否已经复制过模板信息
-        List<WxMpTemplateMessage> mpTemplateMessages = wxMpTemplateMessageService.list(Wrappers.<WxMpTemplateMessage>lambdaQuery().eq(WxMpTemplateMessage::getTemplateId, templateId).eq(WxMpTemplateMessage::getAppId, appId));
+        List<WxMpTemplateMessage> mpTemplateMessages = wxMpTemplateMessageService.list(Wrappers.<WxMpTemplateMessage>lambdaQuery()
+                .eq(WxMpTemplateMessage::getTemplateId, templateId)
+                .eq(WxMpTemplateMessage::getAppId, appId));
         if (!mpTemplateMessages.isEmpty()) {
             return AjaxResult.success(wxMp);
         }

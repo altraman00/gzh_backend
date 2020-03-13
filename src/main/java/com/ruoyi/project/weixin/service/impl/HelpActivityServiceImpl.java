@@ -41,9 +41,8 @@ public class HelpActivityServiceImpl implements ActivityService {
         String appId = wxMp.getAppId();
         String templateId = template.getId();
         QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("app_id", appId);
-        queryWrapper.eq("template_id", templateId);
-        List<WxMpTemplateMessage> list = wxMpTemplateMessageService.list(queryWrapper);
+        queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,templateId);
+        List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
         WxUser wxUser = wxUserService.getByOpenId(openId);
         String wxUserId = wxUser.getId();
         String inviterOpenId = eventKey.substring(eventKey.lastIndexOf(":") + 1);
@@ -58,16 +57,24 @@ public class HelpActivityServiceImpl implements ActivityService {
                         .eq(WxTaskHelpRecord::getHelpWxUserId, wxUserId));
                 if (records.isEmpty()) {
                     // 未助力过，可以执行助力流程
-                    WxTaskHelp wxTaskHelp = executeHelpSuccess(list, wxUser, inviter);
+                    WxTaskHelp wxTaskHelp = executeHelpSuccess(messages, wxUser, inviter);
                     // 为邀请人推送助力成功
-                    executeBeHelped(inviter,wxTaskHelp);
+                    executeBeHelped(messages,wxUser,inviter,wxTaskHelp);
                 }
             }
         }
     }
 
-    private void executeBeHelped(WxUser inviter, WxTaskHelp wxTaskHelp) {
-
+    private void executeBeHelped(List<WxMpTemplateMessage> messages, WxUser wxUser, WxUser inviter, WxTaskHelp wxTaskHelp) {
+        if (wxTaskHelp.getHelpNum() <= HelpActivityConstant.TASK_COMPLETE_NEED_NUM) {
+            WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_BE_HELPED)).findFirst().orElse(null);
+            boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
+            if (hasAvailableMessage) {
+                String content = message.getRepContent();
+                content = content.replace(HelpActivityConstant.PLACEHOLDER_BE_RECOMMEND_NICKNAME,wxUser.getNickName()).replace(HelpActivityConstant.PLACEHOLDER_LACK_NUM,HelpActivityConstant.TASK_COMPLETE_NEED_NUM-wxTaskHelp.getHelpNum()+"");
+                sendTextMessage(inviter.getOpenId(), content,inviter);
+            }
+        }
     }
 
     private WxTaskHelp executeHelpSuccess(List<WxMpTemplateMessage> list, WxUser wxUser, WxUser inviter) {

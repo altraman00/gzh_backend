@@ -22,4 +22,6 @@ public interface HelpActivityConstant {
      * 占位信息
      */
     String PLACEHOLDER_INVITER_NICKNAME = "${上级好友微信昵称}";
+    String PLACEHOLDER_BE_RECOMMEND_NICKNAME = "${被推荐人昵称}";
+    String PLACEHOLDER_LACK_NUM = "${缺少个数}";
 }
