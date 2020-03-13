@@ -139,6 +139,8 @@ public class HelpActivityServiceImpl implements ActivityService {
         wxMsg.setHeadimgUrl(wxUser.getHeadimgUrl());
         wxMsg.setType(ConfigConstant.WX_MSG_TYPE_2);
         wxMsg.setRepContent(wxMsg.getRepContent());
+        wxMsg.setWxUserId(wxUser.getId());
+        wxMsg.setRepType(ConfigConstant.MESSAGE_REP_TYPE);
         wxMsgService.save(wxMsg);
     }
 }

@@ -76,4 +76,6 @@ public interface ConfigConstant {
 	 */
 	int TASK_DOING = 0;
 	int TASK_COMPLETE = 1;
+
+	String MESSAGE_REP_TYPE = "text";
 }
