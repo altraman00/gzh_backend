@@ -49,8 +49,6 @@ public class HelpActivityServiceImpl implements ActivityService {
 
     @Override
     public void execute(WxMpXmlMessage inMessage, WxMp wxMp, WxActivityTemplate template, String openId) {
-        // 先判断是不是对应的扫码带参进入
-        log.info("成功执行助力活动方法");
         String eventKey = inMessage.getEventKey();
         String appId = wxMp.getAppId();
         String templateId = template.getId();
@@ -60,6 +58,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         WxUser wxUser = wxUserService.getByOpenId(openId);
         String wxUserId = wxUser.getId();
         Integer needNum = template.getNeedNum();
+        log.info("event key:[{}],openId:[{}],appId[{}]",eventKey,openId,appId);
         // 首先判断是不是扫活动码进入的
         if (StringUtils.isNotBlank(eventKey) && eventKey.contains(HelpActivityConstant.SCENE_EVENT_KEY)) {
             String inviterOpenId = eventKey.substring(eventKey.lastIndexOf(":") + 1);
@@ -103,6 +102,7 @@ public class HelpActivityServiceImpl implements ActivityService {
     }
 
     private void executeActivityPoster(List<WxMpTemplateMessage> messages, WxUser wxUser) {
+        log.info("开始执行助理活动流程：{}",HelpActivityConstant.SCENE_ACTIVITY_POSTER);
         String openId = wxUser.getOpenId();
         WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent()) && StringUtils.isNotBlank(message.getRepMediaId());
@@ -201,6 +201,7 @@ public class HelpActivityServiceImpl implements ActivityService {
     }
 
     private void executeActivityRule(List<WxMpTemplateMessage> messages, WxUser wxUser, String templateId, String appId) {
+        log.info("开始执行助理活动流程：{}",HelpActivityConstant.SCENE_ACTIVITY_RULE);
         WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_RULE)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
         if (hasAvailableMessage) {
@@ -226,6 +227,7 @@ public class HelpActivityServiceImpl implements ActivityService {
     }
 
     private void executeHasHelp(List<WxMpTemplateMessage> messages, WxUser wxUser, WxUser inviter) {
+        log.info("开始执行助理活动流程：{}",HelpActivityConstant.SCENE_HAS_HELP);
         WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_HAS_HELP)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
         if (hasAvailableMessage) {
@@ -236,6 +238,7 @@ public class HelpActivityServiceImpl implements ActivityService {
     }
 
     private void executeBeHelped(List<WxMpTemplateMessage> messages, WxUser wxUser, WxUser inviter, WxActivityTask wxActivityTask, Integer needNum) {
+        log.info("开始执行助理活动流程：{}",HelpActivityConstant.SCENE_BE_HELPED);
         if (wxActivityTask.getCompleteNum() < needNum) {
             WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_BE_HELPED)).findFirst().orElse(null);
             boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
