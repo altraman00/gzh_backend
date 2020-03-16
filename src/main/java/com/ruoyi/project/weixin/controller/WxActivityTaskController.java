@@ -25,9 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>
@@ -100,6 +98,7 @@ public class WxActivityTaskController extends BaseController {
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent()) && StringUtils.isNotBlank(message.getRepMediaId());
         String posterBase64 = null;
         if (hasAvailableMessage) {
+            Map<String,Object> result = new HashMap<>(4);
             File poster = helpActivityService.getPosterFile(openId, message);
             try {
                 posterBase64 = Base64.getEncoder().encodeToString(FileUtils.readFileToByteArray(poster));
@@ -110,7 +109,12 @@ public class WxActivityTaskController extends BaseController {
                     poster.delete();
                 }
             }
+            result.put("posterBase64",posterBase64);
+            String name = poster.getName();
+            result.put("suffix", name.substring(name.lastIndexOf(".")));
+            return AjaxResult.success(result);
+        } else {
+            return AjaxResult.error();
         }
-        return AjaxResult.success(posterBase64);
     }
 }
