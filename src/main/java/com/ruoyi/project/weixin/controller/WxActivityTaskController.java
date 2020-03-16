@@ -105,6 +105,10 @@ public class WxActivityTaskController extends BaseController {
                 posterBase64 = Base64.getEncoder().encodeToString(FileUtils.readFileToByteArray(poster));
             } catch (IOException e) {
                 log.info("将海报文件编码成base64异常",e);
+            } finally {
+                if (poster.exists()) {
+                    poster.delete();
+                }
             }
         }
         return AjaxResult.success(posterBase64);

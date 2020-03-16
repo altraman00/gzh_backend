@@ -115,6 +115,10 @@ public class HelpActivityServiceImpl implements ActivityService {
                 sendImageMessage(uploadResult,wxUser);
             } catch (WxErrorException e) {
                 log.error("发送活动海报消息异常，消息模板id:{},openId:{}",message.getId(),openId,e);
+            } finally {
+                if (poster.exists()) {
+                    poster.delete();
+                }
             }
         }
     }
