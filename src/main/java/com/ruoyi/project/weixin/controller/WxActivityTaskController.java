@@ -111,7 +111,7 @@ public class WxActivityTaskController extends BaseController {
             }
             result.put("posterBase64",posterBase64);
             String name = poster.getName();
-            result.put("suffix", name.substring(name.lastIndexOf(".")));
+            result.put("suffix", name.substring(name.lastIndexOf(".")+1));
             return AjaxResult.success(result);
         } else {
             return AjaxResult.error();
