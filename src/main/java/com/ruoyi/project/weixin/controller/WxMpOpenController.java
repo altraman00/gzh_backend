@@ -49,7 +49,7 @@ import java.util.Map;
 @RequestMapping("/open/wxmp")
 @AllArgsConstructor
 @Slf4j
-public class WxMpController extends BaseController {
+public class WxMpOpenController extends BaseController {
 
     private final IWxMpService myWxMpService;
 
