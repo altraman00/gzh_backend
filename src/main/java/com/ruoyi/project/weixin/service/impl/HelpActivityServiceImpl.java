@@ -157,6 +157,7 @@ public class HelpActivityServiceImpl implements ActivityService {
             try {
                 // 将海报上传到临时素材库
                 WxMediaUploadResult uploadResult = wxMpService.getMaterialService().mediaUpload(ConfigConstant.MESSAGE_REP_TYPE_IMAGE, poster);
+                log.info("上传海报到临时素材库，上传结果:{}",uploadResult);
                 sendImageMessage(uploadResult,wxUser);
             } catch (WxErrorException e) {
                 log.error("发送活动海报消息异常，消息模板id:{},openId:{}",messageId,openId,e);
