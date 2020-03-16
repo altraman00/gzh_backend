@@ -40,4 +40,6 @@ public class WxActivityTask extends BaseEntity {
      */
     private String templateId;
 
+    private String appId;
+
 }

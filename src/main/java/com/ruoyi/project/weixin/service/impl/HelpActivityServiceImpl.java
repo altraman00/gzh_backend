@@ -68,13 +68,16 @@ public class HelpActivityServiceImpl implements ActivityService {
             // 不是自己扫自己的码进入的
             if (!inviterId.equals(wxUserId)) {
                 WxActivityTask wxActivityTask = wxActivityTaskService.getOne(Wrappers.<WxActivityTask>lambdaQuery()
-                        .eq(WxActivityTask::getWxUserId, inviterId).eq(WxActivityTask::getTemplateId,templateId)) ;
+                        .eq(WxActivityTask::getWxUserId, inviterId)
+                        .eq(WxActivityTask::getTemplateId,templateId)
+                        .eq(WxActivityTask::getAppId,appId));
                 if (wxActivityTask == null) {
                     wxActivityTask = new WxActivityTask();
                     wxActivityTask.setCompleteNum(0);
                     wxActivityTask.setTaskStatus(ConfigConstant.TASK_DOING);
                     wxActivityTask.setWxUserId(inviterId);
                     wxActivityTask.setTemplateId(templateId);
+                    wxActivityTask.setAppId(appId);
                     wxActivityTaskService.save(wxActivityTask);
                 }
                 if (wxActivityTask.getCompleteNum() < needNum ){
@@ -94,7 +97,7 @@ public class HelpActivityServiceImpl implements ActivityService {
             }
         }
         // 推送活动规则消息
-        executeActivityRule(messages,wxUser,templateId);
+        executeActivityRule(messages,wxUser,templateId,appId);
         // 推送活动海报
         executeActivityPoster(messages,wxUser);
     }
@@ -104,65 +107,70 @@ public class HelpActivityServiceImpl implements ActivityService {
         WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent()) && StringUtils.isNotBlank(message.getRepMediaId());
         if (hasAvailableMessage) {
-            String messageId = message.getId();
-            // 先获取海报图片
-            String repMediaId = message.getRepMediaId();
-            InputStream inputStream = null;
-            try {
-                inputStream = wxMpService.getMaterialService().materialImageOrVoiceDownload(repMediaId);
-            } catch (WxErrorException e) {
-                log.error("从素材库获取海报图片异常，消息模板id:{},openId:{}",messageId,openId,e);
-            }
-            // 获取邀请二维码
-            File qrCode = null;
-            try {
-                WxMpQrCodeTicket ticket = wxMpService.getQrcodeService().qrCodeCreateLastTicket("helpActivity:"+ openId);
-                qrCode = wxMpService.getQrcodeService().qrCodePicture(ticket);
-            } catch (Exception e) {
-                log.error("生成助力活动带参二维码异常，消息模板id:{},openId:{}",messageId,openId,e);
-            }
-            // 获取用户头像
-            String headImgUrl = null;
-            try {
-                //语言
-                String lang = "zh_CN";
-                WxMpUser user = wxMpService.getUserService().userInfo(openId,lang);
-                headImgUrl = user.getHeadImgUrl();
-            } catch (WxErrorException e) {
-                log.error("获取用户头像信息异常，消息模板id:{},openId:{}",messageId,openId,e);
-            }
-            // 开始处理图片,生成海报
-            File poster = null;
-            try {
-                // 先处理二维码 设置长宽
-                BufferedImage qrCodeBuffer = Thumbnails.of(qrCode).size(message.getQrcodeSize(), message.getQrcodeSize()).asBufferedImage();
-                // 处理头像
-                URL url = new URL(headImgUrl);
-                // 获取圆形头像
-                BufferedImage roundHead = getRoundHead(url);
-                roundHead = Thumbnails.of(roundHead).size(message.getAvatarSize(), message.getAvatarSize()).asBufferedImage();
-                // 处理海报
-                Thumbnails.Builder<? extends InputStream> builder = Thumbnails.of(inputStream).scale(1.0);
-                // 拼接头像
-                String[] avatarCoordinate = message.getAvatarCoordinate().split(",");
-                builder.watermark(new Coordinate(Integer.parseInt(avatarCoordinate[0]),Integer.parseInt(avatarCoordinate[1])), roundHead,1.0f);
-                // 拼接二维码
-                String[] qrcodeCoordinate = message.getQrcodeCoordinate().split(",");
-                builder.watermark(new Coordinate(Integer.parseInt(qrcodeCoordinate[0]),Integer.parseInt(qrcodeCoordinate[1])), qrCodeBuffer,1.0f);
-                poster = File.createTempFile("temp",".png");
-                builder.toFile(poster);
-            } catch (Exception e) {
-                log.error("生成海报图片异常，消息模板id:{},openId:{}",messageId,openId,e);
-            }
+            File poster = getPosterFile(openId, message);
             try {
                 // 将海报上传到临时素材库
                 WxMediaUploadResult uploadResult = wxMpService.getMaterialService().mediaUpload(ConfigConstant.MESSAGE_REP_TYPE_IMAGE, poster);
                 log.info("上传海报到临时素材库，上传结果:{}",uploadResult);
                 sendImageMessage(uploadResult,wxUser);
             } catch (WxErrorException e) {
-                log.error("发送活动海报消息异常，消息模板id:{},openId:{}",messageId,openId,e);
+                log.error("发送活动海报消息异常，消息模板id:{},openId:{}",message.getId(),openId,e);
             }
         }
+    }
+
+    public File getPosterFile(String openId, WxMpTemplateMessage message) {
+        File poster = null;
+        String messageId = message.getId();
+        // 先获取海报图片
+        String repMediaId = message.getRepMediaId();
+        InputStream inputStream = null;
+        try {
+            inputStream = wxMpService.getMaterialService().materialImageOrVoiceDownload(repMediaId);
+        } catch (WxErrorException e) {
+            log.error("从素材库获取海报图片异常，消息模板id:{},openId:{}",messageId,openId,e);
+        }
+        // 获取邀请二维码
+        File qrCode = null;
+        try {
+            WxMpQrCodeTicket ticket = wxMpService.getQrcodeService().qrCodeCreateLastTicket("helpActivity:"+ openId);
+            qrCode = wxMpService.getQrcodeService().qrCodePicture(ticket);
+        } catch (Exception e) {
+            log.error("生成助力活动带参二维码异常，消息模板id:{},openId:{}",messageId,openId,e);
+        }
+        // 获取用户头像
+        String headImgUrl = null;
+        try {
+            //语言
+            String lang = "zh_CN";
+            WxMpUser user = wxMpService.getUserService().userInfo(openId,lang);
+            headImgUrl = user.getHeadImgUrl();
+        } catch (WxErrorException e) {
+            log.error("获取用户头像信息异常，消息模板id:{},openId:{}",messageId,openId,e);
+        }
+        // 开始处理图片,生成海报
+        try {
+            // 先处理二维码 设置长宽
+            BufferedImage qrCodeBuffer = Thumbnails.of(qrCode).size(message.getQrcodeSize(), message.getQrcodeSize()).asBufferedImage();
+            // 处理头像
+            URL url = new URL(headImgUrl);
+            // 获取圆形头像
+            BufferedImage roundHead = getRoundHead(url);
+            roundHead = Thumbnails.of(roundHead).size(message.getAvatarSize(), message.getAvatarSize()).asBufferedImage();
+            // 处理海报
+            Thumbnails.Builder<? extends InputStream> builder = Thumbnails.of(inputStream).scale(1.0);
+            // 拼接头像
+            String[] avatarCoordinate = message.getAvatarCoordinate().split(",");
+            builder.watermark(new Coordinate(Integer.parseInt(avatarCoordinate[0]),Integer.parseInt(avatarCoordinate[1])), roundHead,1.0f);
+            // 拼接二维码
+            String[] qrcodeCoordinate = message.getQrcodeCoordinate().split(",");
+            builder.watermark(new Coordinate(Integer.parseInt(qrcodeCoordinate[0]),Integer.parseInt(qrcodeCoordinate[1])), qrCodeBuffer,1.0f);
+            poster = File.createTempFile("temp",".png");
+            builder.toFile(poster);
+        } catch (Exception e) {
+            log.error("生成海报图片异常，消息模板id:{},openId:{}",messageId,openId,e);
+        }
+        return poster;
     }
 
     private void sendImageMessage(WxMediaUploadResult result, WxUser wxUser) {
@@ -188,7 +196,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         wxMsgService.save(wxMsg);
     }
 
-    private void executeActivityRule(List<WxMpTemplateMessage> messages, WxUser wxUser, String templateId) {
+    private void executeActivityRule(List<WxMpTemplateMessage> messages, WxUser wxUser, String templateId, String appId) {
         WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_RULE)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
         if (hasAvailableMessage) {
@@ -199,13 +207,16 @@ public class HelpActivityServiceImpl implements ActivityService {
         // 生成助力任务信息
         String wxUserId = wxUser.getId();
         WxActivityTask wxActivityTask = wxActivityTaskService.getOne(Wrappers.<WxActivityTask>lambdaQuery()
-                .eq(WxActivityTask::getWxUserId, wxUserId).eq(WxActivityTask::getTemplateId,templateId));
+                .eq(WxActivityTask::getWxUserId, wxUserId)
+                .eq(WxActivityTask::getTemplateId,templateId)
+                .eq(WxActivityTask::getAppId,appId));
         if (wxActivityTask == null) {
             wxActivityTask = new WxActivityTask();
             wxActivityTask.setCompleteNum(0);
             wxActivityTask.setTaskStatus(ConfigConstant.TASK_DOING);
             wxActivityTask.setWxUserId(wxUserId);
             wxActivityTask.setTemplateId(templateId);
+            wxActivityTask.setAppId(appId);
             wxActivityTaskService.save(wxActivityTask);
         }
     }
