@@ -30,5 +30,8 @@ public class WxActivityTemplate extends BaseEntity {
      */
     private String templateClass;
 
-
+    /**
+     * 活动奖励地址
+     */
+    private String rewardUrl;
 }

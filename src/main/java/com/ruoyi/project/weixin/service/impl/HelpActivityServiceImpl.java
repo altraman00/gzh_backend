@@ -66,17 +66,28 @@ public class HelpActivityServiceImpl implements ActivityService {
             String inviterId = inviter.getId();
             // 不是自己扫自己的码进入的
             if (!inviterId.equals(wxUserId)) {
-                //查找助力记录,一个人可以对多个不同的好友助力一次
-                List<WxTaskHelpRecord> records = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery()
-                        .eq(WxTaskHelpRecord::getHelpWxUserId, wxUserId).eq(WxTaskHelpRecord::getInviteWxUserId,inviterId));
-                if (records.isEmpty()) {
-                    // 未助力过，可以执行助力流程
-                    WxTaskHelp wxTaskHelp = executeHelpSuccess(messages, wxUser, inviter);
-                    // 为邀请人推送助力成功
-                    executeBeHelped(messages,wxUser,inviter,wxTaskHelp);
-                } else {
-                    // 已经助力过了
-                    executeHasHelp(messages,wxUser,inviter);
+                WxTaskHelp wxTaskHelp = wxTaskHelpService.getOne(Wrappers.<WxTaskHelp>lambdaQuery()
+                        .eq(WxTaskHelp::getWxUserId, inviterId)) ;
+                if (wxTaskHelp == null) {
+                    wxTaskHelp = new WxTaskHelp();
+                    wxTaskHelp.setHelpNum(0);
+                    wxTaskHelp.setTaskStatus(ConfigConstant.TASK_DOING);
+                    wxTaskHelp.setWxUserId(inviterId);
+                    wxTaskHelpService.save(wxTaskHelp);
+                }
+                if (wxTaskHelp.getHelpNum() < HelpActivityConstant.TASK_COMPLETE_NEED_NUM ){
+                    //查找助力记录,一个人可以对多个不同的好友助力一次
+                    List<WxTaskHelpRecord> records = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery()
+                            .eq(WxTaskHelpRecord::getHelpWxUserId, wxUserId).eq(WxTaskHelpRecord::getInviteWxUserId,inviterId));
+                    if (records.isEmpty()) {
+                        // 未助力过，可以执行助力流程
+                        executeHelpSuccess(messages, wxUser, inviter, wxTaskHelp);
+                        // 为邀请人推送助力成功
+                        executeBeHelped(messages,wxUser,inviter,wxTaskHelp);
+                    } else {
+                        // 已经助力过了
+                        executeHasHelp(messages,wxUser,inviter);
+                    }
                 }
             }
         }
@@ -213,21 +224,10 @@ public class HelpActivityServiceImpl implements ActivityService {
         }
     }
 
-    private WxTaskHelp executeHelpSuccess(List<WxMpTemplateMessage> list, WxUser wxUser, WxUser inviter) {
+    private WxTaskHelp executeHelpSuccess(List<WxMpTemplateMessage> list, WxUser wxUser, WxUser inviter, WxTaskHelp wxTaskHelp) {
         log.info("开始执行助理活动流程：{}",HelpActivityConstant.SCENE_HELP_SUCCESS);
         String wxUserId = wxUser.getId();
         String inviterId = inviter.getId();
-        // 未助力过，开始执行助力
-        // 获取推荐人的openId
-        WxTaskHelp wxTaskHelp = wxTaskHelpService.getOne(Wrappers.<WxTaskHelp>lambdaQuery()
-                .eq(WxTaskHelp::getWxUserId, wxUserId)) ;
-        if (wxTaskHelp == null) {
-            wxTaskHelp = new WxTaskHelp();
-            wxTaskHelp.setHelpNum(0);
-            wxTaskHelp.setTaskStatus(ConfigConstant.TASK_DOING);
-            wxTaskHelp.setWxUserId(inviterId);
-            wxTaskHelpService.save(wxTaskHelp);
-        }
         // 邀请人完成人数+1
         wxTaskHelp.setHelpNum(wxTaskHelp.getHelpNum() + 1);
         if (wxTaskHelp.getHelpNum() >= HelpActivityConstant.TASK_COMPLETE_NEED_NUM) {
