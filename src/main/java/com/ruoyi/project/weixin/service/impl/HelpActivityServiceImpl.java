@@ -39,7 +39,7 @@ public class HelpActivityServiceImpl implements ActivityService {
 
     private final IWxTaskHelpRecordService wxTaskHelpRecordService;
 
-    private final IWxTaskHelpService wxTaskHelpService;
+    private final IWxActivityTaskService wxActivityTaskService;
 
     private final WxUserService wxUserService;
 
@@ -59,6 +59,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
         WxUser wxUser = wxUserService.getByOpenId(openId);
         String wxUserId = wxUser.getId();
+        Integer needNum = template.getNeedNum();
         // 首先判断是不是扫活动码进入的
         if (StringUtils.isNotBlank(eventKey) && eventKey.contains(HelpActivityConstant.SCENE_EVENT_KEY)) {
             String inviterOpenId = eventKey.substring(eventKey.lastIndexOf(":") + 1);
@@ -66,24 +67,25 @@ public class HelpActivityServiceImpl implements ActivityService {
             String inviterId = inviter.getId();
             // 不是自己扫自己的码进入的
             if (!inviterId.equals(wxUserId)) {
-                WxTaskHelp wxTaskHelp = wxTaskHelpService.getOne(Wrappers.<WxTaskHelp>lambdaQuery()
-                        .eq(WxTaskHelp::getWxUserId, inviterId)) ;
-                if (wxTaskHelp == null) {
-                    wxTaskHelp = new WxTaskHelp();
-                    wxTaskHelp.setHelpNum(0);
-                    wxTaskHelp.setTaskStatus(ConfigConstant.TASK_DOING);
-                    wxTaskHelp.setWxUserId(inviterId);
-                    wxTaskHelpService.save(wxTaskHelp);
+                WxActivityTask wxActivityTask = wxActivityTaskService.getOne(Wrappers.<WxActivityTask>lambdaQuery()
+                        .eq(WxActivityTask::getWxUserId, inviterId).eq(WxActivityTask::getTemplateId,templateId)) ;
+                if (wxActivityTask == null) {
+                    wxActivityTask = new WxActivityTask();
+                    wxActivityTask.setCompleteNum(0);
+                    wxActivityTask.setTaskStatus(ConfigConstant.TASK_DOING);
+                    wxActivityTask.setWxUserId(inviterId);
+                    wxActivityTask.setTemplateId(templateId);
+                    wxActivityTaskService.save(wxActivityTask);
                 }
-                if (wxTaskHelp.getHelpNum() < HelpActivityConstant.TASK_COMPLETE_NEED_NUM ){
+                if (wxActivityTask.getCompleteNum() < needNum ){
                     //查找助力记录,一个人可以对多个不同的好友助力一次
                     List<WxTaskHelpRecord> records = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery()
                             .eq(WxTaskHelpRecord::getHelpWxUserId, wxUserId).eq(WxTaskHelpRecord::getInviteWxUserId,inviterId));
                     if (records.isEmpty()) {
                         // 未助力过，可以执行助力流程
-                        executeHelpSuccess(messages, wxUser, inviter, wxTaskHelp);
+                        executeHelpSuccess(messages, wxUser, inviter, wxActivityTask,needNum);
                         // 为邀请人推送助力成功
-                        executeBeHelped(messages,wxUser,inviter,wxTaskHelp);
+                        executeBeHelped(messages,wxUser,inviter, wxActivityTask,needNum);
                     } else {
                         // 已经助力过了
                         executeHasHelp(messages,wxUser,inviter);
@@ -92,7 +94,7 @@ public class HelpActivityServiceImpl implements ActivityService {
             }
         }
         // 推送活动规则消息
-        executeActivityRule(messages,wxUser);
+        executeActivityRule(messages,wxUser,templateId);
         // 推送活动海报
         executeActivityPoster(messages,wxUser);
     }
@@ -185,13 +187,25 @@ public class HelpActivityServiceImpl implements ActivityService {
         wxMsgService.save(wxMsg);
     }
 
-    private void executeActivityRule(List<WxMpTemplateMessage> messages, WxUser wxUser) {
+    private void executeActivityRule(List<WxMpTemplateMessage> messages, WxUser wxUser, String templateId) {
         WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_RULE)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
         if (hasAvailableMessage) {
             String content = message.getRepContent();
             content = content.replace(HelpActivityConstant.PLACEHOLDER_SUBSCRIBE_NICKNAME,wxUser.getNickName());
             sendTextMessage(content,wxUser);
+        }
+        // 生成助力任务信息
+        String wxUserId = wxUser.getId();
+        WxActivityTask wxActivityTask = wxActivityTaskService.getOne(Wrappers.<WxActivityTask>lambdaQuery()
+                .eq(WxActivityTask::getWxUserId, wxUserId).eq(WxActivityTask::getTemplateId,templateId));
+        if (wxActivityTask == null) {
+            wxActivityTask = new WxActivityTask();
+            wxActivityTask.setCompleteNum(0);
+            wxActivityTask.setTaskStatus(ConfigConstant.TASK_DOING);
+            wxActivityTask.setWxUserId(wxUserId);
+            wxActivityTask.setTemplateId(templateId);
+            wxActivityTaskService.save(wxActivityTask);
         }
     }
 
@@ -205,13 +219,13 @@ public class HelpActivityServiceImpl implements ActivityService {
         }
     }
 
-    private void executeBeHelped(List<WxMpTemplateMessage> messages, WxUser wxUser, WxUser inviter, WxTaskHelp wxTaskHelp) {
-        if (wxTaskHelp.getHelpNum() < HelpActivityConstant.TASK_COMPLETE_NEED_NUM) {
+    private void executeBeHelped(List<WxMpTemplateMessage> messages, WxUser wxUser, WxUser inviter, WxActivityTask wxActivityTask, Integer needNum) {
+        if (wxActivityTask.getCompleteNum() < needNum) {
             WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_BE_HELPED)).findFirst().orElse(null);
             boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
             if (hasAvailableMessage) {
                 String content = message.getRepContent();
-                content = content.replace(HelpActivityConstant.PLACEHOLDER_BE_RECOMMEND_NICKNAME,wxUser.getNickName()).replace(HelpActivityConstant.PLACEHOLDER_LACK_NUM,HelpActivityConstant.TASK_COMPLETE_NEED_NUM-wxTaskHelp.getHelpNum()+"");
+                content = content.replace(HelpActivityConstant.PLACEHOLDER_BE_RECOMMEND_NICKNAME,wxUser.getNickName()).replace(HelpActivityConstant.PLACEHOLDER_LACK_NUM,needNum- wxActivityTask.getCompleteNum()+"");
                 sendTextMessage(content,inviter);
             }
         } else {
@@ -224,16 +238,16 @@ public class HelpActivityServiceImpl implements ActivityService {
         }
     }
 
-    private WxTaskHelp executeHelpSuccess(List<WxMpTemplateMessage> list, WxUser wxUser, WxUser inviter, WxTaskHelp wxTaskHelp) {
+    private void executeHelpSuccess(List<WxMpTemplateMessage> list, WxUser wxUser, WxUser inviter, WxActivityTask wxActivityTask, Integer needNum) {
         log.info("开始执行助理活动流程：{}",HelpActivityConstant.SCENE_HELP_SUCCESS);
         String wxUserId = wxUser.getId();
         String inviterId = inviter.getId();
         // 邀请人完成人数+1
-        wxTaskHelp.setHelpNum(wxTaskHelp.getHelpNum() + 1);
-        if (wxTaskHelp.getHelpNum() >= HelpActivityConstant.TASK_COMPLETE_NEED_NUM) {
-            wxTaskHelp.setTaskStatus(ConfigConstant.TASK_COMPLETE);
+        wxActivityTask.setCompleteNum(wxActivityTask.getCompleteNum() + 1);
+        if (wxActivityTask.getCompleteNum() >= needNum) {
+            wxActivityTask.setTaskStatus(ConfigConstant.TASK_COMPLETE);
         }
-        wxTaskHelpService.updateById(wxTaskHelp);
+        wxActivityTaskService.updateById(wxActivityTask);
         // 存储助力记录
         WxTaskHelpRecord wxTaskHelpRecord = new WxTaskHelpRecord();
         wxTaskHelpRecord.setHelpWxUserId(wxUserId);
@@ -247,7 +261,6 @@ public class HelpActivityServiceImpl implements ActivityService {
             content = content.replace(HelpActivityConstant.PLACEHOLDER_INVITER_NICKNAME,inviter.getNickName());
             sendTextMessage(content,wxUser);
         }
-        return wxTaskHelp;
     }
 
     private void sendTextMessage(String content,WxUser wxUser) {

@@ -16,7 +16,7 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-public class WxTaskHelp extends BaseEntity {
+public class WxActivityTask extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
@@ -28,12 +28,16 @@ public class WxTaskHelp extends BaseEntity {
     /**
      * 被助力人数（任务完成个数）
      */
-    private Integer helpNum;
+    private Integer completeNum;
 
     /**
      * 状态 1-进行中 2-已完成
      */
     private Integer taskStatus;
 
+    /**
+     * 活动模板id
+     */
+    private String templateId;
 
 }

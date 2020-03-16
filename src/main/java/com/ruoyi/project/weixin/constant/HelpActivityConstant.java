@@ -8,11 +8,6 @@ public interface HelpActivityConstant {
     String SCENE_EVENT_KEY = "helpActivity";
 
     /**
-     * 任务完成需要的数量
-     */
-    int TASK_COMPLETE_NEED_NUM = 3;
-
-    /**
      * 场景值
      */
     String SCENE_HELP_SUCCESS = "help_success";
@@ -29,4 +24,9 @@ public interface HelpActivityConstant {
     String PLACEHOLDER_BE_RECOMMEND_NICKNAME = "${被推荐人昵称}";
     String PLACEHOLDER_SUBSCRIBE_NICKNAME = "${关注者微信昵称}";
     String PLACEHOLDER_LACK_NUM = "${缺少个数}";
+
+    /**
+     * 活动id
+     */
+    String ACTIVITY_TEMPLATE_ID = "1";
 }

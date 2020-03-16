@@ -34,4 +34,9 @@ public class WxActivityTemplate extends BaseEntity {
      * 活动奖励地址
      */
     private String rewardUrl;
+
+    /**
+     * 任务完成需要的个数
+     */
+    private Integer needNum;
 }

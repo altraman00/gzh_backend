@@ -1,6 +1,6 @@
 package com.ruoyi.project.weixin.service;
 
-import com.ruoyi.project.weixin.entity.WxTaskHelp;
+import com.ruoyi.project.weixin.entity.WxActivityTask;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author zhangbin
  * @since 2020-03-11
  */
-public interface IWxTaskHelpService extends IService<WxTaskHelp> {
+public interface IWxActivityTaskService extends IService<WxActivityTask> {
 
 }
