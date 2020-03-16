@@ -57,6 +57,10 @@ public class PortalAspect {
                 log.info("appId:[{}]无绑定活动模板，流程结束",appId);
                 return;
             }
+            if (!wxMp.isActivityEnable()) {
+                log.info("appId:[{}]已暂停活动，流程结束",appId);
+                return;
+            }
             String openId= (String) args[5];
             WxActivityTemplate template = iWxActivityTemplateService.getById(templateId);
             String templateClass = template.getTemplateClass();

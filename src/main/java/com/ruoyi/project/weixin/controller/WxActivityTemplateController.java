@@ -63,6 +63,7 @@ public class WxActivityTemplateController extends BaseController {
     public AjaxResult bindWxActivityTemplate(@RequestParam(value = "templateId") String templateId,@RequestParam(value = "appId") String appId){
         WxMp wxMp = wxMpService.getByAppId(appId);
         wxMp.setTemplateId(templateId);
+        wxMp.setActivityEnable(true);
         wxMpService.updateById(wxMp);
         // 判定是否已经复制过模板信息
         List<WxMpTemplateMessage> mpTemplateMessages = wxMpTemplateMessageService.list(Wrappers.<WxMpTemplateMessage>lambdaQuery()

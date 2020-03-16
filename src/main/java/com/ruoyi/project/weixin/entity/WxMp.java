@@ -40,5 +40,9 @@ public class WxMp extends BaseEntity {
      */
     private String appIdentify;
 
+    /**
+     * 活动是否启用
+     */
+    private boolean activityEnable;
 
 }
