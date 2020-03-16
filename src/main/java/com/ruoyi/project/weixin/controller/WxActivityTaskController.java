@@ -37,7 +37,7 @@ import java.util.List;
  * @since 2020-03-11
  */
 @RestController
-@RequestMapping("/wxtask")
+@RequestMapping("/open/wxtask")
 @AllArgsConstructor
 @Slf4j
 public class WxActivityTaskController extends BaseController {
