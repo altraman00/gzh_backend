@@ -16,7 +16,6 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 /**
@@ -102,7 +102,7 @@ public class WxActivityTaskController extends BaseController {
         if (hasAvailableMessage) {
             File poster = helpActivityService.getPosterFile(openId, message);
             try {
-                posterBase64 = Base64.encodeBase64String(FileUtils.readFileToByteArray(poster));
+                posterBase64 = Base64.getEncoder().encodeToString(FileUtils.readFileToByteArray(poster));
             } catch (IOException e) {
                 log.info("将海报文件编码成base64异常",e);
             }
