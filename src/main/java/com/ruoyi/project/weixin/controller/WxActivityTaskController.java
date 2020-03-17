@@ -69,12 +69,12 @@ public class WxActivityTaskController extends BaseController {
         HelpInfoDTO helpInfoDTO = new HelpInfoDTO();
         if (wxActivityTask!=null) {
             String templateId = wxActivityTask.getTemplateId();
-            WxActivityTemplate template = iWxActivityTemplateService.getById(templateId);
             helpInfoDTO.setCompleteNum(wxActivityTask.getCompleteNum());
-            helpInfoDTO.setNeedNum(template.getNeedNum());
-            helpInfoDTO.setRewardUrl(template.getRewardUrl());
             helpInfoDTO.setStatus(wxActivityTask.getTaskStatus());
         }
+        WxActivityTemplate template = iWxActivityTemplateService.getById(HelpActivityConstant.ACTIVITY_TEMPLATE_ID);
+        helpInfoDTO.setNeedNum(template.getNeedNum());
+        helpInfoDTO.setRewardUrl(template.getRewardUrl());
         // 被助力记录
         List<WxTaskHelpRecord> list = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery().eq(WxTaskHelpRecord::getInviteWxUserId, wxUserId));
         List<WxUser> helpers = new ArrayList<>();
