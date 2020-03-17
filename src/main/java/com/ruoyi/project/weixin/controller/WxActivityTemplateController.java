@@ -116,4 +116,17 @@ public class WxActivityTemplateController extends BaseController {
         wxMpTemplateMessageService.updateById(query);
         return AjaxResult.success(query);
     }
+
+    @ApiOperation("活动启动/活动暂停")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="appId",value="appId",required=true,paramType="String")
+    })
+    @PatchMapping("/status/{appId}")
+    public AjaxResult editActivityStatus(@PathVariable("appId") String appId,@RequestBody EditWxTemplateVO editWxTemplateVO) {
+        // 查询出公众号绑定的活动消息
+        WxMp wxMp = wxMpService.getByAppId(appId);
+        wxMp.setActivityEnable(editWxTemplateVO.getActivityEnable());
+        wxMpService.updateById(wxMp);
+        return AjaxResult.success();
+    }
 }

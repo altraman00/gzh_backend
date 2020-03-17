@@ -15,5 +15,7 @@ public class EditWxTemplateVO {
     @ApiModelProperty("若类型为海报，则为上传接口中返回的MediaId")
     private String repMediaId;
 
+    private Boolean activityEnable;
+
 
 }
