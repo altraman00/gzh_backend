@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
+import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.constant.HelpActivityConstant;
 import com.ruoyi.project.weixin.dto.HelpInfoDTO;
 import com.ruoyi.project.weixin.entity.*;
@@ -67,11 +68,17 @@ public class WxActivityTaskController extends BaseController {
                 .eq(WxActivityTask::getTemplateId, HelpActivityConstant.ACTIVITY_TEMPLATE_ID)
                 .eq(WxActivityTask::getAppId,appId));
         HelpInfoDTO helpInfoDTO = new HelpInfoDTO();
-        if (wxActivityTask!=null) {
-            String templateId = wxActivityTask.getTemplateId();
-            helpInfoDTO.setCompleteNum(wxActivityTask.getCompleteNum());
-            helpInfoDTO.setStatus(wxActivityTask.getTaskStatus());
+        if (wxActivityTask == null) {
+            wxActivityTask = new WxActivityTask();
+            wxActivityTask.setCompleteNum(0);
+            wxActivityTask.setTaskStatus(ConfigConstant.TASK_DOING);
+            wxActivityTask.setWxUserId(wxUserId);
+            wxActivityTask.setTemplateId(HelpActivityConstant.ACTIVITY_TEMPLATE_ID);
+            wxActivityTask.setAppId(appId);
+            wxActivityTaskService.save(wxActivityTask);
         }
+        helpInfoDTO.setCompleteNum(wxActivityTask.getCompleteNum());
+        helpInfoDTO.setStatus(wxActivityTask.getTaskStatus());
         WxActivityTemplate template = iWxActivityTemplateService.getById(HelpActivityConstant.ACTIVITY_TEMPLATE_ID);
         helpInfoDTO.setNeedNum(template.getNeedNum());
         helpInfoDTO.setRewardUrl(template.getRewardUrl());
