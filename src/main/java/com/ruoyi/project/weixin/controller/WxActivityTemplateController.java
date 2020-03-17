@@ -20,6 +20,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,6 +51,7 @@ public class WxActivityTemplateController extends BaseController {
 
     @ApiOperation("查询默认活动模板")
     @GetMapping("/template/list")
+    @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")
     public AjaxResult getWxActivityTemplateList(){
         return AjaxResult.success(wxActivityTemplateService.list());
     }
@@ -91,6 +93,7 @@ public class WxActivityTemplateController extends BaseController {
             @ApiImplicitParam(name="appId",value="appId",required=true,paramType="String")
     })
     @GetMapping("/template/message/list")
+    @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")
     public AjaxResult getMpTemplateMessage(@RequestParam(value = "appId") String appId) {
         // 查询出公众号绑定的活动消息
         WxMp wxMp = wxMpService.getByAppId(appId);
