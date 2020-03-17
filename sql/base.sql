@@ -1029,3 +1029,125 @@ CREATE TABLE `wx_user` (
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+CREATE TABLE `wx_activity_task` (
+  `id` varchar(32) CHARACTER SET utf8 NOT NULL DEFAULT '' COMMENT '主键',
+  `create_id` varchar(32) CHARACTER SET utf8 DEFAULT NULL COMMENT '创建者',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_id` varchar(32) CHARACTER SET utf8 DEFAULT NULL COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `remark` varchar(100) CHARACTER SET utf8 DEFAULT NULL COMMENT '备注',
+  `del_flag` char(2) CHARACTER SET utf8 DEFAULT '0' COMMENT '逻辑删除标记（0：显示；1：隐藏）',
+  `wx_user_id` varchar(32) DEFAULT NULL COMMENT '微信用户id',
+  `complete_num` int(2) DEFAULT NULL COMMENT '任务完成个数',
+  `task_status` int(2) DEFAULT NULL COMMENT '状态 1-进行中 2-已完成',
+  `template_id` varchar(32) DEFAULT NULL COMMENT '活动模板id',
+  `app_id` varchar(32) DEFAULT NULL COMMENT 'appId',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='活动任务表';
+
+CREATE TABLE `wx_activity_template` (
+  `id` varchar(32) CHARACTER SET utf8 NOT NULL DEFAULT '' COMMENT '主键',
+  `create_id` varchar(32) CHARACTER SET utf8 DEFAULT NULL COMMENT '创建者',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_id` varchar(32) CHARACTER SET utf8 DEFAULT NULL COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `remark` varchar(100) CHARACTER SET utf8 DEFAULT NULL COMMENT '备注',
+  `del_flag` char(2) CHARACTER SET utf8 DEFAULT '0' COMMENT '逻辑删除标记（0：显示；1：隐藏）',
+  `template_name` varchar(64) DEFAULT NULL COMMENT '模板名称',
+  `template_class` varchar(64) DEFAULT NULL COMMENT '模板对应的服务类名',
+  `need_num` int(2) DEFAULT NULL COMMENT '任务完成需要的个数',
+  `reward_url` varchar(255) DEFAULT NULL COMMENT '活动奖励地址',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='活动模板表';
+
+CREATE TABLE `wx_activity_template_message` (
+  `id` varchar(32) CHARACTER SET utf8 NOT NULL DEFAULT '' COMMENT '主键',
+  `create_id` varchar(32) CHARACTER SET utf8 DEFAULT NULL COMMENT '创建者',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_id` varchar(32) CHARACTER SET utf8 DEFAULT NULL COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `remark` varchar(100) CHARACTER SET utf8 DEFAULT NULL COMMENT '备注',
+  `del_flag` char(2) CHARACTER SET utf8 DEFAULT '0' COMMENT '逻辑删除标记（0：显示；1：隐藏）',
+  `template_id` varchar(32) DEFAULT NULL COMMENT '模板id',
+  `rep_type` char(10) DEFAULT NULL COMMENT '回复消息类型（text：文本；image：图片；poster：海报）',
+  `rep_content` text COMMENT '回复类型文本保存文字',
+  `rep_media_id` varchar(64) DEFAULT NULL COMMENT '回复类型imge、voice、news、video的mediaID或音乐缩略图的媒体id',
+  `rep_url` varchar(500) DEFAULT NULL COMMENT '链接',
+  `title` varchar(255) DEFAULT NULL COMMENT '标题',
+  `scene` varchar(32) DEFAULT NULL COMMENT '场景字段',
+  `avatar_coordinate` varchar(10) DEFAULT NULL COMMENT '头像坐标，用,隔开',
+  `qrcode_coordinate` varchar(10) DEFAULT NULL COMMENT '二维码坐标，用,隔开',
+  `avatar_size` int(4) DEFAULT NULL COMMENT '头像大小',
+  `qrcode_size` int(4) DEFAULT NULL COMMENT '二维码大小',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='活动模板消息内容';
+
+CREATE TABLE `wx_mp` (
+  `id` varchar(32) CHARACTER SET utf8 NOT NULL DEFAULT '' COMMENT '主键',
+  `create_id` varchar(32) CHARACTER SET utf8 DEFAULT NULL COMMENT '创建者',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_id` varchar(32) CHARACTER SET utf8 DEFAULT NULL COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `remark` varchar(100) CHARACTER SET utf8 DEFAULT NULL COMMENT '备注',
+  `del_flag` char(2) CHARACTER SET utf8 DEFAULT '0' COMMENT '逻辑删除标记（0：显示；1：隐藏）',
+  `app_id` varchar(32) DEFAULT NULL COMMENT '公众号appId',
+  `app_name` varchar(64) DEFAULT NULL COMMENT '公众号名称',
+  `app_identify` varchar(64) DEFAULT NULL COMMENT '公众号标识,前端可用此参数获取公众号信息',
+  `template_id` varchar(32) DEFAULT NULL COMMENT '模板id',
+  `activity_enable` tinyint(1) DEFAULT NULL COMMENT '活动是否启用',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='公众号表';
+
+CREATE TABLE `wx_mp_template_message` (
+  `id` varchar(32) CHARACTER SET utf8 NOT NULL DEFAULT '' COMMENT '主键',
+  `create_id` varchar(32) CHARACTER SET utf8 DEFAULT NULL COMMENT '创建者',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_id` varchar(32) CHARACTER SET utf8 DEFAULT NULL COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `remark` varchar(100) CHARACTER SET utf8 DEFAULT NULL COMMENT '备注',
+  `del_flag` char(2) CHARACTER SET utf8 DEFAULT '0' COMMENT '逻辑删除标记（0：显示；1：隐藏）',
+  `template_id` varchar(32) DEFAULT NULL COMMENT '模板id',
+  `rep_type` char(10) DEFAULT NULL COMMENT '回复消息类型（text：文本；image：图片；poster：海报）',
+  `rep_content` text COMMENT '回复类型文本保存文字',
+  `rep_media_id` varchar(64) DEFAULT NULL COMMENT '回复类型imge、voice、news、video的mediaID或音乐缩略图的媒体id',
+  `rep_url` varchar(500) DEFAULT NULL COMMENT '链接',
+  `title` varchar(255) DEFAULT NULL COMMENT '标题',
+  `scene` varchar(32) DEFAULT NULL COMMENT '场景字段',
+  `app_id` varchar(32) DEFAULT NULL COMMENT '公众号id',
+  `avatar_coordinate` varchar(10) DEFAULT NULL COMMENT '头像坐标，用,隔开',
+  `qrcode_coordinate` varchar(10) DEFAULT NULL COMMENT '二维码坐标，用,隔开',
+  `avatar_size` int(4) DEFAULT NULL COMMENT '头像大小',
+  `qrcode_size` int(4) DEFAULT NULL COMMENT '二维码大小',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `wx_task_help_record` (
+  `id` varchar(32) CHARACTER SET utf8 NOT NULL DEFAULT '' COMMENT '主键',
+  `create_id` varchar(32) CHARACTER SET utf8 DEFAULT NULL COMMENT '创建者',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_id` varchar(32) CHARACTER SET utf8 DEFAULT NULL COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `remark` varchar(100) CHARACTER SET utf8 DEFAULT NULL COMMENT '备注',
+  `del_flag` char(2) CHARACTER SET utf8 DEFAULT '0' COMMENT '逻辑删除标记（0：显示；1：隐藏）',
+  `invite_wx_user_id` varchar(32) DEFAULT NULL COMMENT '邀请人微信userId',
+  `help_wx_user_id` varchar(32) DEFAULT NULL COMMENT '助力人微信userId',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='助力记录表';
+
+INSERT INTO `wx_activity_template`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_name`, `template_class`, `need_num`, `reward_url`) VALUES ('1', NULL, '2020-03-11 16:10:31', NULL, '2020-03-16 10:34:01', NULL, '0', '三人助力', 'helpActivityServiceImpl', 3, 'http://qr61.cn/oKHkte/q08pvhH');
+
+INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_id`, `rep_type`, `rep_content`, `rep_media_id`, `rep_url`, `title`, `scene`, `avatar_coordinate`, `qrcode_coordinate`, `avatar_size`, `qrcode_size`) VALUES ('1', NULL, '2020-03-12 09:09:52', NULL, '2020-03-12 17:07:36', '${上级好友微信昵称}——为分享者微信昵称； 此条信息发放给被推荐者', '0', '1', 'text', '【任务完成】\r\n\r\n您已帮好友${上级好友微信昵称}，助力成功。', NULL, '', '关注消息1——给关注者推送任务完成消息', 'help_success', NULL, NULL, NULL, NULL);
+INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_id`, `rep_type`, `rep_content`, `rep_media_id`, `rep_url`, `title`, `scene`, `avatar_coordinate`, `qrcode_coordinate`, `avatar_size`, `qrcode_size`) VALUES ('2', NULL, '2020-03-12 09:09:52', NULL, '2020-03-12 11:37:18', '${上级好友微信昵称}——为分享者微信昵称； 此条信息发放给被推荐者', '0', '1', 'text', '【任务未完成】 您已帮过好友${上级好友微信昵称}，没法再助力了。', NULL, '', '关注消息1——给关注者推送任务完成消息', 'has_help', NULL, NULL, NULL, NULL);
+INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_id`, `rep_type`, `rep_content`, `rep_media_id`, `rep_url`, `title`, `scene`, `avatar_coordinate`, `qrcode_coordinate`, `avatar_size`, `qrcode_size`) VALUES ('3', NULL, '2020-03-12 09:09:52', NULL, '2020-03-16 16:58:20', '给被推荐者发送活动规则', '0', '1', 'text', 'Hi ${关注者微信昵称}！\r\n\r\n我是小M，这里有份MBA报考秘籍！领取规则:\r\n1、只要三位好友助力，就能领取。\r\n2、将下面带有你头像的图片转发给好友或好友群。\r\n3、邀请好友关注公众号，即可助力成功。', NULL, '', '关注消息2——给关注人推送活动规则消息', 'activity_rule', NULL, NULL, NULL, NULL);
+INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_id`, `rep_type`, `rep_content`, `rep_media_id`, `rep_url`, `title`, `scene`, `avatar_coordinate`, `qrcode_coordinate`, `avatar_size`, `qrcode_size`) VALUES ('4', NULL, '2020-03-12 09:09:52', NULL, '2020-03-13 17:46:00', '活动海报', '0', '1', 'poster', 'http://mmbiz.qpic.cn/mmbiz_png/TRQWU20qwKMzGDcqdP5ibGnXdNviamZO0R5ZakJYMB0gJ37pqz9QsOmFfGVA7sGbliaU0cFpSS8Az7BHvauOk8Ggw/0?wx_fmt=png', 'Q1ipCmTIBavTCEiOqjOaYDeIxy0Ggtlsn2PPgTFkdtc', '', '关注消息3——给关注人推送海报消息', 'activity_poster', '72,60', '1060,1972', 108, 320);
+INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_id`, `rep_type`, `rep_content`, `rep_media_id`, `rep_url`, `title`, `scene`, `avatar_coordinate`, `qrcode_coordinate`, `avatar_size`, `qrcode_size`) VALUES ('5', NULL, '2020-03-12 09:09:52', NULL, '2020-03-16 13:17:36', '当被推荐者关注公众号后了，且推荐者的3人助力未完成时 ${被推荐人昵称}为被分享者', '0', '1', 'text', '【活动任务】\r\n您的好友${被推荐人昵称}帮你助力了，还差${缺少个数}个助力，<a href = \"https://www.baidu.com\">查看任务详情</a>！', NULL, '', '关注消息4——给推荐人推送任务过程中的消息', 'be_helped', NULL, NULL, NULL, NULL);
+INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_id`, `rep_type`, `rep_content`, `rep_media_id`, `rep_url`, `title`, `scene`, `avatar_coordinate`, `qrcode_coordinate`, `avatar_size`, `qrcode_size`) VALUES ('6', NULL, '2020-03-12 09:09:52', NULL, '2020-03-16 13:17:19', '当被推荐者关注公众号后了，且推荐者的3人助力完成时', '0', '1', 'text', '【活动任务】\r\n恭喜，您的好友已经帮您完成了助力任务，点击领取秘籍吧！<a href = \"https://www.baidu.com\">领取奖励</a>', NULL, '', '关注消息5——给推荐人推送任务已完成的消息', 'task_complete', NULL, NULL, NULL, NULL);
+
+INSERT INTO `wx_mp`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `app_id`, `app_name`, `app_identify`, `template_id`, `activity_enable`) VALUES ('1', NULL, '2020-03-11 16:00:23', NULL, '2020-03-12 13:31:21', NULL, '0', 'wx9047d074c6a5a211', '测试公众号', 'online_study', '1', NULL);
+
+INSERT INTO `sys_menu`(`menu_id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `is_frame`, `menu_type`, `visible`, `perms`, `icon`, `create_by`, `create_time`, `update_by`, `update_time`, `remark`) VALUES (2033, '运营活动配置', 4, 1000, 'wxsetting', 'wxmp/wxsetting/index', 1, 'C', '0', 'wxmp:wxsetting:index', 'dashboard', 'admin', '2020-03-12 13:56:44', 'admin', '2020-03-16 17:17:28', '');
+
+
+
+
