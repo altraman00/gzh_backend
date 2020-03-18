@@ -40,7 +40,7 @@ public class PortalAspect {
 
     }
 
-    @AfterReturning("portal()")
+    @After("portal()")
     public void doAfterReturning(JoinPoint joinPoint) {
         Object[] args = joinPoint.getArgs();
         log.info("成功切向事件：{}",Arrays.toString(args));
