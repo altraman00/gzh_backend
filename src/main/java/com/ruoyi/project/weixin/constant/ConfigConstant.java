@@ -74,8 +74,8 @@ public interface ConfigConstant {
 	/**
 	 * 任务进行状态
 	 */
-	int TASK_DOING = 0;
-	int TASK_COMPLETE = 1;
+	int TASK_DOING = 1;
+	int TASK_COMPLETE = 2;
 
 	String MESSAGE_REP_TYPE_TEXT = "text";
 	String MESSAGE_REP_TYPE_IMAGE = "image";
