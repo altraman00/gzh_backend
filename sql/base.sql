@@ -1116,8 +1116,8 @@ CREATE TABLE `wx_mp_template_message` (
   `scene` varchar(32) DEFAULT NULL COMMENT '场景字段',
   `app_id` varchar(32) DEFAULT NULL COMMENT '公众号id',
   `avatar_coordinate` varchar(10) DEFAULT NULL COMMENT '头像坐标，用,隔开',
-  `qrcode_coordinate` varchar(10) DEFAULT NULL COMMENT '二维码坐标，用,隔开',
   `avatar_size` int(4) DEFAULT NULL COMMENT '头像大小',
+  `qrcode_coordinate` varchar(10) DEFAULT NULL COMMENT '二维码坐标，用,隔开',
   `qrcode_size` int(4) DEFAULT NULL COMMENT '二维码大小',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -1137,7 +1137,7 @@ CREATE TABLE `wx_task_help_record` (
 
 INSERT INTO `wx_activity_template`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_name`, `template_class`, `need_num`, `reward_url`) VALUES ('1', NULL, '2020-03-11 16:10:31', NULL, '2020-03-16 10:34:01', NULL, '0', '三人助力', 'helpActivityServiceImpl', 3, 'http://qr61.cn/oKHkte/q08pvhH');
 
-INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_id`, `rep_type`, `rep_content`, `rep_media_id`, `rep_url`, `title`, `scene`, `avatar_coordinate`, `qrcode_coordinate`, `avatar_size`, `qrcode_size`) VALUES ('1', NULL, '2020-03-12 09:09:52', NULL, '2020-03-18 15:08:08', '${上级好友微信昵称}——为分享者微信昵称； 此条信息发放给被推荐者', '0', '1', 'text', '【任务完成】\r\n\r\n您已帮好友${上级好友微信昵称}，助力成功', NULL, '', '关注消息1——给关注者推送任务完成消息', 'help_success', NULL, NULL, NULL, NULL);
+INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_id`, `rep_type`, `rep_content`, `rep_media_id`, `rep_url`, `title`, `scene`, `avatar_coordinate`, `qrcode_coordinate`, `avatar_size`, `qrcode_size`) VALUES ('1', NULL, '2020-03-12 09:09:52', NULL, '2020-03-18 15:08:08', '${上级好友微信昵称}——为分享者微信昵称； 此条信息发放给被推荐者', '0', '1', 'text', '【任务完成】\r\n\r\n您已帮好友${上级好友微信昵称}，助力成功。', NULL, '', '关注消息1——给关注者推送任务完成消息', 'help_success', NULL, NULL, NULL, NULL);
 INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_id`, `rep_type`, `rep_content`, `rep_media_id`, `rep_url`, `title`, `scene`, `avatar_coordinate`, `qrcode_coordinate`, `avatar_size`, `qrcode_size`) VALUES ('2', NULL, '2020-03-12 09:09:52', NULL, '2020-03-18 14:34:19', '此条信息发放给被推荐者', '0', '1', 'text', '【任务未完成】 您已助力过，分享给其他好友帮忙助力吧。', NULL, '', '关注消息1——给关注者推送任务完成消息', 'has_help', NULL, NULL, NULL, NULL);
 INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_id`, `rep_type`, `rep_content`, `rep_media_id`, `rep_url`, `title`, `scene`, `avatar_coordinate`, `qrcode_coordinate`, `avatar_size`, `qrcode_size`) VALUES ('3', NULL, '2020-03-12 09:09:52', NULL, '2020-03-18 15:51:41', '给被推荐者发送活动规则', '0', '1', 'text', 'Hi ${关注者微信昵称}, 你好!\n\n我是小M，这里有份MBA必备资料包！领取规则:\n1、只要三位好友助力，就能领取。\n2、将下面带有你头像的图片转发给好友或好友群。\n3、邀请好友关注公众号，即可助力成功。\n<a href = \"https://open.weixin.qq.com/connect/oauth2/authorize?appid=&redirect_uri=http://gzh.supplus.cn&response_type=code&scope=snsapi_userinfo#wechat_redirect\">点击查看活动详情</a>', NULL, '', '关注消息2——给关注人推送活动规则消息', 'activity_rule', NULL, NULL, NULL, NULL);
 INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_id`, `rep_type`, `rep_content`, `rep_media_id`, `rep_url`, `title`, `scene`, `avatar_coordinate`, `qrcode_coordinate`, `avatar_size`, `qrcode_size`) VALUES ('4', NULL, '2020-03-12 09:09:52', NULL, '2020-03-18 14:51:36', '活动海报', '0', '1', 'poster', 'http://mmbiz.qpic.cn/mmbiz_png/TRQWU20qwKNjd3Uv3xD5SyUic83FFGwjxJj1l6MY1A2icdDoJGFdpia9GPDMxJzKpGibVUPxibcia6XbzWkLELeVrH2Q/0?wx_fmt=png', 'Q1ipCmTIBavTCEiOqjOaYGdQZJv_LMO4k8g0Qh0MYu4', '', '关注消息3——给关注人推送海报消息', 'activity_poster', '36,30', '530,986', 54, 160);
@@ -1146,7 +1146,7 @@ INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `up
 
 
 
-INSERT INTO `wx_mp`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `app_id`, `app_name`, `app_identify`, `template_id`, `activity_enable`) VALUES ('1', NULL, '2020-03-11 16:00:23', NULL, '2020-03-12 13:31:21', NULL, '0', 'wx9047d074c6a5a211', '测试公众号', 'online_study', '1', NULL);
+INSERT INTO `wx_mp`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `app_id`, `app_name`, `app_identify`, `template_id`, `activity_enable`) VALUES ('1', NULL, '2020-03-11 16:00:23', NULL, '2020-03-12 13:31:21', NULL, '0', 'wx9047d074c6a5a211', '测试公众号', 'online_study', NULL, NULL);
 
 INSERT INTO `sys_menu`(`menu_id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `is_frame`, `menu_type`, `visible`, `perms`, `icon`, `create_by`, `create_time`, `update_by`, `update_time`, `remark`) VALUES (2033, '运营活动配置', 4, 1000, 'wxsetting', 'wxmp/wxsetting/index', 1, 'C', '0', 'wxmp:wxsetting:index', 'dashboard', 'admin', '2020-03-12 13:56:44', 'admin', '2020-03-16 17:17:28', '');
 
