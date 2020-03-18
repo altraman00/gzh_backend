@@ -17,5 +17,16 @@ public class EditWxTemplateVO {
 
     private Boolean activityEnable;
 
+    @ApiModelProperty("头像坐标")
+    private String avatarCoordinate;
+
+    @ApiModelProperty("二维码坐标")
+    private String qrcodeCoordinate;
+
+    @ApiModelProperty("头像尺寸")
+    private Integer avatarSize;
+
+    @ApiModelProperty("二维码尺寸")
+    private Integer qrcodeSize;
 
 }

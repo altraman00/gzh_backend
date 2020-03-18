@@ -114,9 +114,7 @@ public class WxActivityTemplateController extends BaseController {
     @PatchMapping("/template/message/{id}")
     public AjaxResult updateMpTemplateMessage(@PathVariable("id") String id,@RequestBody EditWxTemplateVO editWxTemplateVO){
         WxMpTemplateMessage query = wxMpTemplateMessageService.getById(id);
-        query.setRemark(editWxTemplateVO.getRemark());
-        query.setRepMediaId(editWxTemplateVO.getRepMediaId());
-        query.setRepContent(editWxTemplateVO.getRepContent());
+        BeanUtils.copyProperties(editWxTemplateVO,query);
         wxMpTemplateMessageService.updateById(query);
         return AjaxResult.success(query);
     }
