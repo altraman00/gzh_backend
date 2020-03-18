@@ -98,7 +98,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         // 推送活动规则消息
         executeActivityRule(messages,wxUser,templateId,appId);
         // 推送活动海报
-        executeActivityPoster(messages,wxUser);
+        //executeActivityPoster(messages,wxUser);
     }
 
     private void executeActivityPoster(List<WxMpTemplateMessage> messages, WxUser wxUser) {

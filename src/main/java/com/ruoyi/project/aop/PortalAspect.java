@@ -67,7 +67,7 @@ public class PortalAspect {
             String templateClass = template.getTemplateClass();
             ActivityService activityService  = (ActivityService) SpringBeanUtil.getBean(templateClass);
             log.info("appId:{}所绑定活动为：{}，开始执行活动流程",appId,template.getTemplateName());
-            //activityService.execute(inMessage,wxMp,template,openId);
+            activityService.execute(inMessage,wxMp,template,openId);
         }
     }
 }
