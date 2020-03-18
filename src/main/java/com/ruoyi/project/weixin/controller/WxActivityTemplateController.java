@@ -83,6 +83,7 @@ public class WxActivityTemplateController extends BaseController {
             WxMpTemplateMessage wxMpTemplateMessage = new WxMpTemplateMessage();
             wxMpTemplateMessage.setAppId(appId);
             BeanUtils.copyProperties(wxActivityTemplateMessage,wxMpTemplateMessage,"id","createId","createTime","updateId","updateTime","delFlag");
+            wxMpTemplateMessage.setRepContent(wxMpTemplateMessage.getRepContent().replace("appid=","appid="+appId));
             wxMpTemplateMessageService.save(wxMpTemplateMessage);
         }
         return AjaxResult.success(wxMp);
