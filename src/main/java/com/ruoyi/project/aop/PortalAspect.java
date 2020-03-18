@@ -68,11 +68,11 @@ public class PortalAspect {
             ActivityService activityService  = (ActivityService) SpringBeanUtil.getBean(templateClass);
             log.info("appId:{}所绑定活动为：{}，开始执行活动流程",appId,template.getTemplateName());
             try {
-                Thread.sleep(1000);
+                Thread.sleep(10000);
             } catch (InterruptedException e) {
-                log.error("线程水淼异常",e);
+                log.error("线程等待异常",e);
             }
-            activityService.execute(inMessage,wxMp,template,openId);
+            //activityService.execute(inMessage,wxMp,template,openId);
         }
     }
 }
