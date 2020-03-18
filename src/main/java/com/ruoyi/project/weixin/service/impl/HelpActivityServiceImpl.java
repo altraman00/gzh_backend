@@ -80,9 +80,9 @@ public class HelpActivityServiceImpl implements ActivityService {
                     wxActivityTaskService.save(wxActivityTask);
                 }
                 if (wxActivityTask.getCompleteNum() < needNum ){
-                    //查找助力记录,一个人可以对多个不同的好友助力一次
+                    //查找助力记录,一个人只能助力一次
                     List<WxTaskHelpRecord> records = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery()
-                            .eq(WxTaskHelpRecord::getHelpWxUserId, wxUserId).eq(WxTaskHelpRecord::getInviteWxUserId,inviterId));
+                            .eq(WxTaskHelpRecord::getHelpWxUserId, wxUserId));
                     if (records.isEmpty()) {
                         // 未助力过，可以执行助力流程
                         executeHelpSuccess(messages, wxUser, inviter, wxActivityTask,needNum);
