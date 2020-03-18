@@ -12,7 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * @author ruoyi
  */
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
-@EnableAsync
+@EnableAsync(proxyTargetClass = true)
 public class RuoYiApplication
 {
     public static void main(String[] args)
