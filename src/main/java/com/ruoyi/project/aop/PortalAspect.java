@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
@@ -39,8 +40,8 @@ public class PortalAspect {
 
     }
 
-    @AfterReturning("portal()")
-    public void doAfterReturning(JoinPoint joinPoint) {
+    @After("portal()")
+    public void doAfter(JoinPoint joinPoint) {
         Object[] args = joinPoint.getArgs();
         log.info("成功切向事件：{}",Arrays.toString(args));
         String requestBody = (String) args[1];
