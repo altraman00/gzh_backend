@@ -18,6 +18,7 @@ import me.chanjar.weixin.mp.bean.result.WxMpQrCodeTicket;
 import me.chanjar.weixin.mp.bean.result.WxMpUser;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Coordinate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -30,6 +31,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 
+/**
+ * @author VingKing
+ */
 @Service
 @Slf4j
 @AllArgsConstructor
@@ -48,6 +52,7 @@ public class HelpActivityServiceImpl implements ActivityService {
     private final WxMsgService wxMsgService;
 
     @Override
+    @Async
     public void execute(WxMpXmlMessage inMessage, WxMp wxMp, WxActivityTemplate template, String openId) {
         String eventKey = inMessage.getEventKey();
         String appId = wxMp.getAppId();
@@ -98,7 +103,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         // 推送活动规则消息
         executeActivityRule(messages,wxUser,templateId,appId);
         // 推送活动海报
-        //executeActivityPoster(messages,wxUser);
+        executeActivityPoster(messages,wxUser);
     }
 
     private void executeActivityPoster(List<WxMpTemplateMessage> messages, WxUser wxUser) {

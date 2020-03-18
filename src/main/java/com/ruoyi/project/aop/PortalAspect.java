@@ -41,7 +41,7 @@ public class PortalAspect {
     }
 
     @After("portal()")
-    public void doAfterReturning(JoinPoint joinPoint) {
+    public void doAfter(JoinPoint joinPoint) {
         Object[] args = joinPoint.getArgs();
         log.info("成功切向事件：{}",Arrays.toString(args));
         String requestBody = (String) args[1];
@@ -67,12 +67,7 @@ public class PortalAspect {
             String templateClass = template.getTemplateClass();
             ActivityService activityService  = (ActivityService) SpringBeanUtil.getBean(templateClass);
             log.info("appId:{}所绑定活动为：{}，开始执行活动流程",appId,template.getTemplateName());
-            try {
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-                log.error("线程等待异常",e);
-            }
-            //activityService.execute(inMessage,wxMp,template,openId);
+            activityService.execute(inMessage,wxMp,template,openId);
         }
     }
 }
