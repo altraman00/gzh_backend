@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
+import com.ruoyi.project.system.service.ISysDictDataService;
 import com.ruoyi.project.weixin.entity.WxActivityTemplateMessage;
 import com.ruoyi.project.weixin.entity.WxMp;
 import com.ruoyi.project.weixin.entity.WxMpTemplateMessage;
@@ -13,17 +14,34 @@ import com.ruoyi.project.weixin.service.IWxActivityTemplateMessageService;
 import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
 import com.ruoyi.project.weixin.service.IWxMpService;
 import com.ruoyi.project.weixin.service.IWxMpTemplateMessageService;
+import com.ruoyi.project.weixin.utils.ImgUtils;
 import com.ruoyi.project.weixin.vo.EditWxTemplateVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import me.chanjar.weixin.common.error.WxErrorException;
+import me.chanjar.weixin.mp.api.WxMpService;
+import net.coobird.thumbnailator.Thumbnails;
+import net.coobird.thumbnailator.geometry.Coordinate;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -37,6 +55,7 @@ import java.util.List;
 @RequestMapping("/wxactivity")
 @AllArgsConstructor
 @Api("活动模板管理")
+@Slf4j
 public class WxActivityTemplateController extends BaseController {
 
 
@@ -48,6 +67,9 @@ public class WxActivityTemplateController extends BaseController {
 
     private final IWxMpService wxMpService;
 
+    private final WxMpService wxService;
+
+    private final ISysDictDataService sysDictDataService;
 
     @ApiOperation("查询默认活动模板")
     @GetMapping("/template/list")
@@ -111,8 +133,8 @@ public class WxActivityTemplateController extends BaseController {
     }
 
     @ApiOperation("编辑消息内容")
-    @PatchMapping("/template/message/{id}")
-    public AjaxResult updateMpTemplateMessage(@PathVariable("id") String id,@RequestBody EditWxTemplateVO editWxTemplateVO){
+    @PatchMapping("/template/message/{messageId}")
+    public AjaxResult updateMpTemplateMessage(@PathVariable("messageId") String id,@RequestBody EditWxTemplateVO editWxTemplateVO){
         WxMpTemplateMessage query = wxMpTemplateMessageService.getById(id);
         BeanUtils.copyProperties(editWxTemplateVO,query);
         wxMpTemplateMessageService.updateById(query);
@@ -130,5 +152,63 @@ public class WxActivityTemplateController extends BaseController {
         wxMp.setActivityEnable(editWxTemplateVO.getActivityEnable());
         wxMpService.updateById(wxMp);
         return AjaxResult.success();
+    }
+
+    @ApiOperation("预览海报")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="messageId",value="消息Id",required=true,paramType="String")
+    })
+    @PatchMapping("/template/{appId}/poster/preview")
+    public AjaxResult previewPoster(@PathVariable("messageId") String messageId) {
+        WxMpTemplateMessage message = wxMpTemplateMessageService.getById(messageId);
+        String mediaId = message.getRepMediaId();
+        if (StringUtils.isNotBlank(mediaId)) {
+            // 取海报图片
+            InputStream inputStream = null;
+            try {
+                inputStream = wxService.getMaterialService().materialImageOrVoiceDownload(mediaId);
+            } catch (WxErrorException e) {
+                log.error("从素材库获取海报图片异常，消息模板id:{},openId:{}",messageId,e);
+            }
+            File poster;
+            // 头像,二维码地址
+            String avatarUrl = sysDictDataService.selectDictValueByLabel(ISysDictDataService.LABEL_IMG_AVATAR_URL);
+            String qrCodeUrl = sysDictDataService.selectDictValueByLabel(ISysDictDataService.LABEL_IMG_QRCODE_URL);
+            try {
+                // 先处理二维码 设置长宽
+                BufferedImage qrCodeBuffer = Thumbnails.of(ImageIO.read(new URL(avatarUrl))).size(message.getQrcodeSize(), message.getQrcodeSize()).asBufferedImage();
+                // 获取圆形头像
+                BufferedImage roundHead = ImgUtils.getRoundHead(new URL(qrCodeUrl));
+                roundHead = Thumbnails.of(roundHead).size(message.getAvatarSize(), message.getAvatarSize()).asBufferedImage();
+                // 处理海报
+                Thumbnails.Builder<? extends InputStream> builder = Thumbnails.of(inputStream).scale(1.0);
+                // 拼接头像
+                String[] avatarCoordinate = message.getAvatarCoordinate().split(",");
+                builder.watermark(new Coordinate(Integer.parseInt(avatarCoordinate[0]),Integer.parseInt(avatarCoordinate[1])), roundHead,1.0f);
+                // 拼接二维码
+                String[] qrcodeCoordinate = message.getQrcodeCoordinate().split(",");
+                builder.watermark(new Coordinate(Integer.parseInt(qrcodeCoordinate[0]),Integer.parseInt(qrcodeCoordinate[1])), qrCodeBuffer,1.0f);
+                poster = File.createTempFile("temp",".png");
+                builder.toFile(poster);
+                Map<String,Object> result = new HashMap<>(4);
+                String posterBase64 = null;
+                try {
+                    posterBase64 = Base64.getEncoder().encodeToString(FileUtils.readFileToByteArray(poster));
+                } catch (IOException e) {
+                    log.info("将海报文件编码成base64异常",e);
+                } finally {
+                    if (poster.exists()) {
+                        poster.delete();
+                    }
+                }
+                result.put("posterBase64",posterBase64);
+                String name = poster.getName();
+                result.put("suffix", name.substring(name.lastIndexOf(".")+1));
+                return AjaxResult.success(result);
+            } catch (Exception e) {
+                logger.error("预览海报图片，拼接图片出现异常");
+            }
+        }
+        return AjaxResult.error();
     }
 }

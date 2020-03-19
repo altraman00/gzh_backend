@@ -1128,6 +1128,11 @@ INSERT INTO `wx_mp`(`id`, `create_id`, `create_time`, `update_id`, `update_time`
 
 INSERT INTO `sys_menu`(`menu_id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `is_frame`, `menu_type`, `visible`, `perms`, `icon`, `create_by`, `create_time`, `update_by`, `update_time`, `remark`) VALUES (2033, '运营活动配置', 4, 1000, 'wxsetting', 'wxmp/wxsetting/index', 1, 'C', '0', 'wxmp:wxsetting:index', 'dashboard', 'admin', '2020-03-12 13:56:44', 'admin', '2020-03-16 17:17:28', '');
 
+INSERT INTO `sys_dict_type`(`dict_id`, `dict_name`, `dict_type`, `status`, `create_by`, `create_time`, `update_by`, `update_time`, `remark`) VALUES (103, '图片地址', 'sys_img_url', '0', 'admin', '2020-03-19 10:52:58', '', NULL, '部分系统所用的图片的地址');
+
+INSERT INTO `sys_dict_data`(`dict_code`, `dict_sort`, `dict_label`, `dict_value`, `dict_type`, `css_class`, `list_class`, `is_default`, `status`, `create_by`, `create_time`, `update_by`, `update_time`, `remark`) VALUES (109, 0, 'img_avatar_url', 'https://qdyyzx-prod-1251987637.cos.ap-guangzhou.myqcloud.com/gzh/img/sunlands.jpg', 'sys_img_url', NULL, NULL, 'N', '0', 'admin', '2020-03-19 10:58:32', '', NULL, '默认头像地址');
+INSERT INTO `sys_dict_data`(`dict_code`, `dict_sort`, `dict_label`, `dict_value`, `dict_type`, `css_class`, `list_class`, `is_default`, `status`, `create_by`, `create_time`, `update_by`, `update_time`, `remark`) VALUES (110, 0, 'img_qrcode_url', 'https://qdyyzx-prod-1251987637.cos.ap-guangzhou.myqcloud.com/gzh/img/QrCode.jpg', 'sys_img_url', NULL, NULL, 'N', '0', 'admin', '2020-03-19 10:58:55', '', NULL, '默认二维码地址');
+
 
 
 
