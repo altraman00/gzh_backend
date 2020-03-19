@@ -158,7 +158,7 @@ public class WxActivityTemplateController extends BaseController {
     @ApiImplicitParams({
             @ApiImplicitParam(name="messageId",value="消息Id",required=true,paramType="String")
     })
-    @PatchMapping("/template/{messageId}/poster/preview")
+    @GetMapping("/template/{messageId}/poster/preview")
     public AjaxResult previewPoster(@PathVariable("messageId") String messageId) {
         WxMpTemplateMessage message = wxMpTemplateMessageService.getById(messageId);
         String mediaId = message.getRepMediaId();
