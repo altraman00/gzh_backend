@@ -120,16 +120,7 @@ CREATE TABLE `sys_dept` (
 /*Data for the table `sys_dept` */
 
 insert  into `sys_dept`(`dept_id`,`parent_id`,`ancestors`,`dept_name`,`order_num`,`leader`,`phone`,`email`,`status`,`del_flag`,`create_by`,`create_time`,`update_by`,`update_time`) values
-(100,0,'0','若依科技',0,'若依','15888888888','ry@qq.com','0','0','admin','2018-03-16 11:33:00','ry','2018-03-16 11:33:00'),
-(101,100,'0,100','深圳总公司',1,'若依','15888888888','ry@qq.com','0','0','admin','2018-03-16 11:33:00','ry','2018-03-16 11:33:00'),
-(102,100,'0,100','长沙分公司',2,'若依','15888888888','ry@qq.com','0','0','admin','2018-03-16 11:33:00','ry','2018-03-16 11:33:00'),
-(103,101,'0,100,101','研发部门',1,'若依','15888888888','ry@qq.com','0','0','admin','2018-03-16 11:33:00','ry','2018-03-16 11:33:00'),
-(104,101,'0,100,101','市场部门',2,'若依','15888888888','ry@qq.com','0','0','admin','2018-03-16 11:33:00','ry','2018-03-16 11:33:00'),
-(105,101,'0,100,101','测试部门',3,'若依','15888888888','ry@qq.com','0','0','admin','2018-03-16 11:33:00','ry','2018-03-16 11:33:00'),
-(106,101,'0,100,101','财务部门',4,'若依','15888888888','ry@qq.com','0','0','admin','2018-03-16 11:33:00','ry','2018-03-16 11:33:00'),
-(107,101,'0,100,101','运维部门',5,'若依','15888888888','ry@qq.com','0','0','admin','2018-03-16 11:33:00','ry','2018-03-16 11:33:00'),
-(108,102,'0,100,102','市场部门',1,'若依','15888888888','ry@qq.com','0','0','admin','2018-03-16 11:33:00','ry','2018-03-16 11:33:00'),
-(109,102,'0,100,102','财务部门',2,'若依','15888888888','ry@qq.com','0','0','admin','2018-03-16 11:33:00','ry','2018-03-16 11:33:00');
+(100,0,'0','尚德机构',0,'尚德机构',null,null,'0','0','admin','2018-03-16 11:33:00',null,'2018-03-16 11:33:00');
 
 /*Table structure for table `sys_dict_data` */
 
@@ -847,9 +838,8 @@ CREATE TABLE `sys_user` (
 /*Data for the table `sys_user` */
 
 insert  into `sys_user`(`user_id`,`dept_id`,`user_name`,`nick_name`,`user_type`,`email`,`phonenumber`,`sex`,`avatar`,`password`,`status`,`del_flag`,`login_ip`,`login_date`,`create_by`,`create_time`,`update_by`,`update_time`,`remark`) values
-(1,103,'admin','若依','00','ry@163.com','15888888888','1','','$2a$10$3jxuUvQAmkIuwtvYgXjNEOouJX89iv0lDZxWE2y.i9Ij0cIdB91Y6','0','0','127.0.0.1','2018-03-16 11:33:00','admin','2018-03-16 11:33:00','ry','2018-03-16 11:33:00','管理员'),
-(2,105,'ry','若依','00','ry@qq.com','15666666666','1','','$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2','0','0','127.0.0.1','2018-03-16 11:33:00','admin','2018-03-16 11:33:00','ry','2018-03-16 11:33:00','测试员'),
-(100,100,'test','test','00','1023536325@qq.com','18608549631','0','','$2a$10$3jxuUvQAmkIuwtvYgXjNEOouJX89iv0lDZxWE2y.i9Ij0cIdB91Y6','0','0','',NULL,'admin','2020-03-04 17:02:29','admin','2020-03-04 17:03:28',NULL);
+(1,100,'admin','admin','00',null,null,'1','','$2a$10$3jxuUvQAmkIuwtvYgXjNEOouJX89iv0lDZxWE2y.i9Ij0cIdB91Y6','0','0','127.0.0.1','2018-03-16 11:33:00','admin','2018-03-16 11:33:00','ry','2018-03-16 11:33:00','管理员');
+
 
 /*Table structure for table `sys_user_post` */
 
@@ -864,8 +854,7 @@ CREATE TABLE `sys_user_post` (
 /*Data for the table `sys_user_post` */
 
 insert  into `sys_user_post`(`user_id`,`post_id`) values
-(1,1),
-(2,2);
+(1,4);
 
 /*Table structure for table `sys_user_role` */
 
