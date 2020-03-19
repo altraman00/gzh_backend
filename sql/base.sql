@@ -624,9 +624,7 @@ CREATE TABLE `sys_role` (
 /*Data for the table `sys_role` */
 
 insert  into `sys_role`(`role_id`,`role_name`,`role_key`,`role_sort`,`data_scope`,`status`,`del_flag`,`create_by`,`create_time`,`update_by`,`update_time`,`remark`) values
-(1,'管理员','admin',1,'1','0','0','admin','2018-03-16 11:33:00','ry','2018-03-16 11:33:00','管理员'),
-(2,'普通角色','common',2,'2','0','0','admin','2018-03-16 11:33:00','ry','2018-03-16 11:33:00','普通角色'),
-(100,'test','test',0,'1','0','0','admin','2020-03-04 17:01:56','',NULL,NULL);
+(1,'管理员','admin',1,'1','0','0','admin','2018-03-16 11:33:00','ry','2018-03-16 11:33:00','管理员');
 
 /*Table structure for table `sys_role_dept` */
 
@@ -637,13 +635,6 @@ CREATE TABLE `sys_role_dept` (
   `dept_id` bigint(20) NOT NULL COMMENT '部门ID',
   PRIMARY KEY (`role_id`,`dept_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='角色和部门关联表';
-
-/*Data for the table `sys_role_dept` */
-
-insert  into `sys_role_dept`(`role_id`,`dept_id`) values
-(2,100),
-(2,101),
-(2,105);
 
 /*Table structure for table `sys_role_menu` */
 
@@ -869,9 +860,7 @@ CREATE TABLE `sys_user_role` (
 /*Data for the table `sys_user_role` */
 
 insert  into `sys_user_role`(`user_id`,`role_id`) values
-(1,1),
-(2,2),
-(100,100);
+(1,1);
 
 /*Table structure for table `wx_auto_reply` */
 
