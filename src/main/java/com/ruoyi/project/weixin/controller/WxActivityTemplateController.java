@@ -26,6 +26,7 @@ import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpService;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Coordinate;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,9 +37,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -193,7 +192,7 @@ public class WxActivityTemplateController extends BaseController {
                 Map<String,Object> result = new HashMap<>(4);
                 String posterBase64 = null;
                 try {
-                    posterBase64 = Base64.getEncoder().encodeToString(FileUtils.readFileToByteArray(poster));
+                    posterBase64 = Base64.encodeBase64String(FileUtils.readFileToByteArray(poster));
                 } catch (IOException e) {
                     log.info("将海报文件编码成base64异常",e);
                 } finally {

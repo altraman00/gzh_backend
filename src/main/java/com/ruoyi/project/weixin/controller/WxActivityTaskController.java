@@ -17,8 +17,9 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
-import org.springframework.util.Base64Utils;
+import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,7 +27,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -108,9 +112,16 @@ public class WxActivityTaskController extends BaseController {
         String posterBase64 = null;
         if (hasAvailableMessage) {
             Map<String,Object> result = new HashMap<>(4);
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start("create poster");
             File poster = helpActivityService.getPosterFile(openId, message);
+            stopWatch.stop();
+            log.info(stopWatch.prettyPrint());
             try {
-                posterBase64 = Base64.getEncoder().encodeToString(FileUtils.readFileToByteArray(poster));
+                stopWatch.start("encode base64");
+                posterBase64 = Base64.encodeBase64String(FileUtils.readFileToByteArray(poster));
+                stopWatch.stop();
+                log.info(stopWatch.prettyPrint());
             } catch (IOException e) {
                 log.info("将海报文件编码成base64异常",e);
             } finally {
