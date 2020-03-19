@@ -206,7 +206,7 @@ public class WxActivityTemplateController extends BaseController {
                 result.put("suffix", name.substring(name.lastIndexOf(".")+1));
                 return AjaxResult.success(result);
             } catch (Exception e) {
-                logger.error("预览海报图片，拼接图片出现异常");
+                logger.error("预览海报图片，拼接图片出现异常",e);
             }
         }
         return AjaxResult.error();
