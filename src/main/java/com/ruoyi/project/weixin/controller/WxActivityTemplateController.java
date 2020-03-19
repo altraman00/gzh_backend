@@ -176,9 +176,9 @@ public class WxActivityTemplateController extends BaseController {
             String qrCodeUrl = sysDictDataService.selectDictValueByLabel(ISysDictDataService.LABEL_IMG_QRCODE_URL);
             try {
                 // 先处理二维码 设置长宽
-                BufferedImage qrCodeBuffer = Thumbnails.of(ImageIO.read(new URL(avatarUrl))).size(message.getQrcodeSize(), message.getQrcodeSize()).asBufferedImage();
+                BufferedImage qrCodeBuffer = Thumbnails.of(ImageIO.read(new URL(qrCodeUrl))).size(message.getQrcodeSize(), message.getQrcodeSize()).asBufferedImage();
                 // 获取圆形头像
-                BufferedImage roundHead = ImgUtils.getRoundHead(new URL(qrCodeUrl));
+                BufferedImage roundHead = ImgUtils.getRoundHead(new URL(avatarUrl));
                 roundHead = Thumbnails.of(roundHead).size(message.getAvatarSize(), message.getAvatarSize()).asBufferedImage();
                 // 处理海报
                 Thumbnails.Builder<? extends InputStream> builder = Thumbnails.of(inputStream).scale(1.0);

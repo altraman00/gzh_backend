@@ -59,8 +59,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	    select count(1) from sys_dict_data where dict_type=#{dictType}
 	</select>
 	<select id="selectDictValueByLabel" resultType="String">
-		select dict_label from sys_dict_data
-		where dict_value = #{label};
+		select dict_value from sys_dict_data
+		where dict_label = #{label};
 	</select>
 
 	<delete id="deleteDictDataById" parameterType="Long">
