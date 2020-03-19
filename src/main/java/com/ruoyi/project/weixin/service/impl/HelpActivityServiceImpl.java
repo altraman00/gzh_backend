@@ -169,7 +169,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         stopWatch.start("Join poster img");
         File poster = null;
         try {
-            poster = File.createTempFile("temp",".png");
+            poster = File.createTempFile("temp",".jpg");
             // 先处理二维码 设置长宽
             BufferedImage qrCodeBuffer = Thumbnails.of(qrCode).size(message.getQrcodeSize(), message.getQrcodeSize()).asBufferedImage();
             // 处理头像
