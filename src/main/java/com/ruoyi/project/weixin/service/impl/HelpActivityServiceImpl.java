@@ -21,6 +21,7 @@ import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Coordinate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -130,17 +131,21 @@ public class HelpActivityServiceImpl implements ActivityService {
     }
 
     public File getPosterFile(String openId, WxMpTemplateMessage message) {
+        StopWatch stopWatch = new StopWatch();
         File poster = null;
         String messageId = message.getId();
         // 先获取海报图片
         String repMediaId = message.getRepMediaId();
         InputStream inputStream = null;
+        stopWatch.start("get poster img");
         try {
             inputStream = wxMpService.getMaterialService().materialImageOrVoiceDownload(repMediaId);
         } catch (WxErrorException e) {
             log.error("从素材库获取海报图片异常，消息模板id:{},openId:{}",messageId,openId,e);
         }
+        stopWatch.stop();
         // 获取邀请二维码
+        stopWatch.start("get qrcode img");
         File qrCode = null;
         try {
             WxMpQrCodeTicket ticket = wxMpService.getQrcodeService().qrCodeCreateLastTicket("helpActivity:"+ openId);
@@ -148,7 +153,9 @@ public class HelpActivityServiceImpl implements ActivityService {
         } catch (Exception e) {
             log.error("生成助力活动带参二维码异常，消息模板id:{},openId:{}",messageId,openId,e);
         }
+        stopWatch.stop();
         // 获取用户头像
+        stopWatch.start("get avatar img");
         String headImgUrl = null;
         try {
             //语言
@@ -158,7 +165,9 @@ public class HelpActivityServiceImpl implements ActivityService {
         } catch (WxErrorException e) {
             log.error("获取用户头像信息异常，消息模板id:{},openId:{}",messageId,openId,e);
         }
+        stopWatch.stop();
         // 开始处理图片,生成海报
+        stopWatch.start("Join poster img");
         try {
             // 先处理二维码 设置长宽
             BufferedImage qrCodeBuffer = Thumbnails.of(qrCode).size(message.getQrcodeSize(), message.getQrcodeSize()).asBufferedImage();
@@ -180,6 +189,8 @@ public class HelpActivityServiceImpl implements ActivityService {
         } catch (Exception e) {
             log.error("生成海报图片异常，消息模板id:{},openId:{}",messageId,openId,e);
         }
+        stopWatch.stop();
+        log.info(stopWatch.prettyPrint());
         return poster;
     }
 

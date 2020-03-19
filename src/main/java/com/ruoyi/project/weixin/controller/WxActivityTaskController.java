@@ -116,7 +116,6 @@ public class WxActivityTaskController extends BaseController {
             stopWatch.start("create poster");
             File poster = helpActivityService.getPosterFile(openId, message);
             stopWatch.stop();
-            log.info(stopWatch.prettyPrint());
             try {
                 stopWatch.start("encode base64");
                 posterBase64 = Base64.encodeBase64String(FileUtils.readFileToByteArray(poster));
