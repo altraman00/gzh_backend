@@ -14,6 +14,7 @@ import com.ruoyi.project.weixin.service.IWxActivityTemplateMessageService;
 import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
 import com.ruoyi.project.weixin.service.IWxMpService;
 import com.ruoyi.project.weixin.service.IWxMpTemplateMessageService;
+import com.ruoyi.project.weixin.service.impl.HelpActivityServiceImpl;
 import com.ruoyi.project.weixin.utils.ImgUtils;
 import com.ruoyi.project.weixin.vo.EditWxTemplateVO;
 import io.swagger.annotations.Api;
@@ -25,7 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpService;
 import net.coobird.thumbnailator.Thumbnails;
-import net.coobird.thumbnailator.geometry.Coordinate;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.BeanUtils;
@@ -69,6 +69,8 @@ public class WxActivityTemplateController extends BaseController {
     private final WxMpService wxService;
 
     private final ISysDictDataService sysDictDataService;
+
+    private final HelpActivityServiceImpl helpActivityService;
 
     @ApiOperation("查询默认活动模板")
     @GetMapping("/template/list")
@@ -169,7 +171,6 @@ public class WxActivityTemplateController extends BaseController {
             } catch (WxErrorException e) {
                 log.error("从素材库获取海报图片异常，消息模板id:{},openId:{}",messageId,e);
             }
-            File poster;
             // 头像,二维码地址
             String avatarUrl = sysDictDataService.selectDictValueByLabel(ISysDictDataService.LABEL_IMG_AVATAR_URL);
             String qrCodeUrl = sysDictDataService.selectDictValueByLabel(ISysDictDataService.LABEL_IMG_QRCODE_URL);
@@ -180,15 +181,8 @@ public class WxActivityTemplateController extends BaseController {
                 BufferedImage roundHead = ImgUtils.getRoundHead(new URL(avatarUrl));
                 roundHead = Thumbnails.of(roundHead).size(message.getAvatarSize(), message.getAvatarSize()).asBufferedImage();
                 // 处理海报
-                Thumbnails.Builder<? extends InputStream> builder = Thumbnails.of(inputStream).scale(1.0);
-                // 拼接头像
-                String[] avatarCoordinate = message.getAvatarCoordinate().split(",");
-                builder.watermark(new Coordinate(Integer.parseInt(avatarCoordinate[0]),Integer.parseInt(avatarCoordinate[1])), roundHead,1.0f);
-                // 拼接二维码
-                String[] qrcodeCoordinate = message.getQrcodeCoordinate().split(",");
-                builder.watermark(new Coordinate(Integer.parseInt(qrcodeCoordinate[0]),Integer.parseInt(qrcodeCoordinate[1])), qrCodeBuffer,1.0f);
-                poster = File.createTempFile("temp",".png");
-                builder.toFile(poster);
+                File poster = File.createTempFile("temp",".jpg");
+                helpActivityService.generatorPoster(message,inputStream,poster,qrCodeBuffer,roundHead);
                 Map<String,Object> result = new HashMap<>(4);
                 String posterBase64 = null;
                 try {

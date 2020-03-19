@@ -29,4 +29,6 @@ public interface HelpActivityConstant {
      * 活动id
      */
     String ACTIVITY_TEMPLATE_ID = "1";
+
+    Integer POSTER_SIZE = 200 * 1024;
 }

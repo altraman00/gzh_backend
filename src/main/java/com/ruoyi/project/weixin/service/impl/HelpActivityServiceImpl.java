@@ -132,7 +132,6 @@ public class HelpActivityServiceImpl implements ActivityService {
 
     public File getPosterFile(String openId, WxMpTemplateMessage message) {
         StopWatch stopWatch = new StopWatch();
-        File poster = null;
         String messageId = message.getId();
         // 先获取海报图片
         String repMediaId = message.getRepMediaId();
@@ -168,7 +167,9 @@ public class HelpActivityServiceImpl implements ActivityService {
         stopWatch.stop();
         // 开始处理图片,生成海报
         stopWatch.start("Join poster img");
+        File poster = null;
         try {
+            poster = File.createTempFile("temp",".png");
             // 先处理二维码 设置长宽
             BufferedImage qrCodeBuffer = Thumbnails.of(qrCode).size(message.getQrcodeSize(), message.getQrcodeSize()).asBufferedImage();
             // 处理头像
@@ -176,22 +177,28 @@ public class HelpActivityServiceImpl implements ActivityService {
             // 获取圆形头像
             BufferedImage roundHead = ImgUtils.getRoundHead(url);
             roundHead = Thumbnails.of(roundHead).size(message.getAvatarSize(), message.getAvatarSize()).asBufferedImage();
-            // 处理海报
-            Thumbnails.Builder<? extends InputStream> builder = Thumbnails.of(inputStream).scale(1.0);
-            // 拼接头像
-            String[] avatarCoordinate = message.getAvatarCoordinate().split(",");
-            builder.watermark(new Coordinate(Integer.parseInt(avatarCoordinate[0]),Integer.parseInt(avatarCoordinate[1])), roundHead,1.0f);
-            // 拼接二维码
-            String[] qrcodeCoordinate = message.getQrcodeCoordinate().split(",");
-            builder.watermark(new Coordinate(Integer.parseInt(qrcodeCoordinate[0]),Integer.parseInt(qrcodeCoordinate[1])), qrCodeBuffer,1.0f);
-            poster = File.createTempFile("temp",".png");
-            builder.toFile(poster);
+            generatorPoster(message, inputStream, poster, qrCodeBuffer, roundHead);
         } catch (Exception e) {
             log.error("生成海报图片异常，消息模板id:{},openId:{}",messageId,openId,e);
         }
         stopWatch.stop();
         log.info(stopWatch.prettyPrint());
         return poster;
+    }
+
+    public void generatorPoster(WxMpTemplateMessage message, InputStream inputStream, File poster, BufferedImage qrCodeBuffer, BufferedImage roundHead) throws IOException {
+        // 处理海报
+        Thumbnails.Builder<? extends InputStream> builder = Thumbnails.of(inputStream).scale(1.0);
+        // 拼接头像
+        String[] avatarCoordinate = message.getAvatarCoordinate().split(",");
+        builder.watermark(new Coordinate(Integer.parseInt(avatarCoordinate[0]),Integer.parseInt(avatarCoordinate[1])), roundHead,1.0f);
+        // 拼接二维码
+        String[] qrcodeCoordinate = message.getQrcodeCoordinate().split(",");
+        builder.watermark(new Coordinate(Integer.parseInt(qrcodeCoordinate[0]),Integer.parseInt(qrcodeCoordinate[1])), qrCodeBuffer,1.0f);
+        builder.toFile(poster);
+        if (poster.length() > HelpActivityConstant.POSTER_SIZE ) {
+            Thumbnails.of(poster).scale(1.0).outputQuality((float)HelpActivityConstant.POSTER_SIZE / poster.length()).outputFormat("jpg").toFile(poster);
+        }
     }
 
     private void sendImageMessage(WxMediaUploadResult result, WxUser wxUser) {
