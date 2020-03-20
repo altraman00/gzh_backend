@@ -79,4 +79,9 @@ public class WxMpTemplateMessage extends BaseEntity {
      * 二维码大小
      */
     private Integer qrcodeSize;
+
+    /**
+     * 类型为定时消息时的cron表达式
+     */
+    private String cron;
 }

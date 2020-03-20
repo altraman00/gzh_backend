@@ -75,4 +75,9 @@ public class WxActivityTemplateMessage extends BaseEntity {
      */
     private Integer qrcodeSize;
 
+    /**
+     * 类型为定时消息时的cron表达式
+     */
+    private String cron;
+
 }

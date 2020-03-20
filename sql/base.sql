@@ -1113,6 +1113,10 @@ CREATE TABLE `wx_task_help_record` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='助力记录表';
 
+ALTER TABLE `wx_activity_template_message`
+MODIFY COLUMN `rep_type` char(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '回复消息类型（text：文本；image：图片；poster：海报; schedule:定时消息）' AFTER `template_id`,
+ADD COLUMN `cron` varchar(64) NULL COMMENT '类型为定时消息的cron表达式' AFTER `qrcode_size`;
+
 INSERT INTO `wx_activity_template`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_name`, `template_class`, `need_num`, `reward_url`) VALUES ('1', NULL, '2020-03-11 16:10:31', NULL, '2020-03-16 10:34:01', NULL, '0', '三人助力', 'helpActivityServiceImpl', 3, 'http://qr61.cn/oKHkte/q08pvhH');
 
 INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_id`, `rep_type`, `rep_content`, `rep_media_id`, `rep_url`, `title`, `scene`, `avatar_coordinate`, `qrcode_coordinate`, `avatar_size`, `qrcode_size`) VALUES ('1', NULL, '2020-03-12 09:09:52', NULL, '2020-03-18 15:08:08', '${上级好友微信昵称}——为分享者微信昵称； 此条信息发放给被推荐者', '0', '1', 'text', '【任务完成】\r\n\r\n您已帮好友${上级好友微信昵称}，助力成功。', NULL, '', '关注消息1——给关注者推送任务完成消息', 'help_success', NULL, NULL, NULL, NULL);
