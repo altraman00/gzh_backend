@@ -16,6 +16,7 @@ public interface HelpActivityConstant {
     String SCENE_BE_HELPED = "be_helped";
     String SCENE_TASK_COMPLETE = "task_complete";
     String SCENE_ACTIVITY_POSTER = "activity_poster";
+    String SCENE_SCHEDULE_INVITER = "schedule_invite";
 
     /**
      * 占位信息

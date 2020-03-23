@@ -7,9 +7,12 @@ import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.system.service.ISysDictDataService;
+import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.entity.WxActivityTemplateMessage;
 import com.ruoyi.project.weixin.entity.WxMp;
 import com.ruoyi.project.weixin.entity.WxMpTemplateMessage;
+import com.ruoyi.project.weixin.schedule.SchedulingRunnable;
+import com.ruoyi.project.weixin.schedule.config.CronTaskRegistrar;
 import com.ruoyi.project.weixin.service.IWxActivityTemplateMessageService;
 import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
 import com.ruoyi.project.weixin.service.IWxMpService;
@@ -29,6 +32,7 @@ import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.scheduling.config.CronTask;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,6 +42,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +77,8 @@ public class WxActivityTemplateController extends BaseController {
 
     private final HelpActivityServiceImpl helpActivityService;
 
+    private final CronTaskRegistrar cronTaskRegistrar;
+
     @ApiOperation("查询默认活动模板")
     @GetMapping("/template/list")
     @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")
@@ -87,6 +94,11 @@ public class WxActivityTemplateController extends BaseController {
     @GetMapping("/template/bind")
     public AjaxResult bindWxActivityTemplate(@RequestParam(value = "templateId") String templateId,@RequestParam(value = "appId") String appId){
         WxMp wxMp = wxMpService.getByAppId(appId);
+        String originalTemplateId = wxMp.getTemplateId();
+        // 未做任何改动
+        if (originalTemplateId.equals(templateId) && wxMp.isActivityEnable()) {
+            return AjaxResult.success(wxMp);
+        }
         wxMp.setTemplateId(templateId);
         wxMp.setActivityEnable(true);
         wxMpService.updateById(wxMp);
@@ -101,6 +113,7 @@ public class WxActivityTemplateController extends BaseController {
         QueryWrapper<WxActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(WxActivityTemplateMessage::getTemplateId,templateId);
         List<WxActivityTemplateMessage> list = wxActivityTemplateMessageService.list(queryWrapper);
+        List<WxMpTemplateMessage> needPublishSchedule = new ArrayList<>();
         for (WxActivityTemplateMessage wxActivityTemplateMessage : list) {
             // 复制到公众号模板信息表
             WxMpTemplateMessage wxMpTemplateMessage = new WxMpTemplateMessage();
@@ -108,6 +121,26 @@ public class WxActivityTemplateController extends BaseController {
             BeanUtils.copyProperties(wxActivityTemplateMessage,wxMpTemplateMessage,"id","createId","createTime","updateId","updateTime","delFlag");
             wxMpTemplateMessage.setRepContent(wxMpTemplateMessage.getRepContent().replace("appid=","appid="+appId));
             wxMpTemplateMessageService.save(wxMpTemplateMessage);
+            if (wxMpTemplateMessage.getRepType().equals(ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE)) {
+                needPublishSchedule.add(wxMpTemplateMessage);
+            }
+        }
+        // 发布定时任务
+        // 先移除原绑定任务
+        List<WxMpTemplateMessage> originalScheduleMessages = wxMpTemplateMessageService.list(Wrappers.<WxMpTemplateMessage>lambdaQuery()
+                .eq(WxMpTemplateMessage::getTemplateId, originalTemplateId)
+                .eq(WxMpTemplateMessage::getAppId, appId)
+                .eq(WxMpTemplateMessage::getRepType, ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE));
+        for (WxMpTemplateMessage originalScheduleMessage : originalScheduleMessages) {
+            SchedulingRunnable task = new SchedulingRunnable(originalScheduleMessage.getScheduleClass(), originalScheduleMessage.getScheduleMethod(), appId);
+            CronTask cronTask = new CronTask(task, originalScheduleMessage.getScheduleCron());
+            cronTaskRegistrar.removeCronTask(cronTask.getRunnable());
+        }
+        // 再发布新的定时任务
+        for (WxMpTemplateMessage wxMpTemplateMessage : needPublishSchedule) {
+            SchedulingRunnable task = new SchedulingRunnable(wxMpTemplateMessage.getScheduleClass(), wxMpTemplateMessage.getScheduleMethod(), appId);
+            CronTask cronTask = new CronTask(task, wxMpTemplateMessage.getScheduleCron());
+            cronTaskRegistrar.addCronTask(cronTask);
         }
         return AjaxResult.success(wxMp);
     }
@@ -137,8 +170,15 @@ public class WxActivityTemplateController extends BaseController {
     @PatchMapping("/template/message/{messageId}")
     public AjaxResult updateMpTemplateMessage(@PathVariable("messageId") String id,@RequestBody EditWxTemplateVO editWxTemplateVO){
         WxMpTemplateMessage query = wxMpTemplateMessageService.getById(id);
+        String originalCron = query.getScheduleCron();
         BeanUtils.copyProperties(editWxTemplateVO,query);
         wxMpTemplateMessageService.updateById(query);
+        if (query.getRepType().equals(ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE) && !originalCron.equals(editWxTemplateVO.getScheduleCron())) {
+            // 重新发布定时任务
+            SchedulingRunnable task = new SchedulingRunnable(query.getScheduleClass(), query.getScheduleMethod(), query.getAppId());
+            CronTask cronTask = new CronTask(task, query.getScheduleCron());
+            cronTaskRegistrar.addCronTask(cronTask);
+        }
         return AjaxResult.success(query);
     }
 
@@ -149,8 +189,9 @@ public class WxActivityTemplateController extends BaseController {
     @PatchMapping("/status/{appId}")
     public AjaxResult editActivityStatus(@PathVariable("appId") String appId,@RequestBody EditWxTemplateVO editWxTemplateVO) {
         // 查询出公众号绑定的活动消息
+        Boolean activityEnable = editWxTemplateVO.getActivityEnable();
         WxMp wxMp = wxMpService.getByAppId(appId);
-        wxMp.setActivityEnable(editWxTemplateVO.getActivityEnable());
+        wxMp.setActivityEnable(activityEnable);
         wxMpService.updateById(wxMp);
         return AjaxResult.success();
     }

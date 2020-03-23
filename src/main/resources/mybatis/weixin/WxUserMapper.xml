@@ -5,7 +5,7 @@
   -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.joolun.cloud.weixin.admin.mapper.WxUserMapper">
+<mapper namespace="com.ruoyi.project.weixin.mapper.WxUserMapper">
 
 	<resultMap id="wxUserMap" type="com.ruoyi.project.weixin.entity.WxUser">
 		<id property="id" column="id"/>
@@ -40,4 +40,17 @@
 		<result property="sessionKey" column="session_key"/>
 		<result property="mallUserId" column="mall_user_id"/>
 	</resultMap>
+
+	<select id="getNotCompleteUser"  resultMap="wxUserMap">
+		SELECT
+		  *
+		FROM
+		wx_user wu
+		INNER JOIN wx_activity_task wct ON wu.id = wct.wx_user_id
+		WHERE
+		wu.subscribe = '1'
+		AND wct.task_status = 1
+		AND wct.app_id = #{appId}
+		AND wct.template_id = #{templateId};
+	</select>
 </mapper>

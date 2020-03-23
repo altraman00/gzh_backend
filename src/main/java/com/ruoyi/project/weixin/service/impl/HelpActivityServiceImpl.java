@@ -6,6 +6,7 @@ import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.constant.HelpActivityConstant;
 import com.ruoyi.project.weixin.entity.*;
+import com.ruoyi.project.weixin.mapper.WxUserMapper;
 import com.ruoyi.project.weixin.service.*;
 import com.ruoyi.project.weixin.utils.ImgUtils;
 import lombok.AllArgsConstructor;
@@ -23,9 +24,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -52,6 +50,8 @@ public class HelpActivityServiceImpl implements ActivityService {
     private final WxMpService wxMpService;
 
     private final WxMsgService wxMsgService;
+
+    private final WxUserMapper wxUserMapper;
 
     @Override
     @Async
@@ -326,5 +326,22 @@ public class HelpActivityServiceImpl implements ActivityService {
         wxMsg.setWxUserId(wxUser.getId());
         wxMsg.setRepType(ConfigConstant.MESSAGE_REP_TYPE_TEXT);
         wxMsgService.save(wxMsg);
+    }
+
+    public void sendInviteMessage(String appId) {
+
+        QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,HelpActivityConstant.ACTIVITY_TEMPLATE_ID);
+        List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
+        WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_SCHEDULE_INVITER)).findFirst().orElse(null);
+        boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent()) && StringUtils.isNotBlank(message.getRepMediaId());
+        if (hasAvailableMessage) {
+            List<WxUser> users =  wxUserMapper.getNotCompleteUser(appId,HelpActivityConstant.ACTIVITY_TEMPLATE_ID);
+            log.info("共查询到：{}个需要发送消息的用户",users.size());
+            String content = message.getRepContent();
+            for (WxUser wxUser : users) {
+                sendTextMessage(content,wxUser);
+            }
+        }
     }
 }

@@ -79,4 +79,5 @@ public interface ConfigConstant {
 
 	String MESSAGE_REP_TYPE_TEXT = "text";
 	String MESSAGE_REP_TYPE_IMAGE = "image";
+	String MESSAGE_REP_TYPE_SCHEDULE = "schedule";
 }
