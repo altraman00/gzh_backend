@@ -78,6 +78,16 @@ public class WxActivityTemplateMessage extends BaseEntity {
     /**
      * 类型为定时消息时的cron表达式
      */
-    private String cron;
+    private String scheduleCron;
+
+    /**
+     * 类型为定时消息时的类
+     */
+    private String scheduleClass;
+
+    /**
+     * 类型为定时消息时的cron方法名
+     */
+    private String scheduleMethod;
 
 }

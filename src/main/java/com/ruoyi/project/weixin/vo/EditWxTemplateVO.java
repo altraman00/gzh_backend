@@ -29,4 +29,7 @@ public class EditWxTemplateVO {
     @ApiModelProperty("二维码尺寸")
     private Integer qrcodeSize;
 
+    @ApiModelProperty("类型为定时消息时的cron表达式")
+    private String scheduleCron;
+
 }
