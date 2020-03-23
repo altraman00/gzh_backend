@@ -53,6 +53,8 @@ public class HelpActivityServiceImpl implements ActivityService {
 
     private final WxUserMapper wxUserMapper;
 
+    private final IWxMpService iWxMpService;
+
     @Override
     @Async
     public void execute(WxMpXmlMessage inMessage, WxMp wxMp, WxActivityTemplate template, String openId) {
@@ -329,7 +331,11 @@ public class HelpActivityServiceImpl implements ActivityService {
     }
 
     public void sendInviteMessage(String appId) {
-
+        WxMp wxMp = iWxMpService.getByAppId(appId);
+        if (!wxMp.isActivityEnable()) {
+            log.info("appId:[{}]已暂停活动，流程结束",appId);
+            return;
+        }
         QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,HelpActivityConstant.ACTIVITY_TEMPLATE_ID);
         List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
