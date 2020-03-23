@@ -10,6 +10,7 @@ import com.ruoyi.project.weixin.schedule.config.CronTaskRegistrar;
 import com.ruoyi.project.weixin.service.IWxMpService;
 import com.ruoyi.project.weixin.service.IWxMpTemplateMessageService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import java.util.List;
  * @since 2020-03-11
  */
 @Service
+@Slf4j
 public class WxMpTemplateMessageServiceImpl extends ServiceImpl<WxMpTemplateMessageMapper, WxMpTemplateMessage> implements IWxMpTemplateMessageService {
 
     @Autowired
@@ -52,6 +54,7 @@ public class WxMpTemplateMessageServiceImpl extends ServiceImpl<WxMpTemplateMess
         for (WxMpTemplateMessage wxMpTemplateMessage : needPublishSchedule) {
             SchedulingRunnable task = new SchedulingRunnable(wxMpTemplateMessage.getScheduleClass(), wxMpTemplateMessage.getScheduleMethod(), wxMpTemplateMessage.getAppId());
             cronTaskRegistrar.addCronTask(task, wxMpTemplateMessage.getScheduleCron(),wxMpTemplateMessage.getId());
+            log.info("成功发布定时任务:messageId:[{}]",wxMpTemplateMessage.getId());
         }
     }
 }
