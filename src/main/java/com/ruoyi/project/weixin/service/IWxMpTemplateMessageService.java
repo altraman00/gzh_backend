@@ -13,4 +13,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IWxMpTemplateMessageService extends IService<WxMpTemplateMessage> {
 
+    /**
+     * 发布所有公众号所绑定的定时任务消息
+     */
+    void pushAllScheduleMessageTask();
 }
