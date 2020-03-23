@@ -24,7 +24,7 @@ public class TaskTest {
     @Test
     public void testTask() throws InterruptedException {
         SchedulingRunnable task = new SchedulingRunnable("demoTask", "taskNoParams", null);
-        cronTaskRegistrar.addCronTask(task, "0/10 * * * * ?");
+        cronTaskRegistrar.addCronTask(task, "0/10 * * * * ?","1");
 
         // 便于观察
         Thread.sleep(3000000);
@@ -33,7 +33,7 @@ public class TaskTest {
     @Test
     public void testHaveParamsTask() throws InterruptedException {
         SchedulingRunnable task = new SchedulingRunnable("demoTask", "taskWithParams", "haha", 23);
-        cronTaskRegistrar.addCronTask(task, "0/10 * * * * ?");
+        cronTaskRegistrar.addCronTask(task, "0/10 * * * * ?","2");
 
         // 便于观察
         Thread.sleep(3000000);

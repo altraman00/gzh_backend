@@ -1,6 +1,7 @@
 package com.ruoyi.project.weixin.schedule.config;
 
 import com.ruoyi.project.weixin.schedule.task.ScheduledTask;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
@@ -17,9 +18,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date: 2019/5/23
  **/
 @Component
+@Slf4j
 public class CronTaskRegistrar implements DisposableBean {
 
-    private final Map<Runnable, ScheduledTask> scheduledTasks = new ConcurrentHashMap<>(16);
+    private final Map<String, ScheduledTask> scheduledTasks = new ConcurrentHashMap<>(16);
 
     @Autowired
     private TaskScheduler taskScheduler;
@@ -33,27 +35,27 @@ public class CronTaskRegistrar implements DisposableBean {
      * @param task
      * @param cronExpression
      */
-    public void addCronTask(Runnable task, String cronExpression) {
-        addCronTask(new CronTask(task, cronExpression));
+    public void addCronTask(Runnable task, String cronExpression,String key) {
+        addCronTask(new CronTask(task, cronExpression),key);
     }
 
-    public void addCronTask(CronTask cronTask) {
+    public void addCronTask(CronTask cronTask, String key) {
         if (cronTask != null) {
-            Runnable task = cronTask.getRunnable();
-            if (this.scheduledTasks.containsKey(task)) {
-                removeCronTask(task);
+            if (this.scheduledTasks.containsKey(key)) {
+                removeCronTask(key);
             }
 
-            this.scheduledTasks.put(task, scheduleCronTask(cronTask));
+            this.scheduledTasks.put(key, scheduleCronTask(cronTask));
         }
+        log.info("scheduledTasks map size ：[{}]",scheduledTasks.size());
     }
 
     /**
      * 移除定时任务
-     * @param task
+     * @param key
      */
-    public void removeCronTask(Runnable task) {
-        ScheduledTask scheduledTask = this.scheduledTasks.remove(task);
+    public void removeCronTask(String key) {
+        ScheduledTask scheduledTask = this.scheduledTasks.remove(key);
         if (scheduledTask != null) {
             scheduledTask.cancel();
         }
