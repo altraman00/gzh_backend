@@ -51,8 +51,7 @@ public class WxMpTemplateMessageServiceImpl extends ServiceImpl<WxMpTemplateMess
         }
         for (WxMpTemplateMessage wxMpTemplateMessage : needPublishSchedule) {
             SchedulingRunnable task = new SchedulingRunnable(wxMpTemplateMessage.getScheduleClass(), wxMpTemplateMessage.getScheduleMethod(), wxMpTemplateMessage.getAppId());
-            CronTask cronTask = new CronTask(task, wxMpTemplateMessage.getScheduleCron());
-            cronTaskRegistrar.addCronTask(cronTask, wxMpTemplateMessage.getId());
+            cronTaskRegistrar.addCronTask(task, wxMpTemplateMessage.getScheduleCron(),wxMpTemplateMessage.getId());
         }
     }
 }

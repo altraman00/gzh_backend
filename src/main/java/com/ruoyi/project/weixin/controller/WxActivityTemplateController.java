@@ -139,8 +139,7 @@ public class WxActivityTemplateController extends BaseController {
         // 再发布新的定时任务
         for (WxMpTemplateMessage wxMpTemplateMessage : needPublishSchedule) {
             SchedulingRunnable task = new SchedulingRunnable(wxMpTemplateMessage.getScheduleClass(), wxMpTemplateMessage.getScheduleMethod(), appId);
-            CronTask cronTask = new CronTask(task, wxMpTemplateMessage.getScheduleCron());
-            cronTaskRegistrar.addCronTask(cronTask, wxMpTemplateMessage.getId());
+            cronTaskRegistrar.addCronTask(task,wxMpTemplateMessage.getScheduleCron(), wxMpTemplateMessage.getId());
         }
         return AjaxResult.success(wxMp);
     }
@@ -183,8 +182,7 @@ public class WxActivityTemplateController extends BaseController {
         if (query.getRepType().equals(ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE) && !originalCron.equals(cron)) {
             // 重新发布定时任务
             SchedulingRunnable task = new SchedulingRunnable(query.getScheduleClass(), query.getScheduleMethod(), query.getAppId());
-            CronTask cronTask = new CronTask(task, query.getScheduleCron());
-            cronTaskRegistrar.addCronTask(cronTask, query.getId());
+            cronTaskRegistrar.addCronTask(task,query.getScheduleCron(),query.getId());
         }
         return AjaxResult.success(query);
     }

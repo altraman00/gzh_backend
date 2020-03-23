@@ -36,7 +36,8 @@ public class CronTaskRegistrar implements DisposableBean {
      * @param cronExpression
      */
     public void addCronTask(Runnable task, String cronExpression,String key) {
-        addCronTask(new CronTask(task, cronExpression),key);
+        CronTask cronTask = new CronTask(task, cronExpression);
+        addCronTask(cronTask,key);
     }
 
     public void addCronTask(CronTask cronTask, String key) {
@@ -44,8 +45,8 @@ public class CronTaskRegistrar implements DisposableBean {
             if (this.scheduledTasks.containsKey(key)) {
                 removeCronTask(key);
             }
-
-            this.scheduledTasks.put(key, scheduleCronTask(cronTask));
+            ScheduledTask scheduledTask = scheduleCronTask(cronTask);
+            this.scheduledTasks.put(key, scheduledTask);
         }
         log.info("scheduledTasks map size ：[{}]",scheduledTasks.size());
     }
@@ -64,7 +65,6 @@ public class CronTaskRegistrar implements DisposableBean {
     public ScheduledTask scheduleCronTask(CronTask cronTask) {
         ScheduledTask scheduledTask = new ScheduledTask();
         scheduledTask.future = this.taskScheduler.schedule(cronTask.getRunnable(), cronTask.getTrigger());
-
         return scheduledTask;
     }
 
