@@ -65,7 +65,19 @@ public class WxActivityTemplateController extends BaseController {
 
     private final IWxActivityTemplateService wxActivityTemplateService;
 
+    private final IWxActivityTemplateMessageService wxActivityTemplateMessageService;
+
     private final IWxMpTemplateMessageService wxMpTemplateMessageService;
+
+    private final IWxMpService wxMpService;
+
+    private final WxMpService wxService;
+
+    private final ISysDictDataService sysDictDataService;
+
+    private final HelpActivityServiceImpl helpActivityService;
+
+    private final CronTaskRegistrar cronTaskRegistrar;
 
     @ApiOperation("查询默认活动模板")
     @GetMapping("/template/list")
@@ -81,7 +93,55 @@ public class WxActivityTemplateController extends BaseController {
     })
     @GetMapping("/template/bind")
     public AjaxResult bindWxActivityTemplate(@RequestParam(value = "templateId") String templateId,@RequestParam(value = "appId") String appId){
-        WxMp wxMp = wxMpTemplateMessageService.bindWxActivityTemplate(templateId, appId);
+        WxMp wxMp = wxMpService.getByAppId(appId);
+        String originalTemplateId = wxMp.getTemplateId();
+        // 未做任何改动
+        if (originalTemplateId.equals(templateId) && wxMp.isActivityEnable()) {
+            return AjaxResult.success(wxMp);
+        }
+        wxMp.setTemplateId(templateId);
+        wxMp.setActivityEnable(true);
+        wxMpService.updateById(wxMp);
+        // 判定是否已经复制过模板信息
+        List<WxMpTemplateMessage> mpTemplateMessages = wxMpTemplateMessageService.list(Wrappers.<WxMpTemplateMessage>lambdaQuery()
+                .eq(WxMpTemplateMessage::getTemplateId, templateId)
+                .eq(WxMpTemplateMessage::getAppId, appId));
+        if (!mpTemplateMessages.isEmpty()) {
+            return AjaxResult.success(wxMp);
+        }
+        // 查询出模板详细信息
+        QueryWrapper<WxActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(WxActivityTemplateMessage::getTemplateId,templateId);
+        List<WxActivityTemplateMessage> list = wxActivityTemplateMessageService.list(queryWrapper);
+        List<WxMpTemplateMessage> needPublishSchedule = new ArrayList<>();
+        for (WxActivityTemplateMessage wxActivityTemplateMessage : list) {
+            // 复制到公众号模板信息表
+            WxMpTemplateMessage wxMpTemplateMessage = new WxMpTemplateMessage();
+            wxMpTemplateMessage.setAppId(appId);
+            BeanUtils.copyProperties(wxActivityTemplateMessage,wxMpTemplateMessage,"id","createId","createTime","updateId","updateTime","delFlag");
+            wxMpTemplateMessage.setRepContent(wxMpTemplateMessage.getRepContent().replace("appid=","appid="+appId));
+            wxMpTemplateMessageService.save(wxMpTemplateMessage);
+            if (wxMpTemplateMessage.getRepType().equals(ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE)) {
+                needPublishSchedule.add(wxMpTemplateMessage);
+            }
+        }
+        // 发布定时任务
+        // 先移除原绑定任务
+        List<WxMpTemplateMessage> originalScheduleMessages = wxMpTemplateMessageService.list(Wrappers.<WxMpTemplateMessage>lambdaQuery()
+                .eq(WxMpTemplateMessage::getTemplateId, originalTemplateId)
+                .eq(WxMpTemplateMessage::getAppId, appId)
+                .eq(WxMpTemplateMessage::getRepType, ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE));
+        for (WxMpTemplateMessage originalScheduleMessage : originalScheduleMessages) {
+            SchedulingRunnable task = new SchedulingRunnable(originalScheduleMessage.getScheduleClass(), originalScheduleMessage.getScheduleMethod(), appId);
+            CronTask cronTask = new CronTask(task, originalScheduleMessage.getScheduleCron());
+            cronTaskRegistrar.removeCronTask(cronTask.getRunnable());
+        }
+        // 再发布新的定时任务
+        for (WxMpTemplateMessage wxMpTemplateMessage : needPublishSchedule) {
+            SchedulingRunnable task = new SchedulingRunnable(wxMpTemplateMessage.getScheduleClass(), wxMpTemplateMessage.getScheduleMethod(), appId);
+            CronTask cronTask = new CronTask(task, wxMpTemplateMessage.getScheduleCron());
+            cronTaskRegistrar.addCronTask(cronTask);
+        }
         return AjaxResult.success(wxMp);
     }
 
@@ -91,16 +151,35 @@ public class WxActivityTemplateController extends BaseController {
     })
     @GetMapping("/template/message/list")
     @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")
-    public AjaxResult getMpTemplateMessageList(@RequestParam(value = "appId") String appId) {
-        List<WxMpTemplateMessage> list = wxMpTemplateMessageService.getMpTemplateMessageList(appId);
+    public AjaxResult getMpTemplateMessage(@RequestParam(value = "appId") String appId) {
+        // 查询出公众号绑定的活动消息
+        WxMp wxMp = wxMpService.getByAppId(appId);
+        String templateId = wxMp.getTemplateId();
+        if (StringUtils.isBlank(templateId)) {
+            return AjaxResult.success();
+        }
+        QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda()
+                .eq(WxMpTemplateMessage::getAppId,appId)
+                .eq(WxMpTemplateMessage::getTemplateId,templateId);
+        List<WxMpTemplateMessage> list = wxMpTemplateMessageService.list(queryWrapper);
         return AjaxResult.success(list);
     }
 
     @ApiOperation("编辑消息内容")
     @PatchMapping("/template/message/{messageId}")
     public AjaxResult updateMpTemplateMessage(@PathVariable("messageId") String id,@RequestBody EditWxTemplateVO editWxTemplateVO){
-        WxMpTemplateMessage wxMpTemplateMessage = wxMpTemplateMessageService.updateMpTemplateMessage(id, editWxTemplateVO);
-        return AjaxResult.success(wxMpTemplateMessage);
+        WxMpTemplateMessage query = wxMpTemplateMessageService.getById(id);
+        String originalCron = query.getScheduleCron();
+        BeanUtils.copyProperties(editWxTemplateVO,query);
+        wxMpTemplateMessageService.updateById(query);
+        if (query.getRepType().equals(ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE) && !originalCron.equals(editWxTemplateVO.getScheduleCron())) {
+            // 重新发布定时任务
+            SchedulingRunnable task = new SchedulingRunnable(query.getScheduleClass(), query.getScheduleMethod(), query.getAppId());
+            CronTask cronTask = new CronTask(task, query.getScheduleCron());
+            cronTaskRegistrar.addCronTask(cronTask);
+        }
+        return AjaxResult.success(query);
     }
 
     @ApiOperation("活动启动/活动暂停")
@@ -110,8 +189,10 @@ public class WxActivityTemplateController extends BaseController {
     @PatchMapping("/status/{appId}")
     public AjaxResult editActivityStatus(@PathVariable("appId") String appId,@RequestBody EditWxTemplateVO editWxTemplateVO) {
         // 查询出公众号绑定的活动消息
-        Boolean status = editWxTemplateVO.getActivityEnable();
-        wxMpTemplateMessageService.editActivityStatus(appId,status);
+        Boolean activityEnable = editWxTemplateVO.getActivityEnable();
+        WxMp wxMp = wxMpService.getByAppId(appId);
+        wxMp.setActivityEnable(activityEnable);
+        wxMpService.updateById(wxMp);
         return AjaxResult.success();
     }
 
@@ -121,7 +202,47 @@ public class WxActivityTemplateController extends BaseController {
     })
     @GetMapping("/template/{messageId}/poster/preview")
     public AjaxResult previewPoster(@PathVariable("messageId") String messageId) {
-        Map<String, Object> map = wxMpTemplateMessageService.previewPoster(messageId);
-        return AjaxResult.success(map);
+        WxMpTemplateMessage message = wxMpTemplateMessageService.getById(messageId);
+        String mediaId = message.getRepMediaId();
+        if (StringUtils.isNotBlank(mediaId)) {
+            // 取海报图片
+            InputStream inputStream = null;
+            try {
+                inputStream = wxService.getMaterialService().materialImageOrVoiceDownload(mediaId);
+            } catch (WxErrorException e) {
+                log.error("从素材库获取海报图片异常，消息模板id:{},openId:{}",messageId,e);
+            }
+            // 头像,二维码地址
+            String avatarUrl = sysDictDataService.selectDictValueByLabel(ISysDictDataService.LABEL_IMG_AVATAR_URL);
+            String qrCodeUrl = sysDictDataService.selectDictValueByLabel(ISysDictDataService.LABEL_IMG_QRCODE_URL);
+            try {
+                // 先处理二维码 设置长宽
+                BufferedImage qrCodeBuffer = Thumbnails.of(ImageIO.read(new URL(qrCodeUrl))).size(message.getQrcodeSize(), message.getQrcodeSize()).asBufferedImage();
+                // 获取圆形头像
+                BufferedImage roundHead = ImgUtils.getRoundHead(new URL(avatarUrl));
+                roundHead = Thumbnails.of(roundHead).size(message.getAvatarSize(), message.getAvatarSize()).asBufferedImage();
+                // 处理海报
+                File poster = File.createTempFile("temp",".jpg");
+                helpActivityService.generatorPoster(message,inputStream,poster,qrCodeBuffer,roundHead);
+                Map<String,Object> result = new HashMap<>(4);
+                String posterBase64 = null;
+                try {
+                    posterBase64 = Base64.encodeBase64String(FileUtils.readFileToByteArray(poster));
+                } catch (IOException e) {
+                    log.info("将海报文件编码成base64异常",e);
+                } finally {
+                    if (poster.exists()) {
+                        poster.delete();
+                    }
+                }
+                result.put("posterBase64",posterBase64);
+                String name = poster.getName();
+                result.put("suffix", name.substring(name.lastIndexOf(".")+1));
+                return AjaxResult.success(result);
+            } catch (Exception e) {
+                logger.error("预览海报图片，拼接图片出现异常",e);
+            }
+        }
+        return AjaxResult.error();
     }
 }
