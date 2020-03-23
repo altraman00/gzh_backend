@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
+import com.ruoyi.project.common.ResultCode;
 import com.ruoyi.project.system.service.ISysDictDataService;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.entity.WxActivityTemplateMessage;
@@ -31,6 +32,7 @@ import me.chanjar.weixin.mp.api.WxMpService;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
+import org.quartz.CronExpression;
 import org.springframework.beans.BeanUtils;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -167,11 +169,18 @@ public class WxActivityTemplateController extends BaseController {
     @ApiOperation("编辑消息内容")
     @PatchMapping("/template/message/{messageId}")
     public AjaxResult updateMpTemplateMessage(@PathVariable("messageId") String id,@RequestBody EditWxTemplateVO editWxTemplateVO){
+        String cron = editWxTemplateVO.getScheduleCron();
         WxMpTemplateMessage query = wxMpTemplateMessageService.getById(id);
+        if (query.getRepType().equals(ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE)) {
+            boolean validExpression = CronExpression.isValidExpression(cron);
+            if (!validExpression) {
+                return AjaxResult.error(ResultCode.CRON_NOT_CORRECT);
+            }
+        }
         String originalCron = query.getScheduleCron();
         BeanUtils.copyProperties(editWxTemplateVO,query);
         wxMpTemplateMessageService.updateById(query);
-        if (query.getRepType().equals(ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE) && !originalCron.equals(editWxTemplateVO.getScheduleCron())) {
+        if (query.getRepType().equals(ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE) && !originalCron.equals(cron)) {
             // 重新发布定时任务
             SchedulingRunnable task = new SchedulingRunnable(query.getScheduleClass(), query.getScheduleMethod(), query.getAppId());
             CronTask cronTask = new CronTask(task, query.getScheduleCron());
