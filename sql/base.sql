@@ -1127,6 +1127,12 @@ CHANGE COLUMN `cron` `schedule_cron` varchar(64) CHARACTER SET utf8mb4 COLLATE u
 ADD COLUMN `schedule_class` varchar(255) NULL COMMENT '类型为定时消息的类名' AFTER `schedule_cron`,
 ADD COLUMN `schedule_method` varchar(255) NULL COMMENT '类型为定时消息的方法名' AFTER `schedule_class`;
 
+ALTER TABLE `wx_activity_template_message`
+ADD COLUMN `sort_no` int(2) NULL COMMENT '排序号' AFTER `schedule_method`;
+
+ALTER TABLE `wx_mp_template_message`
+ADD COLUMN `sort_no` int(2) NULL COMMENT '排序号' AFTER `schedule_method`;
+
 INSERT INTO `wx_activity_template`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_name`, `template_class`, `need_num`, `reward_url`) VALUES ('1', NULL, '2020-03-11 16:10:31', NULL, '2020-03-16 10:34:01', NULL, '0', '三人助力', 'helpActivityServiceImpl', 3, 'http://qr61.cn/oKHkte/q08pvhH');
 
 INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_id`, `rep_type`, `rep_content`, `rep_media_id`, `rep_url`, `title`, `scene`, `avatar_coordinate`, `qrcode_coordinate`, `avatar_size`, `qrcode_size`) VALUES ('1', NULL, '2020-03-12 09:09:52', NULL, '2020-03-18 15:08:08', '${上级好友微信昵称}——为分享者微信昵称； 此条信息发放给被推荐者', '0', '1', 'text', '【任务完成】\r\n\r\n您已帮好友${上级好友微信昵称}，助力成功。', NULL, '', '关注消息1——给关注者推送任务完成消息', 'help_success', NULL, NULL, NULL, NULL);

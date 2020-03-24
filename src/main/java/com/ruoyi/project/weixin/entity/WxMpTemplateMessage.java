@@ -94,4 +94,9 @@ public class WxMpTemplateMessage extends BaseEntity {
      * 类型为定时消息时的cron方法名
      */
     private String scheduleMethod;
+
+    /**
+     * 排序
+     */
+    private Integer sortNo;
 }

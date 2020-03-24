@@ -90,4 +90,9 @@ public class WxActivityTemplateMessage extends BaseEntity {
      */
     private String scheduleMethod;
 
+    /**
+     * 排序
+     */
+    private Integer sortNo;
+
 }
