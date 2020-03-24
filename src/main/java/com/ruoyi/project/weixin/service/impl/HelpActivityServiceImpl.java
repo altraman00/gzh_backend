@@ -101,6 +101,9 @@ public class HelpActivityServiceImpl implements ActivityService {
                         // 已经助力过了
                         executeHasHelp(messages,wxUser,inviter);
                     }
+                } else {
+                    // 邀请者已完成任务
+                    executeHasComplete(messages,wxUser);
                 }
             }
         }
@@ -108,6 +111,16 @@ public class HelpActivityServiceImpl implements ActivityService {
         executeActivityRule(messages,wxUser,templateId,appId);
         // 推送活动海报
         executeActivityPoster(messages,wxUser);
+    }
+
+    private void executeHasComplete(List<WxMpTemplateMessage> messages, WxUser wxUser) {
+        log.info("开始执行助理活动流程：{}",HelpActivityConstant.SCENE_HAS_COMPLETE);
+        WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_HAS_COMPLETE)).findFirst().orElse(null);
+        boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
+        if (hasAvailableMessage) {
+            String content = message.getRepContent();
+            sendTextMessage(content,wxUser);
+        }
     }
 
     private void executeActivityPoster(List<WxMpTemplateMessage> messages, WxUser wxUser) {
