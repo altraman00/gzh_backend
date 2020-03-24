@@ -64,3 +64,12 @@ wx:
               secret:
               token:
               aesKey:
+
+# zhangbin test
+#wx:
+#    mp:
+#        configs:
+#            - appId: wx9047d074c6a5a211
+#              secret: 180ac29acee722e1f82862100eb85bcf
+#              token: smallprogram
+#              aesKey:
