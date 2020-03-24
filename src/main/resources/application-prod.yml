@@ -60,10 +60,10 @@ spring:
 wx:
     mp:
         configs:
-            - appId:
-              secret:
-              token:
-              aesKey:
+            - appId: wx66fcb1f854cdab95
+              secret: 9239cce70b0e7028a2d29ae3e8247e74
+              token: smallprogram
+              aesKey: FR14R0SGgKUygrZ9pIrsarQoWuup8ujgzzrTt1Cqqwf
 
 # zhangbin test
 #wx:
