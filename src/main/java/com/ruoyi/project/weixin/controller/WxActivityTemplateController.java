@@ -98,7 +98,7 @@ public class WxActivityTemplateController extends BaseController {
         WxMp wxMp = wxMpService.getByAppId(appId);
         String originalTemplateId = wxMp.getTemplateId();
         // 未做任何改动
-        if (originalTemplateId.equals(templateId) && wxMp.isActivityEnable()) {
+        if (originalTemplateId!=null && originalTemplateId.equals(templateId) && wxMp.isActivityEnable()) {
             return AjaxResult.success(wxMp);
         }
         wxMp.setTemplateId(templateId);
