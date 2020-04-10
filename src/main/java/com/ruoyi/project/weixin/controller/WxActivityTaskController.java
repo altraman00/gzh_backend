@@ -122,7 +122,7 @@ public class WxActivityTaskController extends BaseController {
                 stopWatch.stop();
                 log.info(stopWatch.prettyPrint());
             } catch (IOException e) {
-                log.info("将海报文件编码成base64异常",e);
+                log.error("将海报文件编码成base64异常",e);
             } finally {
                 if (poster.exists()) {
                     poster.delete();
