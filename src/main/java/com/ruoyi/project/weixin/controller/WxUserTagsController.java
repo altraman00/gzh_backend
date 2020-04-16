@@ -41,7 +41,7 @@ public class WxUserTagsController extends BaseController {
 	@PreAuthorize("@ss.hasPermi('wxmp:wxusertags:list')")
 	@GetMapping("/list")
 	public AjaxResult getWxUserList(String appId) {
-		WxMpUserTagService wxMpUserTagService = wxService.getUserTagService();
+		WxMpUserTagService wxMpUserTagService = wxService.switchoverTo(appId).getUserTagService();
 		try {
 			List<WxUserTag> listWxUserTag =  wxMpUserTagService.tagGet();
 			return AjaxResult.success(listWxUserTag);
