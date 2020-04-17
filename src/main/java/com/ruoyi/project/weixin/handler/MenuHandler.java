@@ -51,6 +51,7 @@ public class MenuHandler extends AbstractHandler {
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage,
                                     Map<String, Object> context, WxMpService weixinService,
                                     WxSessionManager sessionManager) throws WxErrorException {
+        logger.debug("菜单事件 wxMessage:{}", wxMessage);
         //消息记录
         WxMenu wxMenu = null;
         if(WxConsts.EventType.CLICK.equals(wxMessage.getEvent())

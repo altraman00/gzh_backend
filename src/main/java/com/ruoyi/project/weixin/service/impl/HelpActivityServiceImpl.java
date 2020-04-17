@@ -328,9 +328,10 @@ public class HelpActivityServiceImpl implements ActivityService {
                     .toUser(wxUser.getOpenId())
                     .content(content)
                     .build();
-            wxMpService.getKefuService().sendKefuMessage(wxMpKefuMessage);
+//            wxMpService.getKefuService().sendKefuMessage(wxMpKefuMessage);
+            wxMpService.switchoverTo(wxUser.getAppId()).getKefuService().sendKefuMessage(wxMpKefuMessage);
         } catch (Exception e) {
-            log.error("发送客服消息失败，openId：{}",wxUser.getOpenId());
+            log.error("发送客服消息失败，appId:{} openId：{}", wxUser.getAppId(), wxUser.getOpenId());
         }
         // 记录数据库
         WxMsg wxMsg = new WxMsg();

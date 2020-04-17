@@ -36,6 +36,7 @@ public class SubscribeHandler extends AbstractHandler {
                                     Map<String, Object> context, WxMpService weixinService,
                                     WxSessionManager sessionManager) {
         log.info("新关注用户 OPENID: " + wxMessage.getFromUser());
+        log.info("新关注用户 wxMessage: {}" , wxMessage);
         // 获取微信用户基本信息
         try {
             WxMpUser userWxInfo = weixinService.getUserService()
