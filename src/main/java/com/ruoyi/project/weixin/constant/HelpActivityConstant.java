@@ -20,6 +20,7 @@ public interface HelpActivityConstant {
     String SCENE_HAS_COMPLETE = "has_complete";
 
     String SCENE_JP_TITLE = "jp_title";
+    String SCENE_JP_URL = "jp_url";
 
     /**
      * 占位信息

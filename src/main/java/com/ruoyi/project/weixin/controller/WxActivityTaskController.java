@@ -85,7 +85,7 @@ public class WxActivityTaskController extends BaseController {
         helpInfoDTO.setStatus(wxActivityTask.getTaskStatus());
         WxActivityTemplate template = iWxActivityTemplateService.getById(HelpActivityConstant.ACTIVITY_TEMPLATE_ID);
         helpInfoDTO.setNeedNum(template.getNeedNum());
-        helpInfoDTO.setRewardUrl(template.getRewardUrl());
+
         // 被助力记录
         List<WxTaskHelpRecord> list = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery().eq(WxTaskHelpRecord::getInviteWxUserId, wxUserId));
         List<WxUser> helpers = new ArrayList<>();
@@ -98,9 +98,14 @@ public class WxActivityTaskController extends BaseController {
         QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,HelpActivityConstant.ACTIVITY_TEMPLATE_ID);
         List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
-        WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_JP_TITLE)).findFirst().orElse(null);
-        if(message != null){
-            helpInfoDTO.setJpTitleName(message.getRepContent());
+        WxMpTemplateMessage msgJpTitle = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_JP_TITLE)).findFirst().orElse(null);
+        WxMpTemplateMessage msgJpUrl = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_JP_URL)).findFirst().orElse(null);
+
+        if(msgJpTitle != null){
+            helpInfoDTO.setJpTitleName(msgJpTitle.getRepContent());
+        }
+        if(msgJpUrl != null){
+            helpInfoDTO.setRewardUrl(msgJpUrl.getRepContent());
         }
 
         helpInfoDTO.setHelpers(helpers);
