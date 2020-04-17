@@ -19,6 +19,8 @@ public interface HelpActivityConstant {
     String SCENE_SCHEDULE_INVITER = "schedule_invite";
     String SCENE_HAS_COMPLETE = "has_complete";
 
+    String SCENE_JP_TITLE = "jp_title";
+
     /**
      * 占位信息
      */

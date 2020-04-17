@@ -23,4 +23,7 @@ public class HelpInfoDTO {
 
     @ApiModelProperty("助力者信息")
     private List<WxUser> helpers;
+
+    @ApiModelProperty("奖品文件名称用于在H5页面显示奖品标题")
+    private String jpTitleName;
 }

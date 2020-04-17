@@ -93,6 +93,16 @@ public class WxActivityTaskController extends BaseController {
             WxUser wxUser = wxUserService.getById(wxTaskHelpRecord.getHelpWxUserId());
             helpers.add(wxUser);
         }
+
+        // 查询奖品名称返回到前端
+        QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,HelpActivityConstant.ACTIVITY_TEMPLATE_ID);
+        List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
+        WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_JP_TITLE)).findFirst().orElse(null);
+        if(message != null){
+            helpInfoDTO.setJpTitleName(message.getRepContent());
+        }
+
         helpInfoDTO.setHelpers(helpers);
         return AjaxResult.success(helpInfoDTO);
     }
