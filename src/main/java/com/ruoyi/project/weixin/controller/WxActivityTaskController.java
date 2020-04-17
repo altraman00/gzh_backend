@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -94,23 +95,34 @@ public class WxActivityTaskController extends BaseController {
             helpers.add(wxUser);
         }
 
-        // 查询奖品名称返回到前端
-        QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,HelpActivityConstant.ACTIVITY_TEMPLATE_ID);
-        List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
-        WxMpTemplateMessage msgJpTitle = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_JP_TITLE)).findFirst().orElse(null);
-        WxMpTemplateMessage msgJpUrl = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_JP_URL)).findFirst().orElse(null);
 
-        if(msgJpTitle != null){
-            helpInfoDTO.setJpTitleName(msgJpTitle.getRepContent());
-        }
-        if(msgJpUrl != null){
-            helpInfoDTO.setRewardUrl(msgJpUrl.getRepContent());
-        }
+        Map<String,WxMpTemplateMessage> messageMap = getTemplateMessage(appId);
+        WxMpTemplateMessage msgJpTitle = messageMap.get(HelpActivityConstant.SCENE_JP_TITLE);
+        WxMpTemplateMessage msgJpUrl = messageMap.get(HelpActivityConstant.SCENE_JP_URL);
+        helpInfoDTO.setJpTitleName(msgJpTitle != null? msgJpTitle.getRepContent():"");
+        helpInfoDTO.setRewardUrl(msgJpUrl != null ? msgJpUrl.getRepContent():"");
 
         helpInfoDTO.setHelpers(helpers);
         return AjaxResult.success(helpInfoDTO);
     }
+
+    /**
+     * 获得公众号的配置数据
+     * @param appId
+     * @return
+     */
+    private Map<String, WxMpTemplateMessage> getTemplateMessage(String appId) {
+//        Map<String,WxMpTemplateMessage> messageMap = new HashMap<>();
+        // 查询奖品名称返回到前端
+        QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,HelpActivityConstant.ACTIVITY_TEMPLATE_ID);
+        List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
+
+        Map<String,WxMpTemplateMessage> messageMap = messages.stream().collect(Collectors.toMap(WxMpTemplateMessage::getScene,p-> p));
+        return messageMap;
+    }
+
+
 
     @ApiOperation("获取助力任务海报信息")
     @ApiImplicitParams({
