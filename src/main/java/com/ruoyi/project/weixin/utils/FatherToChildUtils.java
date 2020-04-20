@@ -1,5 +1,8 @@
 package com.ruoyi.project.weixin.utils;
 
+import com.ruoyi.project.weixin.dto.WxMpXmlMessageDTO;
+import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -21,14 +24,14 @@ public class FatherToChildUtils {
             System.err.println("child不是father的子类");
         }
         Class fatherClass= father.getClass();
-        Field ff[]= fatherClass.getDeclaredFields();
-        for(int i=0;i<ff.length;i++){
-            Field f=ff[i];//取出每一个属性，如deleteDate
-            Class type=f.getType();
+        Field declaredFields[]= fatherClass.getDeclaredFields();
+        for(int i=0;i<declaredFields.length;i++){
+            Field field=declaredFields[i];
             try {
-                Method m = fatherClass.getMethod("get"+upperHeadChar(f.getName()));//方法getDeleteDate
-                Object obj=m.invoke(father);//取出属性值
-                f.set(child,obj);
+                Method method=fatherClass.getDeclaredMethod("get"+upperHeadChar(field.getName()));
+                Object obj = method.invoke(father);
+                field.setAccessible(true);
+                field.set(child,obj);
             } catch (SecurityException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -54,5 +57,14 @@ public class FatherToChildUtils {
         String head=in.substring(0,1);
         String out=head.toUpperCase()+in.substring(1,in.length());
         return out;
+    }
+
+    public static void main(String[] args) {
+        WxMpXmlMessage wxMpXmlMessage = new WxMpXmlMessage();
+        wxMpXmlMessage.setFromUser("123");
+        wxMpXmlMessage.setContent("123321");
+        WxMpXmlMessageDTO wxMpXmlMessageDTO = new WxMpXmlMessageDTO();
+        fatherToChild(wxMpXmlMessage, wxMpXmlMessageDTO);
+        System.out.println(wxMpXmlMessageDTO.toString());
     }
 }
