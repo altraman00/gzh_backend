@@ -92,7 +92,7 @@ public class WxPortalController {
             FatherToChildUtils.fatherToChild(inMessage, wxMpXmlMessageDTO);
 //            BeanUtils.copyProperties(inMessage, wxMpXmlMessageDTO);
             wxMpXmlMessageDTO.setAppId(appid);
-            WxMpXmlOutMessage outMessage = this.route(inMessage);
+            WxMpXmlOutMessage outMessage = this.route(wxMpXmlMessageDTO);
             if (outMessage == null) {
                 return "";
             }
