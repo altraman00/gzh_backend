@@ -1,6 +1,7 @@
 package com.ruoyi.project.weixin.controller;
 
 import com.ruoyi.project.weixin.dto.WxMpXmlMessageDTO;
+import com.ruoyi.project.weixin.utils.FatherToChildUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.mp.api.WxMpMessageRouter;
@@ -72,7 +73,8 @@ public class WxPortalController {
             // 明文传输的消息
             WxMpXmlMessage inMessage = WxMpXmlMessage.fromXml(requestBody);
             WxMpXmlMessageDTO wxMpXmlMessageDTO = new WxMpXmlMessageDTO();
-            BeanUtils.copyProperties(inMessage, wxMpXmlMessageDTO);
+            FatherToChildUtils.fatherToChild(inMessage, wxMpXmlMessageDTO);
+//            BeanUtils.copyProperties(inMessage, wxMpXmlMessageDTO);
             wxMpXmlMessageDTO.setAppId(appid);
             WxMpXmlOutMessage outMessage = this.route(wxMpXmlMessageDTO);
             log.info("outMessage is :[{}]",outMessage);
@@ -87,7 +89,8 @@ public class WxPortalController {
                 timestamp, nonce, msgSignature);
             log.debug("\n消息解密后内容为：\n{} ", inMessage.toString());
             WxMpXmlMessageDTO wxMpXmlMessageDTO = new WxMpXmlMessageDTO();
-            BeanUtils.copyProperties(inMessage, wxMpXmlMessageDTO);
+            FatherToChildUtils.fatherToChild(inMessage, wxMpXmlMessageDTO);
+//            BeanUtils.copyProperties(inMessage, wxMpXmlMessageDTO);
             wxMpXmlMessageDTO.setAppId(appid);
             WxMpXmlOutMessage outMessage = this.route(inMessage);
             if (outMessage == null) {
