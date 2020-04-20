@@ -32,3 +32,4 @@ DROP PRIMARY KEY,
 ADD PRIMARY KEY (`role_id`) USING BTREE;
 
 -- 为超级管理员admin初始化所有的公众号可见(每次新增公众号之后 该值都要更新)
+-- 以上所有需要补充APPID字段的数据 默认都设置为现在生产正在使用的公众号(尚德在线学堂 APPID:wx66fcb1f854cdab95)
