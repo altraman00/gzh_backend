@@ -27,7 +27,7 @@ DROP PRIMARY KEY,
 ADD PRIMARY KEY (`id`) USING BTREE;
 
 ALTER TABLE `sys_role`
-ADD COLUMN `mp_scope` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '1' COMMENT '可见的公众号ID组成的数组字符串; eg:[1,2,3,5,8]' AFTER `data_scope`,
+ADD COLUMN `mp_scope` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '可见的公众号ID组成的数组字符串; eg:[1,2,3,5,8]' AFTER `data_scope`,
 DROP PRIMARY KEY,
 ADD PRIMARY KEY (`role_id`) USING BTREE;
 

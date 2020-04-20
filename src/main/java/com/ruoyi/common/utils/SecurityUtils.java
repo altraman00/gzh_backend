@@ -49,6 +49,23 @@ public class SecurityUtils
     }
 
     /**
+     * 获取用户ID
+     **/
+    public static Long getLoginUserId()
+    {
+        try
+        {
+            LoginUser loginUser = (LoginUser) getAuthentication().getPrincipal();
+            log.debug("获取当前用户 loginUser:{}", loginUser);
+            return loginUser.getUser().getUserId();
+        }
+        catch (Exception e)
+        {
+            throw new CustomException("获取用户ID信息异常", HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    /**
      * 获取Authentication
      */
     public static Authentication getAuthentication()
