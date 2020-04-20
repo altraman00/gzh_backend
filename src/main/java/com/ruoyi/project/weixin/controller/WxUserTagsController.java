@@ -43,7 +43,7 @@ public class WxUserTagsController extends BaseController {
 	@GetMapping("/list")
 	public AjaxResult getWxUserList(String appId) {
 		appId = ThreadLocalUtil.getAppId();
-		logger.debug("getWxUserList 当前操作的APPID:{}", appId);
+		logger.debug("getWxUserTagList 当前操作的APPID:{}", appId);
 		WxMpUserTagService wxMpUserTagService = wxService.switchoverTo(appId).getUserTagService();
 		try {
 			List<WxUserTag> listWxUserTag =  wxMpUserTagService.tagGet();
