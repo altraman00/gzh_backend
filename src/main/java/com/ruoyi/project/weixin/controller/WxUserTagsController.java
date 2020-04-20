@@ -7,6 +7,7 @@ import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.weixin.service.WxUserService;
 import com.ruoyi.project.weixin.entity.WxUser;
 import com.ruoyi.project.weixin.entity.WxUserTagsDict;
+import com.ruoyi.project.weixin.utils.ThreadLocalUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
@@ -60,6 +61,7 @@ public class WxUserTagsController extends BaseController {
 	@PreAuthorize("@ss.hasPermi('wxmp:wxusertags:list')")
 	@GetMapping("/dict")
 	public AjaxResult getWxUserTagsDict(String appId) {
+		ThreadLocalUtil.getAppId();
 		WxMpUserTagService wxMpUserTagService = wxService.getUserTagService();
 		try {
 			List<WxUserTag> listWxUserTag =  wxMpUserTagService.tagGet();
