@@ -64,7 +64,9 @@ public class HelpActivityServiceImpl implements ActivityService {
         QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,templateId);
         List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
-        WxUser wxUser = wxUserService.getByOpenId(openId);
+//        WxUser wxUser = wxUserService.getByOpenId(openId);
+        WxUser wxUser = wxUserMapper.selectOne(Wrappers.<WxUser>lambdaQuery()
+                .eq(WxUser::getOpenId,openId).eq(WxUser::getAppId,appId));
         String wxUserId = wxUser.getId();
         Integer needNum = template.getNeedNum();
         log.info("event key:[{}],openId:[{}],appId[{}]",eventKey,openId,appId);
@@ -229,6 +231,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         }
         // 记录数据库
         WxMsg wxMsg = new WxMsg();
+        wxMsg.setAppId(wxUser.getAppId());
         wxMsg.setNickName(wxUser.getNickName());
         wxMsg.setHeadimgUrl(wxUser.getHeadimgUrl());
         wxMsg.setType(ConfigConstant.WX_MSG_TYPE_2);
@@ -335,6 +338,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         }
         // 记录数据库
         WxMsg wxMsg = new WxMsg();
+        wxMsg.setAppId(wxUser.getAppId());
         wxMsg.setNickName(wxUser.getNickName());
         wxMsg.setHeadimgUrl(wxUser.getHeadimgUrl());
         wxMsg.setType(ConfigConstant.WX_MSG_TYPE_2);

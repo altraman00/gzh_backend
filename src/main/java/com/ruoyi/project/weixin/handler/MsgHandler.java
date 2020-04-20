@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.project.weixin.config.CommonConstants;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.constant.WebSocketConstant;
+import com.ruoyi.project.weixin.dto.WxMpXmlMessageDTO;
 import com.ruoyi.project.weixin.entity.WxAutoReply;
 import com.ruoyi.project.weixin.entity.WxMsg;
 import com.ruoyi.project.weixin.entity.WxUser;
@@ -41,6 +42,7 @@ public class MsgHandler extends AbstractHandler {
                                     Map<String, Object> context, WxMpService wxMpService,
                                     WxSessionManager sessionManager) {
         //组装回复消息
+        WxMpXmlMessageDTO wxMpXmlMessageDTO = (WxMpXmlMessageDTO) wxMessage;
         if (!wxMessage.getMsgType().equals(XmlMsgType.EVENT)) {
             WxMpXmlOutMessage rs;
             //TODO 可以选择将消息保存到本地
@@ -52,9 +54,10 @@ public class MsgHandler extends AbstractHandler {
                         .<WxAutoReply>query().lambda()
                         .eq(WxAutoReply::getType, ConfigConstant.WX_AUTO_REPLY_TYPE_3)
                         .eq(WxAutoReply::getRepMate, ConfigConstant.WX_REP_MATE_1)
+                        .eq(WxAutoReply::getAppId, wxMpXmlMessageDTO.getAppId())
                         .eq(WxAutoReply::getReqKey, wxMessage.getContent()));
                 if(listWxAutoReply!=null && listWxAutoReply.size()>0){
-                    rs = this.getWxMpXmlOutMessage(wxMessage,listWxAutoReply,wxUser,wxMsgService);
+                    rs = this.getWxMpXmlOutMessage(wxMpXmlMessageDTO,listWxAutoReply,wxUser,wxMsgService);
                     if(rs != null){
                         return  rs;
                     }
@@ -64,9 +67,10 @@ public class MsgHandler extends AbstractHandler {
                         .<WxAutoReply>query().lambda()
                         .eq(WxAutoReply::getType, ConfigConstant.WX_AUTO_REPLY_TYPE_3)
                         .eq(WxAutoReply::getRepMate, ConfigConstant.WX_REP_MATE_2)
+                        .eq(WxAutoReply::getAppId, wxMpXmlMessageDTO.getAppId())
                         .like(WxAutoReply::getReqKey, wxMessage.getContent()));
                 if(listWxAutoReply!=null && listWxAutoReply.size()>0) {
-                    rs = this.getWxMpXmlOutMessage(wxMessage, listWxAutoReply, wxUser,wxMsgService);
+                    rs = this.getWxMpXmlOutMessage(wxMpXmlMessageDTO, listWxAutoReply, wxUser,wxMsgService);
                     if (rs != null) {
                         return rs;
                     }
@@ -76,8 +80,9 @@ public class MsgHandler extends AbstractHandler {
             List<WxAutoReply> listWxAutoReply = wxAutoReplyService.list(Wrappers
                     .<WxAutoReply>query().lambda()
                     .eq(WxAutoReply::getType, ConfigConstant.WX_AUTO_REPLY_TYPE_2)
+                    .eq(WxAutoReply::getAppId, wxMpXmlMessageDTO.getAppId())
                     .eq(WxAutoReply::getReqType, wxMessage.getMsgType()));
-            rs = this.getWxMpXmlOutMessage(wxMessage,listWxAutoReply,wxUser,wxMsgService);
+            rs = this.getWxMpXmlOutMessage(wxMpXmlMessageDTO,listWxAutoReply,wxUser,wxMsgService);
             return rs;
         }
         return null;
@@ -90,11 +95,12 @@ public class MsgHandler extends AbstractHandler {
      * @param listWxAutoReply
      * @return
      */
-    public static WxMpXmlOutMessage getWxMpXmlOutMessage(WxMpXmlMessage wxMessage, List<WxAutoReply> listWxAutoReply, WxUser wxUser,
+    public static WxMpXmlOutMessage getWxMpXmlOutMessage(WxMpXmlMessageDTO wxMessage, List<WxAutoReply> listWxAutoReply, WxUser wxUser,
                                                          WxMsgService wxMsgService){
         WxMpXmlOutMessage wxMpXmlOutMessage = null;
         //记录接收消息
         WxMsg wxMsg = new WxMsg();
+        wxMsg.setAppId(wxMessage.getAppId());
         wxMsg.setWxUserId(wxUser.getId());
         wxMsg.setNickName(wxUser.getNickName());
         wxMsg.setHeadimgUrl(wxUser.getHeadimgUrl());
@@ -140,6 +146,7 @@ public class MsgHandler extends AbstractHandler {
             WxAutoReply wxAutoReply = listWxAutoReply.get(0);
             //记录回复消息
             wxMsg = new WxMsg();
+            wxMsg.setAppId(wxMessage.getAppId());
             wxMsg.setWxUserId(wxUser.getId());
             wxMsg.setNickName(wxUser.getNickName());
             wxMsg.setHeadimgUrl(wxUser.getHeadimgUrl());

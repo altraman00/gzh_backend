@@ -20,3 +20,8 @@ ALTER TABLE `wx_task_help_record`
 ADD COLUMN `app_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '助力记录所属公号APPID' AFTER `id`,
 DROP PRIMARY KEY,
 ADD PRIMARY KEY (`id`) USING BTREE;
+
+ALTER TABLE `wx_auto_reply`
+ADD COLUMN `app_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '自动回复所在公号APPID' AFTER `id`,
+DROP PRIMARY KEY,
+ADD PRIMARY KEY (`id`) USING BTREE;
