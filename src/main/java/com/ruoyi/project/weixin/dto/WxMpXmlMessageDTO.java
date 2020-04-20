@@ -1,6 +1,7 @@
 package com.ruoyi.project.weixin.dto;
 
 import lombok.Data;
+import lombok.ToString;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 
 /**
@@ -10,6 +11,7 @@ import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
  * @Created by pjz
  */
 @Data
+@ToString(callSuper = true)
 public class WxMpXmlMessageDTO extends WxMpXmlMessage {
     private String appId;
 }
