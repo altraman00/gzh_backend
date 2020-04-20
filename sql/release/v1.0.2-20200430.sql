@@ -25,3 +25,10 @@ ALTER TABLE `wx_auto_reply`
 ADD COLUMN `app_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '自动回复所在公号APPID' AFTER `id`,
 DROP PRIMARY KEY,
 ADD PRIMARY KEY (`id`) USING BTREE;
+
+ALTER TABLE `sys_role`
+ADD COLUMN `mp_scope` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '1' COMMENT '可见的公众号ID组成的数组字符串; eg:[1,2,3,5,8]' AFTER `data_scope`,
+DROP PRIMARY KEY,
+ADD PRIMARY KEY (`role_id`) USING BTREE;
+
+-- 为超级管理员admin初始化所有的公众号可见(每次新增公众号之后 该值都要更新)

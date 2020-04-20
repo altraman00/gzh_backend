@@ -47,7 +47,7 @@ public class MsgHandler extends AbstractHandler {
             WxMpXmlOutMessage rs;
             //TODO 可以选择将消息保存到本地
             WxUser wxUser = wxUserMapper.selectOne(Wrappers.<WxUser>lambdaQuery()
-                    .eq(WxUser::getOpenId,wxMessage.getFromUser()));
+                    .eq(WxUser::getOpenId,wxMessage.getFromUser()).eq(WxUser::getAppId,wxMpXmlMessageDTO.getAppId()));
             if(WxConsts.KefuMsgType.TEXT.equals(wxMessage.getMsgType())){//1、先处理是否有文本关键字回复
                 //先全匹配
                 List<WxAutoReply> listWxAutoReply = wxAutoReplyService.list(Wrappers
