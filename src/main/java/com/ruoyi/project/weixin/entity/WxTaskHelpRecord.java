@@ -30,5 +30,7 @@ public class WxTaskHelpRecord extends BaseEntity {
      */
     private String helpWxUserId;
 
+    private String appId;
+
 
 }

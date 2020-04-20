@@ -20,6 +20,10 @@ public class WxActivityTemplate extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
+    public static final String SUPPORT_SCENE_SUBSCRIPTION_NUMBER = "1";
+    public static final String SUPPORT_SCENE_SERVICE_NUMBER = "2";
+    public static final String SUPPORT_SCENE_APPLETS = "3";
+
     /**
      * 模板名称
      */
@@ -39,4 +43,9 @@ public class WxActivityTemplate extends BaseEntity {
      * 任务完成需要的个数
      */
     private Integer needNum;
+    /**
+     * 支持哪些场景 1. 订阅号 2. 服务号 3.小程序
+     * 多场景支持时 用逗号","分隔  eg: 1,2,3
+     */
+    private String supportScene;
 }
