@@ -15,6 +15,7 @@ import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.api.WxMpUserTagService;
 import me.chanjar.weixin.mp.bean.tag.WxUserTag;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -44,6 +45,9 @@ public class WxUserTagsController extends BaseController {
 	public AjaxResult getWxUserList(String appId) {
 		appId = ThreadLocalUtil.getAppId();
 		logger.debug("getWxUserTagList 当前操作的APPID:{}", appId);
+		if(StringUtils.isEmpty(appId)){
+			AjaxResult.success();
+		}
 		WxMpUserTagService wxMpUserTagService = wxService.switchoverTo(appId).getUserTagService();
 		try {
 			List<WxUserTag> listWxUserTag =  wxMpUserTagService.tagGet();
@@ -65,6 +69,9 @@ public class WxUserTagsController extends BaseController {
 	public AjaxResult getWxUserTagsDict(String appId) {
 		appId = ThreadLocalUtil.getAppId();
 		logger.debug("getWxUserTagsDict 当前操作的APPID:{}", appId);
+		if(StringUtils.isEmpty(appId)){
+			AjaxResult.success();
+		}
 		WxMpUserTagService wxMpUserTagService = wxService.switchoverTo(appId).getUserTagService();
 		try {
 			List<WxUserTag> listWxUserTag =  wxMpUserTagService.tagGet();
@@ -93,6 +100,9 @@ public class WxUserTagsController extends BaseController {
 	public AjaxResult save(@RequestBody JSONObject data){
 		String appId = ThreadLocalUtil.getAppId();
 		logger.debug("saveUserTag 当前操作的APPID:{}", appId);
+		if(StringUtils.isEmpty(appId)){
+			AjaxResult.success();
+		}
 		WxMpUserTagService wxMpUserTagService = wxService.switchoverTo(appId).getUserTagService();
 		String name = data.getStr("name");
 //		WxMpUserTagService wxMpUserTagService = wxService.getUserTagService();
@@ -114,6 +124,9 @@ public class WxUserTagsController extends BaseController {
 	public AjaxResult updateById(@RequestBody JSONObject data){
 		String appId = ThreadLocalUtil.getAppId();
 		logger.debug("updateUserTagUserTagById 当前操作的APPID:{}", appId);
+		if(StringUtils.isEmpty(appId)){
+			AjaxResult.success();
+		}
 		WxMpUserTagService wxMpUserTagService = wxService.switchoverTo(appId).getUserTagService();
 		Long id = data.getLong("id");
 		String name = data.getStr("name");
@@ -138,6 +151,9 @@ public class WxUserTagsController extends BaseController {
 	public AjaxResult removeById(Long id,String appId){
 		appId = ThreadLocalUtil.getAppId();
 		logger.debug("removeUserTagById 当前操作的APPID:{}", appId);
+		if(StringUtils.isEmpty(appId)){
+			AjaxResult.success();
+		}
 		String finalAppId = appId;
 		int count = wxUserService.count(Wrappers.<WxUser>lambdaQuery().and(wrapper -> wrapper.eq(WxUser::getAppId, finalAppId))
 				.and(wrapper -> wrapper

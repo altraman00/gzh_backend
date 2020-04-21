@@ -56,6 +56,9 @@
 			from
 			  wx_msg
 			<where>
+				<if test="query.appId != null and query.appId != ''">
+					AND `app_id` = #{query.appId}
+				</if>
 				<if test="query.type != null and query.type != ''">
 					AND `type` = #{query.type}
 				</if>

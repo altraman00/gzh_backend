@@ -15,7 +15,7 @@ public interface WxUserService extends IService<WxUser> {
 	/**
 	 * 同步微信用户
 	 */
-	void synchroWxUser() throws WxErrorException;
+	void synchroWxUser(String appId) throws WxErrorException;
 
 	/**
 	 * 修改用户备注
@@ -31,7 +31,7 @@ public interface WxUserService extends IService<WxUser> {
 	 * @param openIds
 	 * @throws WxErrorException
 	 */
-	void tagging(String taggingType, Long tagId, String[] openIds) throws WxErrorException;
+	void tagging(String taggingType, Long tagId, String[] openIds, String appId) throws WxErrorException;
 
 	WxUser getByOpenId(String openId);
 }
