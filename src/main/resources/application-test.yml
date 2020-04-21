@@ -60,8 +60,8 @@ spring:
 wx:
     mp:
         configs:
-            - appId: wx9047d074c6a5a211
-              secret: 180ac29acee722e1f82862100eb85bcf
+            - appId: wxd3fc86ade86ec00d
+              secret: 4d4d1cbac18f0431727701010474d16c
               token: smallprogram
               aesKey:
 
