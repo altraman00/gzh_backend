@@ -49,6 +49,8 @@ public class WxActivityTaskController extends BaseController {
 
     private final WxUserService wxUserService;
 
+    private final IWxMpService iWxMpService;
+
     private final IWxActivityTaskService wxActivityTaskService;
 
     private final IWxActivityTemplateService iWxActivityTemplateService;
@@ -66,44 +68,52 @@ public class WxActivityTaskController extends BaseController {
     })
     @GetMapping("/help/info")
     public AjaxResult getTaskInfo(@RequestParam(value = "openId") String openId,@RequestParam(value = "appId") String appId){
-        WxUser wxuser = wxUserService.getByOpenId(openId);
-        String wxUserId = wxuser.getId();
-        WxActivityTask wxActivityTask = wxActivityTaskService.getOne(Wrappers.<WxActivityTask>lambdaQuery()
-                .eq(WxActivityTask::getWxUserId, wxUserId)
-                .eq(WxActivityTask::getTemplateId, HelpActivityConstant.ACTIVITY_TEMPLATE_ID)
-                .eq(WxActivityTask::getAppId,appId));
-        HelpInfoDTO helpInfoDTO = new HelpInfoDTO();
-        if (wxActivityTask == null) {
-            wxActivityTask = new WxActivityTask();
-            wxActivityTask.setCompleteNum(0);
-            wxActivityTask.setTaskStatus(ConfigConstant.TASK_DOING);
-            wxActivityTask.setWxUserId(wxUserId);
-            wxActivityTask.setTemplateId(HelpActivityConstant.ACTIVITY_TEMPLATE_ID);
-            wxActivityTask.setAppId(appId);
-            wxActivityTaskService.save(wxActivityTask);
+        WxMp wxMp = iWxMpService.getByAppId(appId);
+        if(wxMp != null){
+            WxUser wxuser = wxUserService.getByOpenId(openId);
+            String templateId = wxMp.getTemplateId();
+            String wxUserId = wxuser.getId();
+            WxActivityTask wxActivityTask = wxActivityTaskService.getOne(Wrappers.<WxActivityTask>lambdaQuery()
+                    .eq(WxActivityTask::getWxUserId, wxUserId)
+                    .eq(WxActivityTask::getTemplateId, templateId)
+                    .eq(WxActivityTask::getAppId,appId));
+            HelpInfoDTO helpInfoDTO = new HelpInfoDTO();
+            if (wxActivityTask == null) {
+                wxActivityTask = new WxActivityTask();
+                wxActivityTask.setCompleteNum(0);
+                wxActivityTask.setTaskStatus(ConfigConstant.TASK_DOING);
+                wxActivityTask.setWxUserId(wxUserId);
+                wxActivityTask.setTemplateId(templateId);
+                wxActivityTask.setAppId(appId);
+                wxActivityTaskService.save(wxActivityTask);
+            }
+            helpInfoDTO.setCompleteNum(wxActivityTask.getCompleteNum());
+            helpInfoDTO.setStatus(wxActivityTask.getTaskStatus());
+            WxActivityTemplate template = iWxActivityTemplateService.getById(templateId);
+            helpInfoDTO.setNeedNum(template.getNeedNum());
+
+            // 被助力记录
+            List<WxTaskHelpRecord> list = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery().eq(WxTaskHelpRecord::getInviteWxUserId, wxUserId));
+            List<WxUser> helpers = new ArrayList<>();
+            for (WxTaskHelpRecord wxTaskHelpRecord : list) {
+                WxUser wxUser = wxUserService.getById(wxTaskHelpRecord.getHelpWxUserId());
+                helpers.add(wxUser);
+            }
+
+
+            Map<String,WxMpTemplateMessage> messageMap = getTemplateMessage(appId, templateId);
+            WxMpTemplateMessage msgJpTitle = messageMap.get(HelpActivityConstant.SCENE_JP_TITLE);
+            WxMpTemplateMessage msgJpUrl = messageMap.get(HelpActivityConstant.SCENE_JP_URL);
+            helpInfoDTO.setJpTitleName(msgJpTitle != null? msgJpTitle.getRepContent():"");
+            helpInfoDTO.setRewardUrl(msgJpUrl != null ? msgJpUrl.getRepContent():"");
+
+            helpInfoDTO.setHelpers(helpers);
+            return AjaxResult.success(helpInfoDTO);
+        }else {
+            logger.debug("appid没有匹配对应WxMp对象 appId:{}", appId);
+            return AjaxResult.success("appId is not found:" + appId);
         }
-        helpInfoDTO.setCompleteNum(wxActivityTask.getCompleteNum());
-        helpInfoDTO.setStatus(wxActivityTask.getTaskStatus());
-        WxActivityTemplate template = iWxActivityTemplateService.getById(HelpActivityConstant.ACTIVITY_TEMPLATE_ID);
-        helpInfoDTO.setNeedNum(template.getNeedNum());
 
-        // 被助力记录
-        List<WxTaskHelpRecord> list = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery().eq(WxTaskHelpRecord::getInviteWxUserId, wxUserId));
-        List<WxUser> helpers = new ArrayList<>();
-        for (WxTaskHelpRecord wxTaskHelpRecord : list) {
-            WxUser wxUser = wxUserService.getById(wxTaskHelpRecord.getHelpWxUserId());
-            helpers.add(wxUser);
-        }
-
-
-        Map<String,WxMpTemplateMessage> messageMap = getTemplateMessage(appId);
-        WxMpTemplateMessage msgJpTitle = messageMap.get(HelpActivityConstant.SCENE_JP_TITLE);
-        WxMpTemplateMessage msgJpUrl = messageMap.get(HelpActivityConstant.SCENE_JP_URL);
-        helpInfoDTO.setJpTitleName(msgJpTitle != null? msgJpTitle.getRepContent():"");
-        helpInfoDTO.setRewardUrl(msgJpUrl != null ? msgJpUrl.getRepContent():"");
-
-        helpInfoDTO.setHelpers(helpers);
-        return AjaxResult.success(helpInfoDTO);
     }
 
     /**
@@ -111,11 +121,11 @@ public class WxActivityTaskController extends BaseController {
      * @param appId
      * @return
      */
-    private Map<String, WxMpTemplateMessage> getTemplateMessage(String appId) {
+    private Map<String, WxMpTemplateMessage> getTemplateMessage(String appId, String templateId) {
 //        Map<String,WxMpTemplateMessage> messageMap = new HashMap<>();
         // 查询奖品名称返回到前端
         QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,HelpActivityConstant.ACTIVITY_TEMPLATE_ID);
+        queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,templateId);
         List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
 
         Map<String,WxMpTemplateMessage> messageMap = messages.stream().collect(Collectors.toMap(WxMpTemplateMessage::getScene,p-> p));
@@ -131,8 +141,9 @@ public class WxActivityTaskController extends BaseController {
     })
     @GetMapping("/help/poster")
     public AjaxResult getTaskPoster(@RequestParam(value = "openId") String openId,@RequestParam(value = "appId") String appId){
+        WxMp wxMp = iWxMpService.getByAppId(appId);
         QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,HelpActivityConstant.ACTIVITY_TEMPLATE_ID);
+        queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,wxMp.getTemplateId());
         List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
         WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent()) && StringUtils.isNotBlank(message.getRepMediaId());
