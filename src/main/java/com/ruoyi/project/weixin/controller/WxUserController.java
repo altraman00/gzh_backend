@@ -92,6 +92,12 @@ public class WxUserController extends BaseController {
     @PostMapping
     @PreAuthorize("@ss.hasPermi('wxmp:wxuser:add')")
     public AjaxResult save(@RequestBody WxUser wxUser) {
+        String appId = ThreadLocalUtil.getAppId();
+        logger.debug("saveWxUser 当前操作的APPID:{}", appId);
+        if(StringUtils.isEmpty(appId)){
+            AjaxResult.success();
+        }
+        wxUser.setAppId(appId);
         return AjaxResult.success(wxUserService.save(wxUser));
     }
 
