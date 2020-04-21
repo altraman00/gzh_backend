@@ -350,12 +350,12 @@ public class HelpActivityServiceImpl implements ActivityService {
             return;
         }
         QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,HelpActivityConstant.ACTIVITY_TEMPLATE_ID);
+        queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,wxMp.getTemplateId());
         List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
         WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_SCHEDULE_INVITER)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
         if (hasAvailableMessage) {
-            List<WxUser> users =  wxUserMapper.getNotCompleteUser(appId,HelpActivityConstant.ACTIVITY_TEMPLATE_ID);
+            List<WxUser> users =  wxUserMapper.getNotCompleteUser(appId,wxMp.getTemplateId());
             log.info("共查询到：{}个需要发送消息的用户",users.size());
             String content = message.getRepContent();
             for (WxUser wxUser : users) {
