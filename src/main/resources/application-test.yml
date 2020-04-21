@@ -76,6 +76,10 @@ wx:
               secret: 180ac29acee722e1f82862100eb85bcf
               token: smallprogram
               aesKey:
+            - appId: wxd3fc86ade86ec00d
+              secret: 4d4d1cbac18f0431727701010474d16c
+              token: smallprogram
+              aesKey:
 #            - appId: wx1ae5569fd1bd1e3e
 #              secret: 22437a698a6bac6837a866d723c9a261
 #              token: smallprogram
