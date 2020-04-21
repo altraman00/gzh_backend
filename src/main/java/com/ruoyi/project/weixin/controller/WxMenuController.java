@@ -5,10 +5,12 @@ import cn.hutool.json.JSONUtil;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.weixin.service.WxMenuService;
+import com.ruoyi.project.weixin.utils.ThreadLocalUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -47,9 +49,14 @@ public class WxMenuController extends BaseController {
 	public AjaxResult saveAndRelease(@RequestBody String data) {
 		JSONObject jSONObject = JSONUtil.parseObj(data);
 		String strWxMenu = jSONObject.getStr("strWxMenu");
-		String appId = jSONObject.getStr("appId");
+//		String appId = jSONObject.getStr("appId");
+		String appId = ThreadLocalUtil.getAppId();
+		logger.debug("wxMenuSaveAndRelease 当前操作的APPID:{}", appId);
+		if(StringUtils.isEmpty(appId)){
+			AjaxResult.success();
+		}
 		try {
-			wxMenuService.saveAndRelease(strWxMenu);
+			wxMenuService.saveAndRelease(strWxMenu, appId);
 			return AjaxResult.success();
 		} catch (WxErrorException e) {
 			e.printStackTrace();

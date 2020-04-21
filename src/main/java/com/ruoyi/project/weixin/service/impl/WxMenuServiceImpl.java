@@ -2,11 +2,14 @@ package com.ruoyi.project.weixin.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.weixin.config.CommonConstants;
 import com.ruoyi.project.weixin.mapper.WxMenuMapper;
 import com.ruoyi.project.weixin.service.WxMenuService;
 import com.ruoyi.project.weixin.entity.*;
+import com.ruoyi.project.weixin.utils.ThreadLocalUtil;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpService;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +26,7 @@ import java.util.List;
  */
 @Service
 @AllArgsConstructor
+@Slf4j
 public class WxMenuServiceImpl extends ServiceImpl<WxMenuMapper, WxMenu> implements WxMenuService {
 	private final WxMpService wxService;
 	/***
@@ -31,9 +35,14 @@ public class WxMenuServiceImpl extends ServiceImpl<WxMenuMapper, WxMenu> impleme
 	 */
 	@Override
 	public String getWxMenuButton() {
+		String appId = ThreadLocalUtil.getAppId();
+		log.debug("getWxMenuButton 当前操作的APPID:{}", appId);
+		if(StringUtils.isEmpty(appId)){
+			AjaxResult.success();
+		}
 		//查出一级菜单
 		List<WxMenu> listWxMenu = baseMapper.selectList(Wrappers
-				.<WxMenu>query().lambda()
+				.<WxMenu>query().lambda().eq(WxMenu::getAppId, appId)
 				.eq(WxMenu::getParentId, CommonConstants.PARENT_ID).orderByAsc(WxMenu::getSort));
 		Menu menu = new Menu();
 		List<MenuButton> listMenuButton = new ArrayList<>();
@@ -51,7 +60,7 @@ public class WxMenuServiceImpl extends ServiceImpl<WxMenuMapper, WxMenu> impleme
 				}else{//有二级菜单
 					//查出二级菜单
 					List<WxMenu> listWxMenu1 = baseMapper.selectList(Wrappers
-							.<WxMenu>query().lambda()
+							.<WxMenu>query().lambda().eq(WxMenu::getAppId, appId)
 							.eq(WxMenu::getParentId,wxMenu.getId()).orderByAsc(WxMenu::getSort));
 					subButtons = new ArrayList<>();
 					for(WxMenu wxMenu1 : listWxMenu1){
@@ -94,12 +103,12 @@ public class WxMenuServiceImpl extends ServiceImpl<WxMenuMapper, WxMenu> impleme
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void saveAndRelease(String strWxMenu) throws WxErrorException {
+	public void saveAndRelease(String strWxMenu, String appId) throws WxErrorException {
 		Menu menu = Menu.fromJson(strWxMenu);
 		List<MenuButton> buttons = menu.getButton();
 		//先删除
 		baseMapper.delete(Wrappers
-				.<WxMenu>query().lambda());
+				.<WxMenu>query().lambda().eq(WxMenu::getAppId, appId));
 		WxMenu wxMenu = null;
 		WxMenu wxMenu1 = null;
 		int sort1 = 1;
@@ -107,6 +116,7 @@ public class WxMenuServiceImpl extends ServiceImpl<WxMenuMapper, WxMenu> impleme
 		//入库
 		for(MenuButton menuButton : buttons){
 			wxMenu = new WxMenu();
+			wxMenu.setAppId(appId);
 			setWxMenuValue(wxMenu,menuButton);
 			wxMenu.setSort(sort1);
 			wxMenu.setParentId(CommonConstants.PARENT_ID);
@@ -115,6 +125,7 @@ public class WxMenuServiceImpl extends ServiceImpl<WxMenuMapper, WxMenu> impleme
 			sort1++;
 			for(MenuButton menuButton1 : menuButton.getSub_button()){
 				wxMenu1 = new WxMenu();
+				wxMenu1.setAppId(appId);
 				setWxMenuValue(wxMenu1,menuButton1);
 				wxMenu1.setSort(sort2);
 				wxMenu1.setParentId(wxMenu.getId());
@@ -124,7 +135,7 @@ public class WxMenuServiceImpl extends ServiceImpl<WxMenuMapper, WxMenu> impleme
 			}
 		}
 		//创建菜单
-		wxService.getMenuService().menuCreate(menu.toString());
+		wxService.switchoverTo(appId).getMenuService().menuCreate(menu.toString());
 	}
 
 	void setWxMenuValue(WxMenu wxMenu,MenuButton menuButton){
