@@ -64,7 +64,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,templateId);
         List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
-//        WxUser wxUser = wxUserService.getByOpenId(openId);
+//        WxUser wxUser = wxUserService.getByOpenIdAndAppId(openId);
         WxUser wxUser = wxUserMapper.selectOne(Wrappers.<WxUser>lambdaQuery()
                 .eq(WxUser::getOpenId,openId).eq(WxUser::getAppId,appId));
         String wxUserId = wxUser.getId();
@@ -73,7 +73,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         // 首先判断是不是扫活动码进入的
         if (StringUtils.isNotBlank(eventKey) && eventKey.contains(HelpActivityConstant.SCENE_EVENT_KEY)) {
             String inviterOpenId = eventKey.substring(eventKey.lastIndexOf(":") + 1);
-            WxUser inviter = wxUserService.getByOpenId(inviterOpenId);
+            WxUser inviter = wxUserService.getByOpenIdAndAppId(inviterOpenId,appId);
             String inviterId = inviter.getId();
             // 不是自己扫自己的码进入的
             if (!inviterId.equals(wxUserId)) {

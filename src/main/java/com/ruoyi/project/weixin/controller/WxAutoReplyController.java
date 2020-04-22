@@ -8,6 +8,7 @@ import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.weixin.service.WxAutoReplyService;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.entity.WxAutoReply;
+import com.ruoyi.project.weixin.utils.ThreadLocalUtil;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,6 +37,12 @@ public class WxAutoReplyController extends BaseController {
     @GetMapping("/page")
     @PreAuthorize("@ss.hasPermi('wxmp:wxautoreply:index')")
     public AjaxResult getWxAutoReplyPage(Page page, WxAutoReply wxAutoReply) {
+		String appId = ThreadLocalUtil.getAppId();
+		logger.debug("getWxAutoReplyPage 当前操作的APPID:{}", appId);
+		if(StringUtils.isEmpty(appId)){
+			AjaxResult.success();
+		}
+		wxAutoReply.setAppId(appId);
     	return AjaxResult.success(wxAutoReplyService.page(page,Wrappers.query(wxAutoReply)));
     }
 
@@ -59,6 +66,12 @@ public class WxAutoReplyController extends BaseController {
     @PostMapping
     @PreAuthorize("@ss.hasPermi('wxmp:wxautoreply:add')")
     public AjaxResult save(@RequestBody WxAutoReply wxAutoReply){
+		String appId = ThreadLocalUtil.getAppId();
+		logger.debug("saveWxAutoReply 当前操作的APPID:{}", appId);
+		if(StringUtils.isEmpty(appId)){
+			AjaxResult.success();
+		}
+		wxAutoReply.setAppId(appId);
 		this.jude(wxAutoReply);
     	return AjaxResult.success(wxAutoReplyService.save(wxAutoReply));
     }
@@ -71,6 +84,12 @@ public class WxAutoReplyController extends BaseController {
     @PutMapping
     @PreAuthorize("@ss.hasPermi('wxmp:wxautoreply:edit')")
     public AjaxResult updateById(@RequestBody WxAutoReply wxAutoReply){
+		String appId = ThreadLocalUtil.getAppId();
+		logger.debug("getWxAutoReplyPage 当前操作的APPID:{}", appId);
+		if(StringUtils.isEmpty(appId)){
+			AjaxResult.success();
+		}
+		wxAutoReply.setAppId(appId);
 		this.jude(wxAutoReply);
     	return AjaxResult.success(wxAutoReplyService.updateById(wxAutoReply));
     }
@@ -92,7 +111,7 @@ public class WxAutoReplyController extends BaseController {
 	 */
 	public void jude(WxAutoReply wxAutoReply){
 		if(ConfigConstant.WX_AUTO_REPLY_TYPE_2.equals(wxAutoReply.getType())){
-			Wrapper<WxAutoReply> queryWrapper = Wrappers.<WxAutoReply>lambdaQuery()
+			Wrapper<WxAutoReply> queryWrapper = Wrappers.<WxAutoReply>lambdaQuery().eq(WxAutoReply::getAppId, wxAutoReply.getAppId())
 					.eq(WxAutoReply::getReqType,wxAutoReply.getReqType());
 			List<WxAutoReply> list = wxAutoReplyService.list(queryWrapper);
 			if(StringUtils.isNotBlank(wxAutoReply.getId())){
@@ -108,6 +127,7 @@ public class WxAutoReplyController extends BaseController {
 		}
 		if(ConfigConstant.WX_AUTO_REPLY_TYPE_3.equals(wxAutoReply.getType())){
 			Wrapper<WxAutoReply> queryWrapper = Wrappers.<WxAutoReply>lambdaQuery()
+					.eq(WxAutoReply::getAppId,wxAutoReply.getAppId())
 					.eq(WxAutoReply::getReqKey,wxAutoReply.getReqKey())
 					.eq(WxAutoReply::getRepType,wxAutoReply.getRepMate());
 			List<WxAutoReply> list = wxAutoReplyService.list(queryWrapper);

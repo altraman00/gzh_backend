@@ -70,7 +70,7 @@ public class WxActivityTaskController extends BaseController {
     public AjaxResult getTaskInfo(@RequestParam(value = "openId") String openId,@RequestParam(value = "appId") String appId){
         WxMp wxMp = iWxMpService.getByAppId(appId);
         if(wxMp != null){
-            WxUser wxuser = wxUserService.getByOpenId(openId);
+            WxUser wxuser = wxUserService.getByOpenIdAndAppId(openId, appId);
             String templateId = wxMp.getTemplateId();
             String wxUserId = wxuser.getId();
             WxActivityTask wxActivityTask = wxActivityTaskService.getOne(Wrappers.<WxActivityTask>lambdaQuery()

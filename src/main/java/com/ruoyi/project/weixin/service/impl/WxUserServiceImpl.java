@@ -89,8 +89,8 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
 	}
 
 	@Override
-	public WxUser getByOpenId(String openId) {
-		return this.getOne(Wrappers.<WxUser>lambdaQuery()
+	public WxUser getByOpenIdAndAppId(String openId, String appId) {
+		return this.getOne(Wrappers.<WxUser>lambdaQuery().eq(WxUser::getAppId, appId)
 				.eq(WxUser::getOpenId,openId));
 	}
 
