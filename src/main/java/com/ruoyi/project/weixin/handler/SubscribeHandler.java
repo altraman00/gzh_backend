@@ -73,7 +73,7 @@ public class SubscribeHandler extends AbstractHandler {
     }
 
     public static void setWxUserValue(WxUser wxUser,WxMpUser userWxInfo){
-        wxUser.setAppType(ConfigConstant.WX_APP_TYPE_2);;
+        wxUser.setAppType(ConfigConstant.WX_APP_TYPE_2);
         wxUser.setSubscribe(ConfigConstant.SUBSCRIBE_TYPE_YES);
         wxUser.setSubscribeScene(userWxInfo.getSubscribeScene());
         wxUser.setSubscribeTime(LocalDateTimeUtils.timestamToDatetime(userWxInfo.getSubscribeTime()*1000));
@@ -90,6 +90,7 @@ public class SubscribeHandler extends AbstractHandler {
         wxUser.setGroupId(JSONUtil.toJsonStr(userWxInfo.getGroupId()));
         wxUser.setTagidList(userWxInfo.getTagIds());
         wxUser.setQrSceneStr(userWxInfo.getQrSceneStr());
+        wxUser.setRemark(userWxInfo.getRemark());
     }
 
 }
