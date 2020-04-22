@@ -18,12 +18,21 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class WxMp extends BaseEntity {
 
+    public static final Integer TYPE_SUBSCRIPTION_NUMBER = 1;
+    public static final Integer TYPE_SERVICE_NUMBER = 2;
+    public static final Integer TYPE_APPLETS = 3;
+
     private static final long serialVersionUID = 1L;
 
     /**
      * 公众号appId
      */
     private String appId;
+
+    /**
+     * 账号主体类型(1. 订阅号 2. 服务号 3.小程序)
+     */
+    private Integer type;
 
     /**
      * 活动模板id

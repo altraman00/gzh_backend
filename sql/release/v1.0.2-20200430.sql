@@ -6,6 +6,9 @@ ADD PRIMARY KEY (`id`) USING BTREE;
 ALTER TABLE `wx_activity_template`
 ADD COLUMN `support_scene` varchar(255) NULL COMMENT '支持哪些场景 1. 订阅号 2. 服务号 3.小程序 ;多场景支持时 用逗号\",\"分隔  eg: 1,2,3' AFTER `template_name`;
 
+ALTER TABLE `wx_mp`
+ADD COLUMN `type` int(2) NULL COMMENT '账号主体类型(1. 订阅号 2. 服务号 3.小程序)' AFTER `del_flag`;
+
 ALTER TABLE `wx_menu`
 ADD COLUMN `app_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '菜单所在公号APPID' AFTER `id`,
 DROP PRIMARY KEY,
