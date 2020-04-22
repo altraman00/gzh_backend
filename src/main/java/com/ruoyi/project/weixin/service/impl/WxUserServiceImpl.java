@@ -44,7 +44,8 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
 		entity.setId(id);
 		entity.setRemark(remark);
 		super.updateById(entity);
-		WxMpUserService wxMpUserService = wxService.switchoverTo(entity.getAppId()).getUserService();
+		WxUser wxUser = getById(id);
+		WxMpUserService wxMpUserService = wxService.switchoverTo(wxUser.getAppId()).getUserService();
 		wxMpUserService.userUpdateRemark(openId,remark);
 		return true;
 	}
