@@ -6,8 +6,10 @@ import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.weixin.entity.WxActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMp;
+import com.ruoyi.project.weixin.entity.WxUser;
 import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
 import com.ruoyi.project.weixin.service.IWxMpService;
+import com.ruoyi.project.weixin.service.WxUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -41,6 +43,8 @@ public class WxMpOpenController extends BaseController {
 
     private final IWxMpService myWxMpService;
 
+    private final WxUserService wxUserService;
+
     private final IWxActivityTemplateService wxActivityTemplateService;
 
     private final WxMpService wxMpService;
@@ -73,8 +77,15 @@ public class WxMpOpenController extends BaseController {
         try {
             WxMpOAuth2AccessToken wxMpOAuth2AccessToken = wxMpService.oauth2getAccessToken(code);
             WxMpUser wxMpUser = wxMpService.oauth2getUserInfo(wxMpOAuth2AccessToken, null);
+            //根据openId获取对应的APPID
+            QueryWrapper<WxUser> queryWrapper = new QueryWrapper<>();
+            queryWrapper.lambda().eq(WxUser::getOpenId,wxMpUser.getOpenId());
+            WxUser wxUser = wxUserService.getOne(queryWrapper);
+            //根据APPID获取WxMp对象
+            WxMp wxMp = myWxMpService.getByAppId(wxUser.getAppId());
             map.put("accessToken",wxMpOAuth2AccessToken);
             map.put("wxMpUser",wxMpUser);
+            map.put("wxMp",wxMp);
         } catch (Exception e) {
             log.error("调用微信授权异常",e);
         }
