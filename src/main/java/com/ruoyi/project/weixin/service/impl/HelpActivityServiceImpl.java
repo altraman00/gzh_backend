@@ -78,7 +78,7 @@ public class HelpActivityServiceImpl implements ActivityService {
             String inviterId = inviter.getId();
             // 不是自己扫自己的码进入的
             if (!inviterId.equals(wxUserId)) {
-                //根据三个参数组合 得到锁对象
+                //根据三个参数组合 得到锁对象 (不支持多节点分布式服务)
                 String lockKey = inviterId + "-" + templateId + "-" + appId;
                 try {
                     synchronized (ObjectLockUtil.lock(lockKey)){
