@@ -131,10 +131,10 @@ public class HelpActivityServiceImpl implements ActivityService {
         WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent()) && StringUtils.isNotBlank(message.getRepMediaId());
         if (hasAvailableMessage) {
-            File poster = getPosterFile(openId, message);
+            File poster = getPosterFile(openId, message, wxUser.getAppId());
             try {
                 // 将海报上传到临时素材库
-                WxMediaUploadResult uploadResult = wxMpService.getMaterialService().mediaUpload(ConfigConstant.MESSAGE_REP_TYPE_IMAGE, poster);
+                WxMediaUploadResult uploadResult = wxMpService.switchoverTo(wxUser.getAppId()).getMaterialService().mediaUpload(ConfigConstant.MESSAGE_REP_TYPE_IMAGE, poster);
                 log.info("上传海报到临时素材库，上传结果:{}",uploadResult);
                 sendImageMessage(uploadResult,wxUser);
             } catch (WxErrorException e) {
@@ -147,7 +147,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         }
     }
 
-    public File getPosterFile(String openId, WxMpTemplateMessage message) {
+    public File getPosterFile(String openId, WxMpTemplateMessage message, String appId) {
         StopWatch stopWatch = new StopWatch();
         String messageId = message.getId();
         // 先获取海报图片
@@ -155,7 +155,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         InputStream inputStream = null;
         stopWatch.start("get poster img");
         try {
-            inputStream = wxMpService.getMaterialService().materialImageOrVoiceDownload(repMediaId);
+            inputStream = wxMpService.switchoverTo(appId).getMaterialService().materialImageOrVoiceDownload(repMediaId);
         } catch (WxErrorException e) {
             log.error("从素材库获取海报图片异常，消息模板id:{},openId:{}",messageId,openId,e);
         }
@@ -164,8 +164,8 @@ public class HelpActivityServiceImpl implements ActivityService {
         stopWatch.start("get qrcode img");
         File qrCode = null;
         try {
-            WxMpQrCodeTicket ticket = wxMpService.getQrcodeService().qrCodeCreateLastTicket("helpActivity:"+ openId);
-            qrCode = wxMpService.getQrcodeService().qrCodePicture(ticket);
+            WxMpQrCodeTicket ticket = wxMpService.switchoverTo(appId).getQrcodeService().qrCodeCreateLastTicket("helpActivity:"+ openId);
+            qrCode = wxMpService.switchoverTo(appId).getQrcodeService().qrCodePicture(ticket);
         } catch (Exception e) {
             log.error("生成助力活动带参二维码异常，消息模板id:{},openId:{}",messageId,openId,e);
         }
@@ -176,7 +176,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         try {
             //语言
             String lang = "zh_CN";
-            WxMpUser user = wxMpService.getUserService().userInfo(openId,lang);
+            WxMpUser user = wxMpService.switchoverTo(appId).getUserService().userInfo(openId,lang);
             headImgUrl = user.getHeadImgUrl();
         } catch (WxErrorException e) {
             log.error("获取用户头像信息异常，消息模板id:{},openId:{}",messageId,openId,e);
@@ -225,7 +225,7 @@ public class HelpActivityServiceImpl implements ActivityService {
                     .toUser(wxUser.getOpenId())
                     .mediaId(result.getMediaId())
                     .build();
-            wxMpService.getKefuService().sendKefuMessage(wxMpKefuMessage);
+            wxMpService.switchoverTo(wxUser.getAppId()).getKefuService().sendKefuMessage(wxMpKefuMessage);
         } catch (Exception e) {
             log.error("发送客服消息失败，openId：{}",wxUser.getOpenId());
         }

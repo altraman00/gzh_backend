@@ -40,7 +40,7 @@ public class WxPortalController {
             throw new IllegalArgumentException(String.format("未找到对应appid=[%s]的配置，请核实！", appid));
         }
 
-        if (wxService.checkSignature(timestamp, nonce, signature)) {
+        if (wxService.switchoverTo(appid).checkSignature(timestamp, nonce, signature)) {
             return echostr;
         }
 
@@ -64,7 +64,7 @@ public class WxPortalController {
             throw new IllegalArgumentException(String.format("未找到对应appid=[%s]的配置，请核实！", appid));
         }
 
-        if (!wxService.checkSignature(timestamp, nonce, signature)) {
+        if (!wxService.switchoverTo(appid).checkSignature(timestamp, nonce, signature)) {
             throw new IllegalArgumentException("非法请求，可能属于伪造的请求！");
         }
 
@@ -86,7 +86,7 @@ public class WxPortalController {
             out = outMessage.toXml();
         } else if ("aes".equalsIgnoreCase(encType)) {
             // aes加密的消息
-            WxMpXmlMessage inMessage = WxMpXmlMessage.fromEncryptedXml(requestBody, wxService.getWxMpConfigStorage(),
+            WxMpXmlMessage inMessage = WxMpXmlMessage.fromEncryptedXml(requestBody, wxService.switchoverTo(appid).getWxMpConfigStorage(),
                 timestamp, nonce, msgSignature);
             log.debug("\n消息解密后内容为：\n{} ", inMessage.toString());
             WxMpXmlMessageDTO wxMpXmlMessageDTO = new WxMpXmlMessageDTO();
@@ -98,7 +98,7 @@ public class WxPortalController {
                 return "";
             }
 
-            out = outMessage.toEncryptedXml(wxService.getWxMpConfigStorage());
+            out = outMessage.toEncryptedXml(wxService.switchoverTo(appid).getWxMpConfigStorage());
         }
 
         log.debug("\n组装回复信息：{}", out);

@@ -124,7 +124,7 @@ public class WxActivityTemplateController extends BaseController {
             WxMpTemplateMessage wxMpTemplateMessage = new WxMpTemplateMessage();
             wxMpTemplateMessage.setAppId(appId);
             BeanUtils.copyProperties(wxActivityTemplateMessage,wxMpTemplateMessage,"id","createId","createTime","updateId","updateTime","delFlag");
-            wxMpTemplateMessage.setRepContent(wxMpTemplateMessage.getRepContent().replace("appid=","appid="+appId));
+            wxMpTemplateMessage.setRepContent(wxMpTemplateMessage.getRepContent().replace("appid=","appid="+appId).replace("state=","state="+appId));
             wxMpTemplateMessageService.save(wxMpTemplateMessage);
             if (wxMpTemplateMessage.getRepType().equals(ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE)) {
                 needPublishSchedule.add(wxMpTemplateMessage);
