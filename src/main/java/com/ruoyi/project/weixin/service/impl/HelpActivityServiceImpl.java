@@ -9,6 +9,7 @@ import com.ruoyi.project.weixin.entity.*;
 import com.ruoyi.project.weixin.mapper.WxUserMapper;
 import com.ruoyi.project.weixin.service.*;
 import com.ruoyi.project.weixin.utils.ImgUtils;
+import com.ruoyi.project.weixin.utils.ObjectLockUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.result.WxMediaUploadResult;
@@ -77,35 +78,45 @@ public class HelpActivityServiceImpl implements ActivityService {
             String inviterId = inviter.getId();
             // 不是自己扫自己的码进入的
             if (!inviterId.equals(wxUserId)) {
-                WxActivityTask wxActivityTask = wxActivityTaskService.getOne(Wrappers.<WxActivityTask>lambdaQuery()
-                        .eq(WxActivityTask::getWxUserId, inviterId)
-                        .eq(WxActivityTask::getTemplateId,templateId)
-                        .eq(WxActivityTask::getAppId,appId));
-                if (wxActivityTask == null) {
-                    wxActivityTask = new WxActivityTask();
-                    wxActivityTask.setCompleteNum(0);
-                    wxActivityTask.setTaskStatus(ConfigConstant.TASK_DOING);
-                    wxActivityTask.setWxUserId(inviterId);
-                    wxActivityTask.setTemplateId(templateId);
-                    wxActivityTask.setAppId(appId);
-                    wxActivityTaskService.save(wxActivityTask);
-                }
-                if (wxActivityTask.getCompleteNum() < needNum ){
-                    //查找助力记录,一个人只能助力一次
-                    List<WxTaskHelpRecord> records = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery()
-                            .eq(WxTaskHelpRecord::getHelpWxUserId, wxUserId));
-                    if (records.isEmpty()) {
-                        // 未助力过，可以执行助力流程
-                        executeHelpSuccess(messages, wxUser, inviter, wxActivityTask,needNum);
-                        // 为邀请人推送助力成功
-                        executeBeHelped(messages,wxUser,inviter, wxActivityTask,needNum);
-                    } else {
-                        // 已经助力过了
-                        executeHasHelp(messages,wxUser,inviter);
+                //根据三个参数组合 得到锁对象
+                String lockKey = inviterId + "-" + templateId + "-" + appId;
+                try {
+                    synchronized (ObjectLockUtil.lock(lockKey)){
+                        WxActivityTask wxActivityTask = wxActivityTaskService.getOne(Wrappers.<WxActivityTask>lambdaQuery()
+                                .eq(WxActivityTask::getWxUserId, inviterId)
+                                .eq(WxActivityTask::getTemplateId,templateId)
+                                .eq(WxActivityTask::getAppId,appId));
+                        if (wxActivityTask == null) {
+                            wxActivityTask = new WxActivityTask();
+                            wxActivityTask.setCompleteNum(0);
+                            wxActivityTask.setTaskStatus(ConfigConstant.TASK_DOING);
+                            wxActivityTask.setWxUserId(inviterId);
+                            wxActivityTask.setTemplateId(templateId);
+                            wxActivityTask.setAppId(appId);
+                            wxActivityTaskService.save(wxActivityTask);
+                        }
+                        if (wxActivityTask.getCompleteNum() < needNum ){
+                            //查找助力记录,一个人只能助力一次
+                            List<WxTaskHelpRecord> records = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery()
+                                    .eq(WxTaskHelpRecord::getHelpWxUserId, wxUserId));
+                            if (records.isEmpty()) {
+                                // 未助力过，可以执行助力流程
+                                executeHelpSuccess(messages, wxUser, inviter, wxActivityTask,needNum);
+                                // 为邀请人推送助力成功
+                                executeBeHelped(messages,wxUser,inviter, wxActivityTask,needNum);
+                            } else {
+                                // 已经助力过了
+                                executeHasHelp(messages,wxUser,inviter);
+                            }
+                        } else {
+                            // 邀请者已完成任务
+                            executeHasComplete(messages,wxUser);
+                        }
                     }
-                } else {
-                    // 邀请者已完成任务
-                    executeHasComplete(messages,wxUser);
+                }catch (Exception e){
+                    log.error("助力异常 当前用户openId:{} lockKey:{}", openId, lockKey);
+                }finally {
+                    ObjectLockUtil.unlock(lockKey);
                 }
             }
         }
