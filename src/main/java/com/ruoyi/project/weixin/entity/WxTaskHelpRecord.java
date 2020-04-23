@@ -29,8 +29,15 @@ public class WxTaskHelpRecord extends BaseEntity {
      * 助力人微信userId
      */
     private String helpWxUserId;
+    /**
+     * 对应的wx_activity_task主键
+     */
+    private String wxUserTaskId;
 
-    private String appId;
+    /**
+     * wxUserTaskId对应的对象中已经包含了APPID
+     */
+//    private String appId;
 
 
 }

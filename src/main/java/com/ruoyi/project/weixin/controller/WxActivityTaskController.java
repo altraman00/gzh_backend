@@ -93,7 +93,7 @@ public class WxActivityTaskController extends BaseController {
             helpInfoDTO.setNeedNum(template.getNeedNum());
 
             // 被助力记录
-            List<WxTaskHelpRecord> list = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery().eq(WxTaskHelpRecord::getInviteWxUserId, wxUserId));
+            List<WxTaskHelpRecord> list = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery().eq(WxTaskHelpRecord::getWxUserTaskId, wxActivityTask.getId()));
             List<WxUser> helpers = new ArrayList<>();
             for (WxTaskHelpRecord wxTaskHelpRecord : list) {
                 WxUser wxUser = wxUserService.getById(wxTaskHelpRecord.getHelpWxUserId());

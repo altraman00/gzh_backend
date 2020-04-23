@@ -313,6 +313,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         WxTaskHelpRecord wxTaskHelpRecord = new WxTaskHelpRecord();
         wxTaskHelpRecord.setHelpWxUserId(wxUserId);
         wxTaskHelpRecord.setInviteWxUserId(inviterId);
+        wxTaskHelpRecord.setWxUserTaskId(wxActivityTask.getId());
         wxTaskHelpRecordService.save(wxTaskHelpRecord);
         // 推送助力成功消息
         WxMpTemplateMessage message = list.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_HELP_SUCCESS)).findFirst().orElse(null);

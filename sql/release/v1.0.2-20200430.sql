@@ -19,11 +19,6 @@ ADD COLUMN `app_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci
 DROP PRIMARY KEY,
 ADD PRIMARY KEY (`id`) USING BTREE;
 
-ALTER TABLE `wx_task_help_record`
-ADD COLUMN `app_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '助力记录所属公号APPID' AFTER `id`,
-DROP PRIMARY KEY,
-ADD PRIMARY KEY (`id`) USING BTREE;
-
 ALTER TABLE `wx_auto_reply`
 ADD COLUMN `app_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '自动回复所在公号APPID' AFTER `id`,
 DROP PRIMARY KEY,
@@ -33,6 +28,12 @@ ALTER TABLE `sys_role`
 ADD COLUMN `mp_scope` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '可见的公众号ID组成的数组字符串; eg:[1,2,3,5,8]' AFTER `data_scope`,
 DROP PRIMARY KEY,
 ADD PRIMARY KEY (`role_id`) USING BTREE;
+
+ALTER TABLE `wx_task_help_record`
+ADD COLUMN `wx_user_task_id` int(32) NULL COMMENT '对应的wx_activity_task主键' AFTER `help_wx_user_id`;
+
+-- 初始化wx_user_task_id
+UPDATE wx_task_help_record a, wx_activity_task b SET a.wx_user_task_id = b.id WHERE a.invite_wx_user_id = b.wx_user_id AND b.app_id = 'wx66fcb1f854cdab95'AND b.template_id = 1;
 
 -- 为超级管理员admin初始化所有的公众号可见(每次新增公众号之后 该值都要更新)
 -- 以上所有需要补充APPID字段的数据 默认都设置为现在生产正在使用的公众号(尚德在线学堂 APPID:wx66fcb1f854cdab95)
