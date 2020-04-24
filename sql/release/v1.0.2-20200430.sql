@@ -38,7 +38,7 @@ UPDATE wx_task_help_record a, wx_activity_task b SET a.wx_user_task_id = b.id WH
 ALTER TABLE `wx_mp`
 ADD COLUMN `secret` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '公众号secret' AFTER `app_id`,
 ADD COLUMN `token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '公众号token' AFTER `secret`,
-ADD COLUMN `aesKey` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '公众号aesKey' AFTER `token`,
+ADD COLUMN `aes_key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '公众号aesKey' AFTER `token`,
 DROP PRIMARY KEY,
 ADD PRIMARY KEY (`id`) USING BTREE;
 -- wx_mp新增字段需要根据实际情况初始化
