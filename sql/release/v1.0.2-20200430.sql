@@ -30,7 +30,7 @@ DROP PRIMARY KEY,
 ADD PRIMARY KEY (`role_id`) USING BTREE;
 
 ALTER TABLE `wx_task_help_record`
-ADD COLUMN `wx_user_task_id` int(32) NULL COMMENT '对应的wx_activity_task主键' AFTER `help_wx_user_id`;
+ADD COLUMN `wx_user_task_id` varchar(32) DEFAULT NULL COMMENT '对应的wx_activity_task主键' AFTER `help_wx_user_id`;
 
 -- 初始化wx_user_task_id
 UPDATE wx_task_help_record a, wx_activity_task b SET a.wx_user_task_id = b.id WHERE a.invite_wx_user_id = b.wx_user_id AND b.app_id = 'wx66fcb1f854cdab95'AND b.template_id = 1;
