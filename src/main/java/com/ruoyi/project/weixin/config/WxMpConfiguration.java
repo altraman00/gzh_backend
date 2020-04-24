@@ -57,7 +57,7 @@ public class WxMpConfiguration {
         QueryWrapper<WxMp> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(WxMp::getDelFlag, "0");
         List<WxMp> list = iWxMpService.list(queryWrapper);
-        log.debug("从数据库获取所有有效的公众号 list:{}", list);
+        log.debug("从数据库获取所有有效的公众号 size:{} list:{}", list.size(), list);
         for (WxMp wxMp : list) {
             WxMpProperties.MpConfig mpConfig = new WxMpProperties.MpConfig();
             mpConfig.setAppId(wxMp.getAppId());
