@@ -25,7 +25,7 @@ DROP PRIMARY KEY,
 ADD PRIMARY KEY (`id`) USING BTREE;
 
 ALTER TABLE `sys_role`
-ADD COLUMN `mp_scope` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '可见的公众号ID组成的数组字符串; eg:[1,2,3,5,8]' AFTER `data_scope`,
+ADD COLUMN `mp_scope` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '[]' COMMENT '可见的公众号ID组成的数组字符串; eg:[1,2,3,5,8]' AFTER `data_scope`,
 DROP PRIMARY KEY,
 ADD PRIMARY KEY (`role_id`) USING BTREE;
 
@@ -42,7 +42,17 @@ ADD COLUMN `aes_key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_
 DROP PRIMARY KEY,
 ADD PRIMARY KEY (`id`) USING BTREE;
 -- wx_mp新增字段需要根据实际情况初始化
-
--- 为超级管理员admin初始化所有的公众号可见(每次新增公众号之后 该值都要更新)
+UPDATE wx_mp SET secret = '9239cce70b0e7028a2d29ae3e8247e74', token = 'smallprogram', aes_key = 'FR14R0SGgKUygrZ9pIrsarQoWuup8ujgzzrTt1Cqqwf' WHERE app_id = 'wx66fcb1f854cdab95';
+-- 设置角色可见公众号为空数组(超级管理员默认全部可见,不用特殊设置, 其他角色需要去后台手动配置公众号可见权限)
+UPDATE sys_role SET mp_scope = '[]';
 -- 以上所有需要补充APPID字段的数据 默认都设置为现在生产正在使用的公众号(尚德在线学堂 APPID:wx66fcb1f854cdab95)
+UPDATE wx_user SET app_id = 'wx66fcb1f854cdab95';
+UPDATE wx_menu SET app_id = 'wx66fcb1f854cdab95';
+UPDATE wx_msg SET app_id = 'wx66fcb1f854cdab95';
+UPDATE wx_auto_reply SET app_id = 'wx66fcb1f854cdab95';
+UPDATE wx_activity_template SET support_scene = '2';
+UPDATE wx_mp SET type = '2';
 -- wx_activity_template_message中rep_content包含重定向到gzh-h5页面的URL 都要加上'state=', 然后现有公众号的模板消息中也要加上'state='
+UPDATE wx_activity_template_message SET rep_content = REPLACE(rep_content, '#wechat_redirect' ,'&state=#wechat_redirect');
+UPDATE wx_mp_template_message SET rep_content = REPLACE(rep_content, '#wechat_redirect' ,CONCAT('&state=',app_id,'#wechat_redirect'));
+-- 另外注意: 每个公众号的海报不能共用, 切换公众号之后需要在公众号配置中重新上传海报, 验证预览海报正常即可
