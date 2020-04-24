@@ -75,7 +75,8 @@
 	<!-- 系统模块日志级别控制  -->
 	<logger name="com.ruoyi" level="debug" />
 	<!-- Spring日志级别控制  -->
-	<logger name="org.springframework" level="warn" />
+<!--	<logger name="org.springframework" level="warn" />-->
+	<logger name="org" level="warn" />
 
 	<root level="debug">
 		<appender-ref ref="console" />
