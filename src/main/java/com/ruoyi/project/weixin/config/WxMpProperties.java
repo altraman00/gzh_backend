@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import java.util.List;
 
 /**
- * wechat mp properties
+ * wechat mp properties  已经将公众号信息全部放到数据库 方便维护 此类已失效
  *
  * @author Binary Wang(https://github.com/binarywang)
  */

@@ -35,6 +35,14 @@ ADD COLUMN `wx_user_task_id` int(32) NULL COMMENT '对应的wx_activity_task主�
 -- 初始化wx_user_task_id
 UPDATE wx_task_help_record a, wx_activity_task b SET a.wx_user_task_id = b.id WHERE a.invite_wx_user_id = b.wx_user_id AND b.app_id = 'wx66fcb1f854cdab95'AND b.template_id = 1;
 
+ALTER TABLE `wx_mp`
+ADD COLUMN `secret` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '公众号secret' AFTER `app_id`,
+ADD COLUMN `token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '公众号token' AFTER `secret`,
+ADD COLUMN `aesKey` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '公众号aesKey' AFTER `token`,
+DROP PRIMARY KEY,
+ADD PRIMARY KEY (`id`) USING BTREE;
+-- wx_mp新增字段需要根据实际情况初始化
+
 -- 为超级管理员admin初始化所有的公众号可见(每次新增公众号之后 该值都要更新)
 -- 以上所有需要补充APPID字段的数据 默认都设置为现在生产正在使用的公众号(尚德在线学堂 APPID:wx66fcb1f854cdab95)
 -- wx_activity_template_message中rep_content包含重定向到gzh-h5页面的URL 都要加上'state=', 然后现有公众号的模板消息中也要加上'state='
