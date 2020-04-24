@@ -114,7 +114,7 @@ public class HelpActivityServiceImpl implements ActivityService {
                         }
                     }
                 }catch (Exception e){
-                    log.error("助力异常 当前用户openId:{} lockKey:{}", openId, lockKey);
+                    log.error("助力异常 当前用户openId:{} lockKey:{}", openId, lockKey, e);
                 }finally {
                     ObjectLockUtil.unlock(lockKey);
                 }
