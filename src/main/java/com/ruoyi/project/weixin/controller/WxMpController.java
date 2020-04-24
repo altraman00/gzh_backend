@@ -92,7 +92,7 @@ public class WxMpController extends BaseController {
 	 *
 	 * @return R
 	 */
-	@GetMapping("/load")
+	@GetMapping("/reload")
 	public AjaxResult loadWxMp() {
 		try {
 			logger.debug("重新加载所有公众号信息到WxMpService对象中");
@@ -113,8 +113,7 @@ public class WxMpController extends BaseController {
 				throw new RuntimeException("大哥，拜托先看下项目首页的说明（readme文件），添加下相关配置，注意别配错了！");
 			}
 
-			WxMpService service = new WxMpServiceImpl();
-			service.setMultiConfigStorages(configs
+			wxMpService.setMultiConfigStorages(configs
 					.stream().map(a -> {
 						WxMpDefaultConfigImpl configStorage = new WxMpDefaultConfigImpl();
 						configStorage.setAppId(a.getAppId());
