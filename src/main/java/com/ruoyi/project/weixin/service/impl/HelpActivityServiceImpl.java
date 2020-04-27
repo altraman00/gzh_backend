@@ -229,6 +229,21 @@ public class HelpActivityServiceImpl implements ActivityService {
         }
     }
 
+//    public static void main(String[] args) throws IOException {
+////        File poster = File.createTempFile("/Users/admin/Desktop/temp_haibao",".jpg");
+//        File poster = new File("/Users/admin/Desktop/temp_haibao.jpg");
+//        InputStream inputStream = new FileInputStream("/Users/admin/Desktop/temp/haibao.jpeg");
+//        Thumbnails.Builder<? extends InputStream> builder = Thumbnails.of(inputStream).size(540,960);
+//        // 拼接二维码
+//        String[] qrcodeCoordinate = {"60","800"};
+//        BufferedImage qrCodeBuffer = Thumbnails.of(ImageIO.read(new URL("https://qdyyzx-prod-1251987637.cos.ap-guangzhou.myqcloud.com/gzh/img/QrCode.jpg"))).size(128, 128).asBufferedImage();
+//        builder.watermark(new Coordinate(Integer.parseInt(qrcodeCoordinate[0]),Integer.parseInt(qrcodeCoordinate[1])), qrCodeBuffer,1.0f);
+//        builder.toFile(poster);
+//        if (poster.length() > HelpActivityConstant.POSTER_SIZE ) {
+//            Thumbnails.of(poster).scale(1.0).outputQuality((float)HelpActivityConstant.POSTER_SIZE / poster.length()).outputFormat("jpg").toFile(poster);
+//        }
+//    }
+
     private void sendImageMessage(WxMediaUploadResult result, WxUser wxUser) {
         try {
             WxMpKefuMessage wxMpKefuMessage = WxMpKefuMessage
