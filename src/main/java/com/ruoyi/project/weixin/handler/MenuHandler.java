@@ -5,16 +5,13 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.project.weixin.config.CommonConstants;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
-import com.ruoyi.project.weixin.constant.WebSocketConstant;
+import com.ruoyi.project.weixin.dto.WxMpXmlMessageDTO;
 import com.ruoyi.project.weixin.entity.WxMenu;
 import com.ruoyi.project.weixin.entity.WxMsg;
 import com.ruoyi.project.weixin.entity.WxUser;
 import com.ruoyi.project.weixin.mapper.WxMenuMapper;
 import com.ruoyi.project.weixin.mapper.WxMsgMapper;
 import com.ruoyi.project.weixin.mapper.WxUserMapper;
-import com.ruoyi.project.weixin.service.WxMenuService;
-import com.ruoyi.project.weixin.service.WxMsgService;
-import com.ruoyi.project.weixin.service.WxUserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.api.WxConsts;
@@ -33,8 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static me.chanjar.weixin.common.api.WxConsts.EventType;
-
 /**
  * @author JL
  */
@@ -51,6 +46,8 @@ public class MenuHandler extends AbstractHandler {
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage,
                                     Map<String, Object> context, WxMpService weixinService,
                                     WxSessionManager sessionManager) throws WxErrorException {
+        logger.debug("菜单事件 wxMessage:{}", wxMessage);
+        WxMpXmlMessageDTO wxMpXmlMessageDTO = (WxMpXmlMessageDTO) wxMessage;
         //消息记录
         WxMenu wxMenu = null;
         if(WxConsts.EventType.CLICK.equals(wxMessage.getEvent())
@@ -63,17 +60,18 @@ public class MenuHandler extends AbstractHandler {
             wxMenu = new WxMenu();
         }
         WxUser wxUser = wxUserMapper.selectOne(Wrappers.<WxUser>lambdaQuery()
-                .eq(WxUser::getOpenId,wxMessage.getFromUser()));
+                .eq(WxUser::getOpenId,wxMessage.getFromUser()).eq(WxUser::getAppId,wxMpXmlMessageDTO.getAppId()));
         if(wxUser==null){//库中无此用户
             WxMpUser userWxInfo = weixinService.getUserService()
                     .userInfo(wxMessage.getFromUser(), null);
             wxUser = new WxUser();
+            wxUser.setAppId(wxMpXmlMessageDTO.getAppId());
             wxUser.setSubscribeNum(1);
             SubscribeHandler.setWxUserValue(wxUser,userWxInfo);
             wxUserMapper.insert(wxUser);
         }
         //组装菜单回复消息
-        return getWxMpXmlOutMessage(wxMessage, wxMenu, wxUser);
+        return getWxMpXmlOutMessage(wxMpXmlMessageDTO, wxMenu, wxUser);
     }
 
     /**
@@ -82,10 +80,11 @@ public class MenuHandler extends AbstractHandler {
      * @param wxMenu
      * @return
      */
-    public WxMpXmlOutMessage getWxMpXmlOutMessage(WxMpXmlMessage wxMessage, WxMenu wxMenu, WxUser wxUser){
+    public WxMpXmlOutMessage getWxMpXmlOutMessage(WxMpXmlMessageDTO wxMessage, WxMenu wxMenu, WxUser wxUser){
         WxMpXmlOutMessage wxMpXmlOutMessage = null;
         //记录接收消息
         WxMsg wxMsg = new WxMsg();
+        wxMsg.setAppId(wxMessage.getAppId());
 //		wxMsg.setTenantId(wxApp.getTenantId());
         wxMsg.setWxUserId(wxUser.getId());
         wxMsg.setNickName(wxUser.getNickName());
@@ -108,6 +107,7 @@ public class MenuHandler extends AbstractHandler {
                 || WxConsts.MenuButtonType.SCANCODE_WAITMSG.equals(wxMenu.getType())){
             //记录回复消息
             wxMsg = new WxMsg();
+            wxMsg.setAppId(wxMessage.getAppId());
             wxMsg.setWxUserId(wxUser.getId());
             wxMsg.setNickName(wxUser.getNickName());
             wxMsg.setHeadimgUrl(wxUser.getHeadimgUrl());

@@ -81,6 +81,7 @@ private static final long serialVersionUID = 1L;
    * 用户标识
    */
     private String openId;
+    private String appId;
     /**
    * 昵称
    */

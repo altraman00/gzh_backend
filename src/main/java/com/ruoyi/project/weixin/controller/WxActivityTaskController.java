@@ -70,7 +70,7 @@ public class WxActivityTaskController extends BaseController {
     public AjaxResult getTaskInfo(@RequestParam(value = "openId") String openId,@RequestParam(value = "appId") String appId){
         WxMp wxMp = iWxMpService.getByAppId(appId);
         if(wxMp != null){
-            WxUser wxuser = wxUserService.getByOpenId(openId);
+            WxUser wxuser = wxUserService.getByOpenIdAndAppId(openId, appId);
             String templateId = wxMp.getTemplateId();
             String wxUserId = wxuser.getId();
             WxActivityTask wxActivityTask = wxActivityTaskService.getOne(Wrappers.<WxActivityTask>lambdaQuery()
@@ -93,7 +93,7 @@ public class WxActivityTaskController extends BaseController {
             helpInfoDTO.setNeedNum(template.getNeedNum());
 
             // 被助力记录
-            List<WxTaskHelpRecord> list = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery().eq(WxTaskHelpRecord::getInviteWxUserId, wxUserId));
+            List<WxTaskHelpRecord> list = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery().eq(WxTaskHelpRecord::getWxUserTaskId, wxActivityTask.getId()));
             List<WxUser> helpers = new ArrayList<>();
             for (WxTaskHelpRecord wxTaskHelpRecord : list) {
                 WxUser wxUser = wxUserService.getById(wxTaskHelpRecord.getHelpWxUserId());
@@ -152,7 +152,7 @@ public class WxActivityTaskController extends BaseController {
             Map<String,Object> result = new HashMap<>(4);
             StopWatch stopWatch = new StopWatch();
             stopWatch.start("create poster");
-            File poster = helpActivityService.getPosterFile(openId, message);
+            File poster = helpActivityService.getPosterFile(openId, message, appId);
             stopWatch.stop();
             try {
                 stopWatch.start("encode base64");

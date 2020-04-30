@@ -9,6 +9,7 @@ import com.ruoyi.project.weixin.entity.*;
 import com.ruoyi.project.weixin.mapper.WxUserMapper;
 import com.ruoyi.project.weixin.service.*;
 import com.ruoyi.project.weixin.utils.ImgUtils;
+import com.ruoyi.project.weixin.utils.ObjectLockUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.result.WxMediaUploadResult;
@@ -64,46 +65,58 @@ public class HelpActivityServiceImpl implements ActivityService {
         QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,templateId);
         List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
-        WxUser wxUser = wxUserService.getByOpenId(openId);
+//        WxUser wxUser = wxUserService.getByOpenIdAndAppId(openId);
+        WxUser wxUser = wxUserMapper.selectOne(Wrappers.<WxUser>lambdaQuery()
+                .eq(WxUser::getOpenId,openId).eq(WxUser::getAppId,appId));
         String wxUserId = wxUser.getId();
         Integer needNum = template.getNeedNum();
         log.info("event key:[{}],openId:[{}],appId[{}]",eventKey,openId,appId);
         // 首先判断是不是扫活动码进入的
         if (StringUtils.isNotBlank(eventKey) && eventKey.contains(HelpActivityConstant.SCENE_EVENT_KEY)) {
             String inviterOpenId = eventKey.substring(eventKey.lastIndexOf(":") + 1);
-            WxUser inviter = wxUserService.getByOpenId(inviterOpenId);
+            WxUser inviter = wxUserService.getByOpenIdAndAppId(inviterOpenId,appId);
             String inviterId = inviter.getId();
             // 不是自己扫自己的码进入的
             if (!inviterId.equals(wxUserId)) {
-                WxActivityTask wxActivityTask = wxActivityTaskService.getOne(Wrappers.<WxActivityTask>lambdaQuery()
-                        .eq(WxActivityTask::getWxUserId, inviterId)
-                        .eq(WxActivityTask::getTemplateId,templateId)
-                        .eq(WxActivityTask::getAppId,appId));
-                if (wxActivityTask == null) {
-                    wxActivityTask = new WxActivityTask();
-                    wxActivityTask.setCompleteNum(0);
-                    wxActivityTask.setTaskStatus(ConfigConstant.TASK_DOING);
-                    wxActivityTask.setWxUserId(inviterId);
-                    wxActivityTask.setTemplateId(templateId);
-                    wxActivityTask.setAppId(appId);
-                    wxActivityTaskService.save(wxActivityTask);
-                }
-                if (wxActivityTask.getCompleteNum() < needNum ){
-                    //查找助力记录,一个人只能助力一次
-                    List<WxTaskHelpRecord> records = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery()
-                            .eq(WxTaskHelpRecord::getHelpWxUserId, wxUserId));
-                    if (records.isEmpty()) {
-                        // 未助力过，可以执行助力流程
-                        executeHelpSuccess(messages, wxUser, inviter, wxActivityTask,needNum);
-                        // 为邀请人推送助力成功
-                        executeBeHelped(messages,wxUser,inviter, wxActivityTask,needNum);
-                    } else {
-                        // 已经助力过了
-                        executeHasHelp(messages,wxUser,inviter);
+                //根据三个参数组合 得到锁对象 (不支持多节点分布式服务)
+                String lockKey = inviterId + "-" + templateId + "-" + appId;
+                try {
+                    synchronized (ObjectLockUtil.lock(lockKey)){
+                        WxActivityTask wxActivityTask = wxActivityTaskService.getOne(Wrappers.<WxActivityTask>lambdaQuery()
+                                .eq(WxActivityTask::getWxUserId, inviterId)
+                                .eq(WxActivityTask::getTemplateId,templateId)
+                                .eq(WxActivityTask::getAppId,appId));
+                        if (wxActivityTask == null) {
+                            wxActivityTask = new WxActivityTask();
+                            wxActivityTask.setCompleteNum(0);
+                            wxActivityTask.setTaskStatus(ConfigConstant.TASK_DOING);
+                            wxActivityTask.setWxUserId(inviterId);
+                            wxActivityTask.setTemplateId(templateId);
+                            wxActivityTask.setAppId(appId);
+                            wxActivityTaskService.save(wxActivityTask);
+                        }
+                        if (wxActivityTask.getCompleteNum() < needNum ){
+                            //查找助力记录,一个人只能助力一次
+                            List<WxTaskHelpRecord> records = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery()
+                                    .eq(WxTaskHelpRecord::getHelpWxUserId, wxUserId));
+                            if (records.isEmpty()) {
+                                // 未助力过，可以执行助力流程
+                                executeHelpSuccess(messages, wxUser, inviter, wxActivityTask,needNum);
+                                // 为邀请人推送助力成功
+                                executeBeHelped(messages,wxUser,inviter, wxActivityTask,needNum);
+                            } else {
+                                // 已经助力过了
+                                executeHasHelp(messages,wxUser,inviter);
+                            }
+                        } else {
+                            // 邀请者已完成任务
+                            executeHasComplete(messages,wxUser);
+                        }
                     }
-                } else {
-                    // 邀请者已完成任务
-                    executeHasComplete(messages,wxUser);
+                }catch (Exception e){
+                    log.error("助力异常 当前用户openId:{} lockKey:{}", openId, lockKey, e);
+                }finally {
+                    ObjectLockUtil.unlock(lockKey);
                 }
             }
         }
@@ -129,10 +142,10 @@ public class HelpActivityServiceImpl implements ActivityService {
         WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent()) && StringUtils.isNotBlank(message.getRepMediaId());
         if (hasAvailableMessage) {
-            File poster = getPosterFile(openId, message);
+            File poster = getPosterFile(openId, message, wxUser.getAppId());
             try {
                 // 将海报上传到临时素材库
-                WxMediaUploadResult uploadResult = wxMpService.getMaterialService().mediaUpload(ConfigConstant.MESSAGE_REP_TYPE_IMAGE, poster);
+                WxMediaUploadResult uploadResult = wxMpService.switchoverTo(wxUser.getAppId()).getMaterialService().mediaUpload(ConfigConstant.MESSAGE_REP_TYPE_IMAGE, poster);
                 log.info("上传海报到临时素材库，上传结果:{}",uploadResult);
                 sendImageMessage(uploadResult,wxUser);
             } catch (WxErrorException e) {
@@ -145,7 +158,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         }
     }
 
-    public File getPosterFile(String openId, WxMpTemplateMessage message) {
+    public File getPosterFile(String openId, WxMpTemplateMessage message, String appId) {
         StopWatch stopWatch = new StopWatch();
         String messageId = message.getId();
         // 先获取海报图片
@@ -153,7 +166,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         InputStream inputStream = null;
         stopWatch.start("get poster img");
         try {
-            inputStream = wxMpService.getMaterialService().materialImageOrVoiceDownload(repMediaId);
+            inputStream = wxMpService.switchoverTo(appId).getMaterialService().materialImageOrVoiceDownload(repMediaId);
         } catch (WxErrorException e) {
             log.error("从素材库获取海报图片异常，消息模板id:{},openId:{}",messageId,openId,e);
         }
@@ -162,8 +175,8 @@ public class HelpActivityServiceImpl implements ActivityService {
         stopWatch.start("get qrcode img");
         File qrCode = null;
         try {
-            WxMpQrCodeTicket ticket = wxMpService.getQrcodeService().qrCodeCreateLastTicket("helpActivity:"+ openId);
-            qrCode = wxMpService.getQrcodeService().qrCodePicture(ticket);
+            WxMpQrCodeTicket ticket = wxMpService.switchoverTo(appId).getQrcodeService().qrCodeCreateLastTicket("helpActivity:"+ openId);
+            qrCode = wxMpService.switchoverTo(appId).getQrcodeService().qrCodePicture(ticket);
         } catch (Exception e) {
             log.error("生成助力活动带参二维码异常，消息模板id:{},openId:{}",messageId,openId,e);
         }
@@ -174,7 +187,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         try {
             //语言
             String lang = "zh_CN";
-            WxMpUser user = wxMpService.getUserService().userInfo(openId,lang);
+            WxMpUser user = wxMpService.switchoverTo(appId).getUserService().userInfo(openId,lang);
             headImgUrl = user.getHeadImgUrl();
         } catch (WxErrorException e) {
             log.error("获取用户头像信息异常，消息模板id:{},openId:{}",messageId,openId,e);
@@ -216,6 +229,21 @@ public class HelpActivityServiceImpl implements ActivityService {
         }
     }
 
+//    public static void main(String[] args) throws IOException {
+////        File poster = File.createTempFile("/Users/admin/Desktop/temp_haibao",".jpg");
+//        File poster = new File("/Users/admin/Desktop/temp_haibao.jpg");
+//        InputStream inputStream = new FileInputStream("/Users/admin/Desktop/temp/haibao.jpeg");
+//        Thumbnails.Builder<? extends InputStream> builder = Thumbnails.of(inputStream).size(540,960);
+//        // 拼接二维码
+//        String[] qrcodeCoordinate = {"60","800"};
+//        BufferedImage qrCodeBuffer = Thumbnails.of(ImageIO.read(new URL("https://qdyyzx-prod-1251987637.cos.ap-guangzhou.myqcloud.com/gzh/img/QrCode.jpg"))).size(128, 128).asBufferedImage();
+//        builder.watermark(new Coordinate(Integer.parseInt(qrcodeCoordinate[0]),Integer.parseInt(qrcodeCoordinate[1])), qrCodeBuffer,1.0f);
+//        builder.toFile(poster);
+//        if (poster.length() > HelpActivityConstant.POSTER_SIZE ) {
+//            Thumbnails.of(poster).scale(1.0).outputQuality((float)HelpActivityConstant.POSTER_SIZE / poster.length()).outputFormat("jpg").toFile(poster);
+//        }
+//    }
+
     private void sendImageMessage(WxMediaUploadResult result, WxUser wxUser) {
         try {
             WxMpKefuMessage wxMpKefuMessage = WxMpKefuMessage
@@ -223,12 +251,13 @@ public class HelpActivityServiceImpl implements ActivityService {
                     .toUser(wxUser.getOpenId())
                     .mediaId(result.getMediaId())
                     .build();
-            wxMpService.getKefuService().sendKefuMessage(wxMpKefuMessage);
+            wxMpService.switchoverTo(wxUser.getAppId()).getKefuService().sendKefuMessage(wxMpKefuMessage);
         } catch (Exception e) {
             log.error("发送客服消息失败，openId：{}",wxUser.getOpenId());
         }
         // 记录数据库
         WxMsg wxMsg = new WxMsg();
+        wxMsg.setAppId(wxUser.getAppId());
         wxMsg.setNickName(wxUser.getNickName());
         wxMsg.setHeadimgUrl(wxUser.getHeadimgUrl());
         wxMsg.setType(ConfigConstant.WX_MSG_TYPE_2);
@@ -310,6 +339,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         WxTaskHelpRecord wxTaskHelpRecord = new WxTaskHelpRecord();
         wxTaskHelpRecord.setHelpWxUserId(wxUserId);
         wxTaskHelpRecord.setInviteWxUserId(inviterId);
+        wxTaskHelpRecord.setWxUserTaskId(wxActivityTask.getId());
         wxTaskHelpRecordService.save(wxTaskHelpRecord);
         // 推送助力成功消息
         WxMpTemplateMessage message = list.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_HELP_SUCCESS)).findFirst().orElse(null);
@@ -328,12 +358,14 @@ public class HelpActivityServiceImpl implements ActivityService {
                     .toUser(wxUser.getOpenId())
                     .content(content)
                     .build();
-            wxMpService.getKefuService().sendKefuMessage(wxMpKefuMessage);
+//            wxMpService.getKefuService().sendKefuMessage(wxMpKefuMessage);
+            wxMpService.switchoverTo(wxUser.getAppId()).getKefuService().sendKefuMessage(wxMpKefuMessage);
         } catch (Exception e) {
-            log.error("发送客服消息失败，openId：{}",wxUser.getOpenId());
+            log.error("发送客服消息失败，appId:{} openId：{}", wxUser.getAppId(), wxUser.getOpenId());
         }
         // 记录数据库
         WxMsg wxMsg = new WxMsg();
+        wxMsg.setAppId(wxUser.getAppId());
         wxMsg.setNickName(wxUser.getNickName());
         wxMsg.setHeadimgUrl(wxUser.getHeadimgUrl());
         wxMsg.setType(ConfigConstant.WX_MSG_TYPE_2);

@@ -8,6 +8,7 @@ import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.weixin.entity.ImageManager;
 import com.ruoyi.project.weixin.utils.FileUtils;
+import com.ruoyi.project.weixin.utils.ThreadLocalUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.api.WxConsts;
@@ -19,6 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -58,6 +60,11 @@ public class WxMaterialController extends BaseController {
 										 @RequestParam("introduction") String introduction,
 										 @RequestParam("mediaType") String mediaType) {
 		try {
+			String appId = ThreadLocalUtil.getAppId();
+			logger.debug("materialFileUpload 当前操作的APPID:{}", appId);
+			if(StringUtils.isEmpty(appId)){
+				AjaxResult.success();
+			}
 			WxMpMaterial material = new WxMpMaterial();
 			material.setName(mulFile.getOriginalFilename());
 			if(WxConsts.MediaFileType.VIDEO.equals(mediaType)){
@@ -66,7 +73,7 @@ public class WxMaterialController extends BaseController {
 			}
 			File file = FileUtils.multipartFileToFile(mulFile);
 			material.setFile(file);
-			WxMpMaterialService wxMpMaterialService = wxService.getMaterialService();
+			WxMpMaterialService wxMpMaterialService = wxService.switchoverTo(appId).getMaterialService();
 			WxMpMaterialUploadResult wxMpMaterialUploadResult = wxMpMaterialService.materialFileUpload(mediaType,material);
 			WxMpMaterialFileBatchGetResult.WxMaterialFileBatchGetNewsItem wxMpMaterialFileBatchGetResult = new WxMpMaterialFileBatchGetResult.WxMaterialFileBatchGetNewsItem();
 			wxMpMaterialFileBatchGetResult.setName(file.getName());
@@ -93,11 +100,16 @@ public class WxMaterialController extends BaseController {
 	@PreAuthorize("@ss.hasPermi('wxmp:wxmaterial:add')")
 	public AjaxResult materialNewsUpload(@RequestBody JSONObject data) {
 		try {
+			String appId = ThreadLocalUtil.getAppId();
+			logger.debug("materialNewsUpload 当前操作的APPID:{}", appId);
+			if(StringUtils.isEmpty(appId)){
+				AjaxResult.success();
+			}
 			JSONArray jSONArray = data.getJSONArray("articles");
 			List<WxMpMaterialNews.WxMpMaterialNewsArticle> articles = jSONArray.toList(WxMpMaterialNews.WxMpMaterialNewsArticle.class);
 			WxMpMaterialNews news = new WxMpMaterialNews();
 			news.setArticles(articles);
-			WxMpMaterialService wxMpMaterialService = wxService.getMaterialService();
+			WxMpMaterialService wxMpMaterialService = wxService.switchoverTo(appId).getMaterialService();
 			WxMpMaterialUploadResult wxMpMaterialUploadResult = wxMpMaterialService.materialNewsUpload(news);
 			return AjaxResult.success(wxMpMaterialUploadResult);
 		} catch (WxErrorException e) {
@@ -120,10 +132,15 @@ public class WxMaterialController extends BaseController {
 	@PreAuthorize("@ss.hasPermi('wxmp:wxmaterial:edit')")
 	public AjaxResult materialNewsUpdate(@RequestBody JSONObject data) {
 		try {
+			String appId = ThreadLocalUtil.getAppId();
+			logger.debug("materialNewsUpdate 当前操作的APPID:{}", appId);
+			if(StringUtils.isEmpty(appId)){
+				AjaxResult.success();
+			}
 			String mediaId = data.getStr("mediaId");
 			JSONArray jSONArray = data.getJSONArray("articles");
 			List<WxMpMaterialNews.WxMpMaterialNewsArticle> articles = jSONArray.toList(WxMpMaterialNews.WxMpMaterialNewsArticle.class);
-			WxMpMaterialService wxMpMaterialService = wxService.getMaterialService();
+			WxMpMaterialService wxMpMaterialService = wxService.switchoverTo(appId).getMaterialService();
 			WxMpMaterialArticleUpdate wxMpMaterialArticleUpdate = new WxMpMaterialArticleUpdate();
 			wxMpMaterialArticleUpdate.setMediaId(mediaId);
 			int index = 0;
@@ -153,8 +170,13 @@ public class WxMaterialController extends BaseController {
 	@PostMapping("/newsImgUpload")
 	//	@PreAuthorize("@ss.hasPermi('wxmp:wxmaterial:add')")
 	public String newsImgUpload(@RequestParam("file") MultipartFile mulFile) throws Exception {
+		String appId = ThreadLocalUtil.getAppId();
+		logger.debug("newsImgUpload 当前操作的APPID:{}", appId);
+		if(StringUtils.isEmpty(appId)){
+			AjaxResult.success();
+		}
 		File file = FileUtils.multipartFileToFile(mulFile);
-		WxMpMaterialService wxMpMaterialService = wxService.getMaterialService();
+		WxMpMaterialService wxMpMaterialService = wxService.switchoverTo(appId).getMaterialService();
 		WxMediaImgUploadResult wxMediaImgUploadResult = wxMpMaterialService.mediaImgUpload(file);
 		Map<Object, Object> responseData = new HashMap<>();
 		responseData.put("link", wxMediaImgUploadResult.getUrl());
@@ -169,7 +191,12 @@ public class WxMaterialController extends BaseController {
 	@DeleteMapping
 	@PreAuthorize("@ss.hasPermi('wxmp:wxmaterial:del')")
 	public AjaxResult materialDel(String id){
-		WxMpMaterialService wxMpMaterialService = wxService.getMaterialService();
+		String appId = ThreadLocalUtil.getAppId();
+		logger.debug("materialDel 当前操作的APPID:{}", appId);
+		if(StringUtils.isEmpty(appId)){
+			AjaxResult.success();
+		}
+		WxMpMaterialService wxMpMaterialService = wxService.switchoverTo(appId).getMaterialService();
 		try {
 			return  AjaxResult.success(wxMpMaterialService.materialDelete(id));
 		} catch (WxErrorException e) {
@@ -189,14 +216,19 @@ public class WxMaterialController extends BaseController {
 	@PreAuthorize("@ss.hasPermi('wxmp:wxmaterial:index')")
 	public AjaxResult getWxMaterialPage(Page page, String type) {
 		try {
-		  WxMpMaterialService wxMpMaterialService = wxService.getMaterialService();
-		  int count = (int)page.getSize();
-		  int offset = (int)page.getCurrent()*count-count;
-		  if(WxConsts.MaterialType.NEWS.equals(type)){
-			  return  AjaxResult.success(wxMpMaterialService.materialNewsBatchGet(offset,count));
-		  }else{
-			  return  AjaxResult.success(wxMpMaterialService.materialFileBatchGet(type,offset,count));
-		  }
+			String appId = ThreadLocalUtil.getAppId();
+			logger.debug("getWxMaterialPage 当前操作的APPID:{}", appId);
+			if(StringUtils.isEmpty(appId)){
+				AjaxResult.success();
+			}
+		  	WxMpMaterialService wxMpMaterialService = wxService.switchoverTo(appId).getMaterialService();
+		  	int count = (int)page.getSize();
+		  	int offset = (int)page.getCurrent()*count-count;
+		  	if(WxConsts.MaterialType.NEWS.equals(type)){
+			  	return  AjaxResult.success(wxMpMaterialService.materialNewsBatchGet(offset,count));
+		  	}else{
+			   return  AjaxResult.success(wxMpMaterialService.materialFileBatchGet(type,offset,count));
+		    }
 		} catch (WxErrorException e) {
 			e.printStackTrace();
 			log.error("查询素材失败", e);
@@ -212,8 +244,13 @@ public class WxMaterialController extends BaseController {
 	@GetMapping("/page-manager")
 //	@PreAuthorize("@ss.hasPermi('wxmp:wxmaterial:index')")
 	public String getWxMaterialPageManager(Integer count, Integer offset, String type) throws WxErrorException {
+		String appId = ThreadLocalUtil.getAppId();
+		logger.debug("getWxMaterialPageManager 当前操作的APPID:{}", appId);
+		if(StringUtils.isEmpty(appId)){
+			AjaxResult.success();
+		}
 		List<ImageManager> listImageManager = new ArrayList<>();
-		WxMpMaterialService wxMpMaterialService = wxService.getMaterialService();
+		WxMpMaterialService wxMpMaterialService = wxService.switchoverTo(appId).getMaterialService();
 		List<WxMpMaterialFileBatchGetResult.WxMaterialFileBatchGetNewsItem> list = wxMpMaterialService.materialFileBatchGet(type,offset,count).getItems();
 		list.forEach(wxMaterialFileBatchGetNewsItem -> {
 			ImageManager imageManager = new ImageManager();
@@ -233,7 +270,12 @@ public class WxMaterialController extends BaseController {
 	@GetMapping("/materialVideo")
 	@PreAuthorize("@ss.hasPermi('wxmp:wxmaterial:get')")
 	public AjaxResult getMaterialVideo(String mediaId){
-	  WxMpMaterialService wxMpMaterialService = wxService.getMaterialService();
+		String appId = ThreadLocalUtil.getAppId();
+		logger.debug("getMaterialVideo 当前操作的APPID:{}", appId);
+		if(StringUtils.isEmpty(appId)){
+			AjaxResult.success();
+		}
+	  WxMpMaterialService wxMpMaterialService = wxService.switchoverTo(appId).getMaterialService();
 	  try {
 		  return  AjaxResult.success(wxMpMaterialService.materialVideoInfo(mediaId));
 	  } catch (WxErrorException e) {
@@ -252,7 +294,12 @@ public class WxMaterialController extends BaseController {
 	@PreAuthorize("@ss.hasPermi('wxmp:wxmaterial:get')")
 	public ResponseEntity<byte[]> getMaterialOther(String mediaId, String fileName) throws Exception {
 		try {
-			WxMpMaterialService wxMpMaterialService = wxService.getMaterialService();
+			String appId = ThreadLocalUtil.getAppId();
+			logger.debug("getMaterialOther 当前操作的APPID:{}", appId);
+			if(StringUtils.isEmpty(appId)){
+				AjaxResult.success();
+			}
+			WxMpMaterialService wxMpMaterialService = wxService.switchoverTo(appId).getMaterialService();
 			//获取文件
 			InputStream is = wxMpMaterialService.materialImageOrVoiceDownload(mediaId);
 			byte[] body = new byte[is.available()];
@@ -281,7 +328,12 @@ public class WxMaterialController extends BaseController {
 	@PreAuthorize("@ss.hasPermi('wxmp:wxmsg:index')")
 	public ResponseEntity<byte[]> getTempMaterialOther(String mediaId, String fileName) throws Exception {
 		try {
-			WxMpMaterialService wxMpMaterialService = wxService.getMaterialService();
+			String appId = ThreadLocalUtil.getAppId();
+			logger.debug("getTempMaterialOther 当前操作的APPID:{}", appId);
+			if(StringUtils.isEmpty(appId)){
+				AjaxResult.success();
+			}
+			WxMpMaterialService wxMpMaterialService = wxService.switchoverTo(appId).getMaterialService();
 			//获取文件
 			InputStream is = new FileInputStream(wxMpMaterialService.mediaDownload(mediaId));
 			byte[] body = new byte[is.available()];

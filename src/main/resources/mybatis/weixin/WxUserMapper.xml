@@ -22,6 +22,7 @@
 		<result property="subscribeNum" column="subscribe_num"/>
 		<result property="cancelSubscribeTime" column="cancel_subscribe_time"/>
 		<result property="openId" column="open_id"/>
+		<result property="appId" column="app_id"/>
 		<result property="nickName" column="nick_name"/>
 		<result property="sex" column="sex"/>
 		<result property="city" column="city"/>
@@ -43,7 +44,7 @@
 
 	<select id="getNotCompleteUser"  resultMap="wxUserMap">
 		SELECT
-		  *
+		  wu.*
 		FROM
 		wx_user wu
 		INNER JOIN wx_activity_task wct ON wu.id = wct.wx_user_id

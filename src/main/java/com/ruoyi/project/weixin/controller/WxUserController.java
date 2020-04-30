@@ -3,13 +3,14 @@ package com.ruoyi.project.weixin.controller;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
-import com.ruoyi.project.weixin.service.WxUserService;
 import com.ruoyi.project.weixin.entity.WxUser;
+import com.ruoyi.project.weixin.service.WxUserService;
+import com.ruoyi.project.weixin.utils.ThreadLocalUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
@@ -41,7 +42,12 @@ public class WxUserController extends BaseController {
     @GetMapping("/page")
     @PreAuthorize("@ss.hasPermi('wxmp:wxuser:index')")
     public AjaxResult getWxUserPage(Page page, WxUser wxUser, String tagId) {
-        Wrapper<WxUser> queryWrapper;
+        String appId = ThreadLocalUtil.getAppId();
+        logger.debug("getWxUserPage 当前操作的APPID:{}", appId);
+        if(StringUtils.isEmpty(appId)){
+            AjaxResult.success();
+        }
+        LambdaQueryWrapper<WxUser> queryWrapper;
         if (StringUtils.isNotBlank(tagId)) {
             queryWrapper = Wrappers.lambdaQuery(wxUser)
                     .and(wrapper -> wrapper
@@ -60,6 +66,7 @@ public class WxUserController extends BaseController {
         } else {
             queryWrapper = Wrappers.lambdaQuery(wxUser);
         }
+        queryWrapper.eq(WxUser::getAppId, appId);
         return AjaxResult.success(wxUserService.page(page, queryWrapper));
     }
 
@@ -85,6 +92,12 @@ public class WxUserController extends BaseController {
     @PostMapping
     @PreAuthorize("@ss.hasPermi('wxmp:wxuser:add')")
     public AjaxResult save(@RequestBody WxUser wxUser) {
+        String appId = ThreadLocalUtil.getAppId();
+        logger.debug("saveWxUser 当前操作的APPID:{}", appId);
+        if(StringUtils.isEmpty(appId)){
+            AjaxResult.success();
+        }
+        wxUser.setAppId(appId);
         return AjaxResult.success(wxUserService.save(wxUser));
     }
 
@@ -116,7 +129,12 @@ public class WxUserController extends BaseController {
     @PreAuthorize("@ss.hasPermi('wxmp:wxuser:synchro')")
     public AjaxResult synchron() {
         try {
-            wxUserService.synchroWxUser();
+            String appId = ThreadLocalUtil.getAppId();
+            logger.debug("synchronWxUser 当前操作的APPID:{}", appId);
+            if(StringUtils.isEmpty(appId)){
+                AjaxResult.success();
+            }
+            wxUserService.synchroWxUser(appId);
             return AjaxResult.success();
         } catch (WxErrorException e) {
             e.printStackTrace();
@@ -135,6 +153,12 @@ public class WxUserController extends BaseController {
     @PreAuthorize("@ss.hasPermi('wxmp:wxuser:edit:remark')")
     public AjaxResult remark(@RequestBody WxUser wxUser) {
         try {
+            String appId = ThreadLocalUtil.getAppId();
+            logger.debug("remarkWxUser 当前操作的APPID:{} wxUser:{}", appId, wxUser);
+            if(StringUtils.isEmpty(appId) || StringUtils.isEmpty(wxUser.getAppId()) || !appId.equals(wxUser.getAppId())){
+                //因为正常情况下wxUser对象是包含APPID的 所以此处只用作校验
+                AjaxResult.success();
+            }
             return AjaxResult.success(wxUserService.updateRemark(wxUser));
         } catch (WxErrorException e) {
             e.printStackTrace();
@@ -153,13 +177,18 @@ public class WxUserController extends BaseController {
     @PreAuthorize("@ss.hasPermi('wxmp:wxuser:tagging')")
     public AjaxResult tagidList(@RequestBody JSONObject data) {
         try {
-            String appId = data.getStr("appId");
+            String appId = ThreadLocalUtil.getAppId();
+            logger.debug("tagid-list 当前操作的APPID:{}", appId);
+            if(StringUtils.isEmpty(appId)){
+                AjaxResult.success();
+            }
+//            String appId = data.getStr("appId");
             String taggingType = data.getStr("taggingType");
             JSONArray tagIdsArray = data.getJSONArray("tagIds");
             JSONArray openIdsArray = data.getJSONArray("openIds");
             String[] openIds = openIdsArray.toArray(new String[0]);
             for (Object tagId : tagIdsArray) {
-                wxUserService.tagging(taggingType, Long.valueOf(String.valueOf(tagId)), openIds);
+                wxUserService.tagging(taggingType, Long.valueOf(String.valueOf(tagId)), openIds, appId);
             }
             return AjaxResult.success();
         } catch (WxErrorException e) {

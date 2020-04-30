@@ -2,11 +2,13 @@ package com.ruoyi.project.weixin.controller;
 
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
+import com.ruoyi.project.weixin.utils.ThreadLocalUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpDataCubeService;
 import me.chanjar.weixin.mp.api.WxMpService;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,7 +39,12 @@ public class WxSummaryController extends BaseController {
 //	@PreAuthorize("@ss.hasPermi('wxmp:wxsummary:index')")
 	public AjaxResult getUsersummary(String appId, String startDate, String endDate) {
 		try {
-			WxMpDataCubeService wxMpDataCubeService = wxService.getDataCubeService();
+			appId = ThreadLocalUtil.getAppId();
+			logger.debug("getUsersummary 当前操作的APPID:{}", appId);
+			if(StringUtils.isEmpty(appId)){
+				AjaxResult.success();
+			}
+			WxMpDataCubeService wxMpDataCubeService = wxService.switchoverTo(appId).getDataCubeService();
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			return AjaxResult.success(wxMpDataCubeService.getUserSummary(sdf.parse(startDate), sdf.parse(endDate)));
 		} catch (WxErrorException e) {
@@ -62,7 +69,12 @@ public class WxSummaryController extends BaseController {
 //	@PreAuthorize("@ss.hasPermi('wxmp:wxsummary:index')")
 	public AjaxResult getUserCumulate(String appId, String startDate, String endDate){
 		try {
-			WxMpDataCubeService wxMpDataCubeService = wxService.getDataCubeService();
+			appId = ThreadLocalUtil.getAppId();
+			logger.debug("getUserCumulate 当前操作的APPID:{}", appId);
+			if(StringUtils.isEmpty(appId)){
+				AjaxResult.success();
+			}
+			WxMpDataCubeService wxMpDataCubeService = wxService.switchoverTo(appId).getDataCubeService();
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			return AjaxResult.success(wxMpDataCubeService.getUserCumulate(sdf.parse(startDate), sdf.parse(endDate)));
 		} catch (WxErrorException e) {
@@ -87,7 +99,12 @@ public class WxSummaryController extends BaseController {
 //	@PreAuthorize("@ss.hasPermi('wxmp:wxsummary:index')")
 	public AjaxResult getInterfaceSummary(String appId, String startDate, String endDate){
 		try {
-			WxMpDataCubeService wxMpDataCubeService = wxService.getDataCubeService();
+			appId = ThreadLocalUtil.getAppId();
+			logger.debug("getInterfaceSummary 当前操作的APPID:{}", appId);
+			if(StringUtils.isEmpty(appId)){
+				AjaxResult.success();
+			}
+			WxMpDataCubeService wxMpDataCubeService = wxService.switchoverTo(appId).getDataCubeService();
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			return AjaxResult.success(wxMpDataCubeService.getInterfaceSummary(sdf.parse(startDate), sdf.parse(endDate)));
 		} catch (WxErrorException e) {

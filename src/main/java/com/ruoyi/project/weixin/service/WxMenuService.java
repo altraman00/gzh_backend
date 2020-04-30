@@ -4,8 +4,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.project.weixin.entity.WxMenu;
 import me.chanjar.weixin.common.error.WxErrorException;
 
-import java.io.Serializable;
-
 /**
  * 自定义菜单
  *
@@ -24,6 +22,6 @@ public interface WxMenuService extends IService<WxMenu> {
 	 * 保存并发布菜单
 	 * @param
 	 */
-	void saveAndRelease( String strWxMenu) throws WxErrorException;
+	void saveAndRelease( String strWxMenu, String appId) throws WxErrorException;
 
 }

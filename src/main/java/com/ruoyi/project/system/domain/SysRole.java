@@ -10,7 +10,7 @@ import com.ruoyi.framework.web.domain.BaseEntity;
 
 /**
  * 角色表 sys_role
- * 
+ *
  * @author ruoyi
  */
 public class SysRole extends BaseEntity
@@ -36,6 +36,11 @@ public class SysRole extends BaseEntity
     /** 数据范围（1：所有数据权限；2：自定义数据权限；3：本部门数据权限；4：本部门及以下数据权限） */
     @Excel(name = "数据范围", readConverterExp = "1=所有数据权限,2=自定义数据权限,3=本部门数据权限,4=本部门及以下数据权限")
     private String dataScope;
+    /**
+     * 可见的公众号ID组成的数组字符串
+     * [1,2,3,5,8]
+     */
+    private String mpScope;
 
     /** 角色状态（0正常 1停用） */
     @Excel(name = "角色状态", readConverterExp = "0=正常,1=停用")
@@ -177,7 +182,15 @@ public class SysRole extends BaseEntity
     {
         this.deptIds = deptIds;
     }
-    
+
+    public String getMpScope() {
+        return mpScope;
+    }
+
+    public void setMpScope(String mpScope) {
+        this.mpScope = mpScope;
+    }
+
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
             .append("roleId", getRoleId())
@@ -192,6 +205,7 @@ public class SysRole extends BaseEntity
             .append("updateBy", getUpdateBy())
             .append("updateTime", getUpdateTime())
             .append("remark", getRemark())
+            .append("mpScope", getMpScope())
             .toString();
     }
 }

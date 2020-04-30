@@ -32,6 +32,8 @@ private static final long serialVersionUID = 1L;
    */
     @TableId(type = IdType.ASSIGN_ID)
     private String id;
+
+	private String appId;
     /**
    * 创建者
    */
@@ -141,5 +143,5 @@ private static final long serialVersionUID = 1L;
    * 已读标记（0：是；1：否）
    */
     private String readFlag;
-  
+
 }

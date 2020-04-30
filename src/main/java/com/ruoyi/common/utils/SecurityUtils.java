@@ -1,5 +1,6 @@
 package com.ruoyi.common.utils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -9,9 +10,10 @@ import com.ruoyi.framework.security.LoginUser;
 
 /**
  * 安全服务工具类
- * 
+ *
  * @author ruoyi
  */
+@Slf4j
 public class SecurityUtils
 {
     /**
@@ -36,11 +38,30 @@ public class SecurityUtils
     {
         try
         {
-            return (LoginUser) getAuthentication().getPrincipal();
+            LoginUser loginUser = (LoginUser) getAuthentication().getPrincipal();
+            log.debug("获取当前用户 loginUser:{}", loginUser);
+            return loginUser;
         }
         catch (Exception e)
         {
             throw new CustomException("获取用户信息异常", HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    /**
+     * 获取用户ID
+     **/
+    public static Long getLoginUserId()
+    {
+        try
+        {
+            LoginUser loginUser = (LoginUser) getAuthentication().getPrincipal();
+            log.debug("获取当前用户 loginUser:{}", loginUser);
+            return loginUser.getUser().getUserId();
+        }
+        catch (Exception e)
+        {
+            throw new CustomException("获取用户ID信息异常", HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -79,12 +100,28 @@ public class SecurityUtils
 
     /**
      * 是否为管理员
-     * 
+     *
      * @param userId 用户ID
      * @return 结果
      */
     public static boolean isAdmin(Long userId)
     {
         return userId != null && 1L == userId;
+    }
+
+    /**
+     * 是否为管理员
+     *
+     * @return 结果
+     */
+    public static boolean isAdmin()
+    {
+        LoginUser loginUser = getLoginUser();
+        if(loginUser != null && loginUser.getUser() != null){
+            Long userId = loginUser.getUser().getUserId();
+            return userId != null && 1L == userId;
+        }else {
+            return false;
+        }
     }
 }

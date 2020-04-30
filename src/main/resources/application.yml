@@ -84,6 +84,9 @@ token:
     secret: abcdefghijklmnopqrstuvwxyz
     # 令牌有效期（默认30分钟）
     expireTime: 1440
+    app:
+      id:
+        key: appIdKey
 
 # MyBatis配置
 mybatis-plus:

@@ -2,6 +2,7 @@
 <configuration>
     <!-- 日志存放路径 -->
 	<property name="log.path" value="/opt/projects/gzh/logs" />
+<!--	<property name="log.path" value="/Users/admin/Desktop/logs" />-->
     <!-- 日志输出格式 -->
 	<property name="log.pattern" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{20} - [%method,%line] - %msg%n" />
 
@@ -11,7 +12,7 @@
 			<pattern>${log.pattern}</pattern>
 		</encoder>
 	</appender>
-	
+
 	<!-- 系统日志输出 -->
 	<appender name="file_info" class="ch.qos.logback.core.rolling.RollingFileAppender">
 	    <file>${log.path}/sys-info.log</file>
@@ -25,16 +26,16 @@
 		<encoder>
 			<pattern>${log.pattern}</pattern>
 		</encoder>
-		<filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <!-- 过滤的级别 -->
-            <level>INFO</level>
-            <!-- 匹配时的操作：接收（记录） -->
-            <onMatch>ACCEPT</onMatch>
-            <!-- 不匹配时的操作：拒绝（不记录） -->
-            <onMismatch>DENY</onMismatch>
-        </filter>
+<!--		<filter class="ch.qos.logback.classic.filter.LevelFilter">-->
+<!--            &lt;!&ndash; 过滤的级别 &ndash;&gt;-->
+<!--            <level>DEBUG</level>-->
+<!--            &lt;!&ndash; 匹配时的操作：接收（记录） &ndash;&gt;-->
+<!--            <onMatch>ACCEPT</onMatch>-->
+<!--            &lt;!&ndash; 不匹配时的操作：拒绝（不记录） &ndash;&gt;-->
+<!--            <onMismatch>DENY</onMismatch>-->
+<!--        </filter>-->
 	</appender>
-	
+
 	<appender name="file_error" class="ch.qos.logback.core.rolling.RollingFileAppender">
 	    <file>${log.path}/sys-error.log</file>
         <!-- 循环政策：基于时间创建日志文件 -->
@@ -56,7 +57,7 @@
             <onMismatch>DENY</onMismatch>
         </filter>
     </appender>
-	
+
 	<!-- 用户访问日志输出  -->
     <appender name="sys-user" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>${log.path}/sys-user.log</file>
@@ -70,24 +71,25 @@
             <pattern>${log.pattern}</pattern>
         </encoder>
     </appender>
-	
-	<!-- 系统模块日志级别控制  -->
-	<logger name="com.ruoyi" level="info" />
-	<!-- Spring日志级别控制  -->
-	<logger name="org.springframework" level="warn" />
 
-	<root level="info">
+	<!-- 系统模块日志级别控制  -->
+	<logger name="com.ruoyi" level="debug" />
+	<!-- Spring日志级别控制  -->
+<!--	<logger name="org.springframework" level="warn" />-->
+	<logger name="org" level="warn" />
+
+	<root level="debug">
 		<appender-ref ref="console" />
 	</root>
-	
+
 	<!--系统操作日志-->
-    <root level="info">
+    <root level="debug">
         <appender-ref ref="file_info" />
         <appender-ref ref="file_error" />
     </root>
-	
+
 	<!--系统用户操作日志-->
-    <logger name="sys-user" level="info">
+    <logger name="sys-user" level="debug">
         <appender-ref ref="sys-user"/>
     </logger>
-</configuration> 
+</configuration>

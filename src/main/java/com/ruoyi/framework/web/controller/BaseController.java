@@ -20,7 +20,7 @@ import com.ruoyi.framework.web.page.TableSupport;
 
 /**
  * web层通用数据处理
- * 
+ *
  * @author ruoyi
  */
 public class BaseController
@@ -74,7 +74,7 @@ public class BaseController
 
     /**
      * 响应返回结果
-     * 
+     *
      * @param rows 影响行数
      * @return 操作结果
      */
@@ -82,4 +82,10 @@ public class BaseController
     {
         return rows > 0 ? AjaxResult.success() : AjaxResult.error();
     }
+
+//    protected WxMpService switchoverTo(WxMpService wxMpService,String appId){
+//        WxMpService switchoverTo = wxMpService.switchoverTo(appId);
+//        return switchoverTo;
+//    }
+
 }

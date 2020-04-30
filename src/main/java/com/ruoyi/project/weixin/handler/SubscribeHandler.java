@@ -3,6 +3,7 @@ package com.ruoyi.project.weixin.handler;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
+import com.ruoyi.project.weixin.dto.WxMpXmlMessageDTO;
 import com.ruoyi.project.weixin.entity.WxAutoReply;
 import com.ruoyi.project.weixin.entity.WxUser;
 import com.ruoyi.project.weixin.mapper.WxUserMapper;
@@ -36,16 +37,19 @@ public class SubscribeHandler extends AbstractHandler {
                                     Map<String, Object> context, WxMpService weixinService,
                                     WxSessionManager sessionManager) {
         log.info("新关注用户 OPENID: " + wxMessage.getFromUser());
+        log.info("新关注用户 wxMessage: {}" , wxMessage);
         // 获取微信用户基本信息
         try {
+            WxMpXmlMessageDTO wxMpXmlMessageDTO = (WxMpXmlMessageDTO) wxMessage;
             WxMpUser userWxInfo = weixinService.getUserService()
                     .userInfo(wxMessage.getFromUser(), null);
             if (userWxInfo != null) {
                 // TODO 添加关注用户到本地数据库
                 WxUser wxUser = wxUserMapper.selectOne(Wrappers.<WxUser>lambdaQuery()
-                        .eq(WxUser::getOpenId,userWxInfo.getOpenId()));
+                        .eq(WxUser::getOpenId,userWxInfo.getOpenId()).eq(WxUser::getAppId,wxMpXmlMessageDTO.getAppId()));
                 if(wxUser==null){//第一次关注
                     wxUser = new WxUser();
+                    wxUser.setAppId(wxMpXmlMessageDTO.getAppId());
                     wxUser.setSubscribeNum(1);
                     this.setWxUserValue(wxUser,userWxInfo);
 //						wxUser.setTenantId(wxApp.getTenantId());
@@ -58,8 +62,8 @@ public class SubscribeHandler extends AbstractHandler {
                 }
                 //发送关注消息
                 List<WxAutoReply> listWxAutoReply = wxAutoReplyService.list(Wrappers.<WxAutoReply>query()
-                        .lambda().eq(WxAutoReply::getType,ConfigConstant.WX_AUTO_REPLY_TYPE_1));
-                WxMpXmlOutMessage wxMpXmlOutMessage = MsgHandler.getWxMpXmlOutMessage(wxMessage,listWxAutoReply,wxUser,wxMsgService);
+                        .lambda().eq(WxAutoReply::getType,ConfigConstant.WX_AUTO_REPLY_TYPE_1).eq(WxAutoReply::getAppId,wxMpXmlMessageDTO.getAppId()));
+                WxMpXmlOutMessage wxMpXmlOutMessage = MsgHandler.getWxMpXmlOutMessage(wxMpXmlMessageDTO,listWxAutoReply,wxUser,wxMsgService);
                 return wxMpXmlOutMessage;
             }
         } catch (Exception e) {
@@ -69,7 +73,7 @@ public class SubscribeHandler extends AbstractHandler {
     }
 
     public static void setWxUserValue(WxUser wxUser,WxMpUser userWxInfo){
-        wxUser.setAppType(ConfigConstant.WX_APP_TYPE_2);;
+        wxUser.setAppType(ConfigConstant.WX_APP_TYPE_2);
         wxUser.setSubscribe(ConfigConstant.SUBSCRIBE_TYPE_YES);
         wxUser.setSubscribeScene(userWxInfo.getSubscribeScene());
         wxUser.setSubscribeTime(LocalDateTimeUtils.timestamToDatetime(userWxInfo.getSubscribeTime()*1000));
@@ -86,6 +90,7 @@ public class SubscribeHandler extends AbstractHandler {
         wxUser.setGroupId(JSONUtil.toJsonStr(userWxInfo.getGroupId()));
         wxUser.setTagidList(userWxInfo.getTagIds());
         wxUser.setQrSceneStr(userWxInfo.getQrSceneStr());
+        wxUser.setRemark(userWxInfo.getRemark());
     }
 
 }
