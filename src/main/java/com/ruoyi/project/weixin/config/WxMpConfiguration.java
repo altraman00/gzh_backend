@@ -1,7 +1,11 @@
 package com.ruoyi.project.weixin.config;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.ruoyi.project.weixin.entity.WxMp;
 import com.ruoyi.project.weixin.handler.*;
+import com.ruoyi.project.weixin.service.IWxMpService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.mp.api.WxMpMessageRouter;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.api.impl.WxMpServiceImpl;
@@ -9,8 +13,11 @@ import me.chanjar.weixin.mp.config.impl.WxMpDefaultConfigImpl;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import static me.chanjar.weixin.common.api.WxConsts.EventType;
 import static me.chanjar.weixin.common.api.WxConsts.EventType.SUBSCRIBE;
 import static me.chanjar.weixin.common.api.WxConsts.EventType.UNSUBSCRIBE;
@@ -27,6 +34,7 @@ import static me.chanjar.weixin.mp.constant.WxMpEventConstants.POI_CHECK_NOTIFY;
 @AllArgsConstructor
 @Configuration
 @EnableConfigurationProperties(WxMpProperties.class)
+@Slf4j
 public class WxMpConfiguration {
     private final LogHandler logHandler;
     private final NullHandler nullHandler;
@@ -38,12 +46,26 @@ public class WxMpConfiguration {
     private final UnsubscribeHandler unsubscribeHandler;
     private final SubscribeHandler subscribeHandler;
     private final ScanHandler scanHandler;
-    private final WxMpProperties properties;
+//    private final WxMpProperties properties;
+    private final IWxMpService iWxMpService;
 
     @Bean
     public WxMpService wxMpService() {
         // 代码里 getConfigs()处报错的同学，请注意仔细阅读项目说明，你的IDE需要引入lombok插件！！！！
-        final List<WxMpProperties.MpConfig> configs = this.properties.getConfigs();
+//        final List<WxMpProperties.MpConfig> configs = this.properties.getConfigs();
+        final List<WxMpProperties.MpConfig> configs = new ArrayList<>();
+        QueryWrapper<WxMp> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(WxMp::getDelFlag, "0");
+        List<WxMp> list = iWxMpService.list(queryWrapper);
+        log.debug("从数据库获取所有有效的公众号 size:{} list:{}", list.size(), list);
+        for (WxMp wxMp : list) {
+            WxMpProperties.MpConfig mpConfig = new WxMpProperties.MpConfig();
+            mpConfig.setAppId(wxMp.getAppId());
+            mpConfig.setSecret(wxMp.getSecret());
+            mpConfig.setToken(wxMp.getToken());
+            mpConfig.setAesKey(wxMp.getAesKey());
+            configs.add(mpConfig);
+        }
         if (configs == null) {
             throw new RuntimeException("大哥，拜托先看下项目首页的说明（readme文件），添加下相关配置，注意别配错了！");
         }

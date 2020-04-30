@@ -5,7 +5,8 @@
   -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.joolun.cloud.weixin.admin.mapper.WxMsgMapper">
+<!--<mapper namespace="com.joolun.cloud.weixin.admin.mapper.WxMsgMapper">-->
+<mapper namespace="com.ruoyi.project.weixin.mapper.WxMsgMapper">
 	<resultMap id="wxMsgMap" type="com.ruoyi.project.weixin.entity.WxMsg">
 		<id property="id" column="id"/>
 		<result property="createId" column="create_id"/>
@@ -55,6 +56,9 @@
 			from
 			  wx_msg
 			<where>
+				<if test="query.appId != null and query.appId != ''">
+					AND `app_id` = #{query.appId}
+				</if>
 				<if test="query.type != null and query.type != ''">
 					AND `type` = #{query.type}
 				</if>

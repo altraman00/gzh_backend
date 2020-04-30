@@ -9,9 +9,7 @@ import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.common.ResultCode;
 import com.ruoyi.project.system.service.ISysDictDataService;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
-import com.ruoyi.project.weixin.entity.WxActivityTemplateMessage;
-import com.ruoyi.project.weixin.entity.WxMp;
-import com.ruoyi.project.weixin.entity.WxMpTemplateMessage;
+import com.ruoyi.project.weixin.entity.*;
 import com.ruoyi.project.weixin.schedule.SchedulingRunnable;
 import com.ruoyi.project.weixin.schedule.config.CronTaskRegistrar;
 import com.ruoyi.project.weixin.service.IWxActivityTemplateMessageService;
@@ -20,6 +18,7 @@ import com.ruoyi.project.weixin.service.IWxMpService;
 import com.ruoyi.project.weixin.service.IWxMpTemplateMessageService;
 import com.ruoyi.project.weixin.service.impl.HelpActivityServiceImpl;
 import com.ruoyi.project.weixin.utils.ImgUtils;
+import com.ruoyi.project.weixin.utils.ThreadLocalUtil;
 import com.ruoyi.project.weixin.vo.EditWxTemplateVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -84,8 +83,12 @@ public class WxActivityTemplateController extends BaseController {
     @ApiOperation("查询默认活动模板")
     @GetMapping("/template/list")
     @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")
-    public AjaxResult getWxActivityTemplateList(){
-        return AjaxResult.success(wxActivityTemplateService.list());
+    public AjaxResult getWxActivityTemplateList(@RequestParam(value = "type") String type){
+        //type 表示当前账号主体类型(1. 订阅号 2. 服务号 3.小程序) 根据这个条件 查询支持当前主体的活动模板
+        QueryWrapper<WxActivityTemplate> queryWrapper = new QueryWrapper<>();
+        //此处可以用like匹配 是因为 supportScene里面现在最多只包含1,2,3 三个数字, 如果后期包含的数字超过9 需要更改匹配方案(因为1可能会匹配到10或者11上面)
+        queryWrapper.lambda().like(WxActivityTemplate::getSupportScene, type);
+        return AjaxResult.success(wxActivityTemplateService.list(queryWrapper));
     }
 
     @ApiOperation("绑定活动模板")
@@ -121,7 +124,7 @@ public class WxActivityTemplateController extends BaseController {
             WxMpTemplateMessage wxMpTemplateMessage = new WxMpTemplateMessage();
             wxMpTemplateMessage.setAppId(appId);
             BeanUtils.copyProperties(wxActivityTemplateMessage,wxMpTemplateMessage,"id","createId","createTime","updateId","updateTime","delFlag");
-            wxMpTemplateMessage.setRepContent(wxMpTemplateMessage.getRepContent().replace("appid=","appid="+appId));
+            wxMpTemplateMessage.setRepContent(wxMpTemplateMessage.getRepContent().replace("appid=","appid="+appId).replace("state=","state="+appId));
             wxMpTemplateMessageService.save(wxMpTemplateMessage);
             if (wxMpTemplateMessage.getRepType().equals(ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE)) {
                 needPublishSchedule.add(wxMpTemplateMessage);
@@ -211,11 +214,16 @@ public class WxActivityTemplateController extends BaseController {
     public AjaxResult previewPoster(@PathVariable("messageId") String messageId) {
         WxMpTemplateMessage message = wxMpTemplateMessageService.getById(messageId);
         String mediaId = message.getRepMediaId();
+        String appId = ThreadLocalUtil.getAppId();
+        logger.debug("previewPoster 当前操作的APPID:{}", appId);
+        if(StringUtils.isEmpty(appId)){
+            AjaxResult.success();
+        }
         if (StringUtils.isNotBlank(mediaId)) {
             // 取海报图片
             InputStream inputStream = null;
             try {
-                inputStream = wxService.getMaterialService().materialImageOrVoiceDownload(mediaId);
+                inputStream = wxService.switchoverTo(appId).getMaterialService().materialImageOrVoiceDownload(mediaId);
             } catch (WxErrorException e) {
                 log.error("从素材库获取海报图片异常，消息模板id:{},openId:{}",messageId,e);
             }

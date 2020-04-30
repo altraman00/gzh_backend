@@ -15,6 +15,7 @@ import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.entity.WxMsg;
 import com.ruoyi.project.weixin.entity.WxMsgVO;
 import com.ruoyi.project.weixin.entity.WxUser;
+import com.ruoyi.project.weixin.utils.ThreadLocalUtil;
 import io.swagger.annotations.Api;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +58,12 @@ public class WxMsgController extends BaseController {
     @GetMapping("/page")
     @PreAuthorize("@ss.hasPermi('wxmp:wxmsg:index')")
     public AjaxResult getWxMsgPage(Page page, WxMsgVO wxMsgVO) {
+		String appId = ThreadLocalUtil.getAppId();
+		logger.debug("getWxMsgPage 当前操作的APPID:{}", appId);
+		if(StringUtils.isEmpty(appId)){
+			AjaxResult.success();
+		}
+		wxMsgVO.setAppId(appId);
     	if(StringUtils.isNotBlank(wxMsgVO.getNotInRepType())){
 			return  AjaxResult.success(wxMsgService.listWxMsgMapGroup(page,wxMsgVO));
 		}
@@ -64,7 +71,7 @@ public class WxMsgController extends BaseController {
 			WxMsg wxMsg = new WxMsg();
 			wxMsg.setReadFlag(CommonConstants.YES);
 			Wrapper queryWrapper = Wrappers.<WxMsg>lambdaQuery()
-					.eq(WxMsg::getWxUserId,wxMsgVO.getWxUserId())
+					.eq(WxMsg::getWxUserId,wxMsgVO.getWxUserId()).eq(WxMsg::getAppId, appId)
 					.eq(WxMsg::getReadFlag,CommonConstants.NO);
 			wxMsgService.update(wxMsg,queryWrapper);
 		}
@@ -91,12 +98,19 @@ public class WxMsgController extends BaseController {
     @PreAuthorize("@ss.hasPermi('wxmp:wxmsg:add')")
     public AjaxResult save(@RequestBody WxMsg wxMsg){
 		try {
+			String appId = ThreadLocalUtil.getAppId();
+			logger.debug("saveWxMsg 当前操作的APPID:{} wxMsg:{}", appId, wxMsg);
 			WxUser wxUser = wxUserService.getById(wxMsg.getWxUserId());
+			if(StringUtils.isEmpty(appId) || StringUtils.isEmpty(wxUser.getAppId()) || !appId.equals(wxUser.getAppId())){
+				//因为正常情况下wxUser对象是包含APPID的 所以此处只用作校验
+				AjaxResult.success();
+			}
 			//入库
 			wxMsg.setNickName(wxUser.getNickName());
 			wxMsg.setHeadimgUrl(wxUser.getHeadimgUrl());
 			wxMsg.setCreateTime(LocalDateTime.now());
 			wxMsg.setType(ConfigConstant.WX_MSG_TYPE_2);
+			wxMsg.setAppId(appId);
 			WxMpKefuMessage wxMpKefuMessage = null;
 			if(WxConsts.KefuMsgType.TEXT.equals(wxMsg.getRepType())){
 				wxMsg.setRepContent(wxMsg.getRepContent());
@@ -161,7 +175,7 @@ public class WxMsgController extends BaseController {
 				wxMpKefuMessage.setArticles(list);
 			}
 			if(wxMpKefuMessage != null){
-				WxMpKefuService wxMpKefuService = wxService.getKefuService();
+				WxMpKefuService wxMpKefuService = wxService.switchoverTo(appId).getKefuService();
 				wxMpKefuMessage.setToUser(wxUser.getOpenId());
 				wxMpKefuService.sendKefuMessage(wxMpKefuMessage);
 				wxMsgService.save(wxMsg);

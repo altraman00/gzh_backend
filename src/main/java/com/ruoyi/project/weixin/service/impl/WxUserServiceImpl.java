@@ -44,15 +44,16 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
 		entity.setId(id);
 		entity.setRemark(remark);
 		super.updateById(entity);
-		WxMpUserService wxMpUserService = wxService.getUserService();
+		WxUser wxUser = getById(id);
+		WxMpUserService wxMpUserService = wxService.switchoverTo(wxUser.getAppId()).getUserService();
 		wxMpUserService.userUpdateRemark(openId,remark);
 		return true;
 	}
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void tagging(String taggingType,Long tagId,String[] openIds) throws WxErrorException {
-		WxMpUserTagService wxMpUserTagService = wxService.getUserTagService();
+	public void tagging(String taggingType,Long tagId,String[] openIds, String appId) throws WxErrorException {
+		WxMpUserTagService wxMpUserTagService = wxService.switchoverTo(appId).getUserTagService();
 		WxUser wxUser;
 		if("tagging".equals(taggingType)){
 			for(String openId : openIds){
@@ -89,36 +90,37 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
 	}
 
 	@Override
-	public WxUser getByOpenId(String openId) {
-		return this.getOne(Wrappers.<WxUser>lambdaQuery()
+	public WxUser getByOpenIdAndAppId(String openId, String appId) {
+		return this.getOne(Wrappers.<WxUser>lambdaQuery().eq(WxUser::getAppId, appId)
 				.eq(WxUser::getOpenId,openId));
 	}
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void synchroWxUser() throws WxErrorException {
+	public void synchroWxUser(String appId) throws WxErrorException {
 		//先将已关注的用户取关
 		WxUser wxUser = new WxUser();
 		wxUser.setSubscribe(ConfigConstant.SUBSCRIBE_TYPE_NO);
-		this.baseMapper.update(wxUser, Wrappers.<WxUser>lambdaQuery()
+		this.baseMapper.update(wxUser, Wrappers.<WxUser>lambdaQuery().eq(WxUser::getAppId, appId)
 				.eq(WxUser::getSubscribe, ConfigConstant.SUBSCRIBE_TYPE_YES));
-		WxMpUserService wxMpUserService = wxService.getUserService();
-		this.recursionGet(wxMpUserService,null);
+		WxMpUserService wxMpUserService = wxService.switchoverTo(appId).getUserService();
+		this.recursionGet(wxMpUserService,null, appId);
 	}
 
 	/**
 	 * 递归获取
 	 * @param nextOpenid
 	 */
-	void recursionGet(WxMpUserService wxMpUserService,String nextOpenid) throws WxErrorException {
+	void recursionGet(WxMpUserService wxMpUserService,String nextOpenid, String appId) throws WxErrorException {
 		WxMpUserList userList = wxMpUserService.userList(nextOpenid);
 		List<WxUser> listWxUser = new ArrayList<>();
 		List<WxMpUser> listWxMpUser = getWxMpUserList(wxMpUserService,userList.getOpenids());
 		listWxMpUser.forEach(wxMpUser -> {
-			WxUser wxUser = baseMapper.selectOne(Wrappers.<WxUser>lambdaQuery()
+			WxUser wxUser = baseMapper.selectOne(Wrappers.<WxUser>lambdaQuery().eq(WxUser::getAppId, appId)
 					.eq(WxUser::getOpenId,wxMpUser.getOpenId()));
 			if(wxUser == null){//用户未存在
 				wxUser = new WxUser();
+				wxUser.setAppId(appId);
 				wxUser.setSubscribeNum(1);
 			}
 			SubscribeHandler.setWxUserValue(wxUser,wxMpUser);
@@ -126,7 +128,7 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
 		});
 		this.saveOrUpdateBatch(listWxUser);
 		if(userList.getCount() >= 10000){
-			this.recursionGet(wxMpUserService,userList.getNextOpenid());
+			this.recursionGet(wxMpUserService,userList.getNextOpenid(),appId);
 		}
 	}
 

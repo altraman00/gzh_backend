@@ -6,8 +6,10 @@ import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.weixin.entity.WxActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMp;
+import com.ruoyi.project.weixin.entity.WxUser;
 import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
 import com.ruoyi.project.weixin.service.IWxMpService;
+import com.ruoyi.project.weixin.service.WxUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -41,6 +43,8 @@ public class WxMpOpenController extends BaseController {
 
     private final IWxMpService myWxMpService;
 
+//    private final WxUserService wxUserService;
+
     private final IWxActivityTemplateService wxActivityTemplateService;
 
     private final WxMpService wxMpService;
@@ -67,14 +71,26 @@ public class WxMpOpenController extends BaseController {
     @ApiOperation("移动端微信授权")
     @ApiImplicitParam(name = "code", value = "微信授权code", dataType = "String",required = true)
     @GetMapping("/oauth2")
-    public AjaxResult oauth2(@RequestParam(value = "code") String code){
+    public AjaxResult oauth2(@RequestParam(value = "code") String code, @RequestParam(value = "appId") String appId){
         // 目前只支持单公众号，返回默认公众号,若改造多公众号需根据appId查询
         Map<String,Object> map = new HashMap<>(16);
         try {
-            WxMpOAuth2AccessToken wxMpOAuth2AccessToken = wxMpService.oauth2getAccessToken(code);
-            WxMpUser wxMpUser = wxMpService.oauth2getUserInfo(wxMpOAuth2AccessToken, null);
-            map.put("accessToken",wxMpOAuth2AccessToken);
-            map.put("wxMpUser",wxMpUser);
+            //根据APPID获取WxMp对象
+            WxMp wxMp = myWxMpService.getByAppId(appId);
+            if(wxMp != null){
+                WxMpOAuth2AccessToken wxMpOAuth2AccessToken = wxMpService.switchoverTo(appId).oauth2getAccessToken(code);
+                WxMpUser wxMpUser = wxMpService.switchoverTo(appId).oauth2getUserInfo(wxMpOAuth2AccessToken, null);
+                //根据openId获取对应的APPID
+//            QueryWrapper<WxUser> queryWrapper = new QueryWrapper<>();
+//            queryWrapper.lambda().eq(WxUser::getOpenId,wxMpUser.getOpenId());
+//            WxUser wxUser = wxUserService.getOne(queryWrapper);
+                map.put("accessToken",wxMpOAuth2AccessToken);
+                map.put("wxMpUser",wxMpUser);
+                map.put("wxMp",wxMp);
+            }else {
+                logger.debug("参数appId未匹配到对应实体对象 :{}", appId);
+                return AjaxResult.success("参数appId未匹配到对应实体对象 APPID:" + appId);
+            }
         } catch (Exception e) {
             log.error("调用微信授权异常",e);
         }
