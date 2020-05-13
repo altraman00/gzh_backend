@@ -13,7 +13,6 @@ import com.ruoyi.project.weixin.mapper.WxUserMapper;
 import com.ruoyi.project.weixin.service.ActivityService;
 import com.ruoyi.project.weixin.service.IWxMpTemplateMessageService;
 import com.ruoyi.project.weixin.service.WxMsgService;
-import com.sun.media.jfxmedia.logging.Logger;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.mp.api.WxMpService;
