@@ -86,7 +86,7 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
 
         //查询糖知家，看该openId有没有做过测评
         try {
-            String url = "http://gzh.supplus.cn/diabetes/xxxx";
+            String url = "http://gzh.supplus.cn/diabetes/api/report/"+openId;
             String result = HttpUtils.sendGet(url, openId);
             if(StringUtils.isNotEmpty(result)){
                 JSONObject jsonObject = JSONUtil.parseObj(result);
