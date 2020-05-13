@@ -77,26 +77,28 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
         String wxUserId = wxUser.getId();
         log.info("【DiabetesTestingReport】event key:[{}],openId:[{}],appId[{}]", eventKey, openId, appId);
 
-        //查询糖知家，看该openId有没有做过测评
-        try {
-            String url = "http://gzh.supplus.cn/diabetes/api/report/"+openId;
-            String result = HttpUtils.sendGet(url, openId);
-            if(StringUtils.isNotEmpty(result)){
-                JSONObject jsonObject = JSONUtil.parseObj(result);
-                String code = jsonObject.get("code").toString();
+        executeHasTested(messages, wxUser);
 
-                Boolean hasTested = StringUtils.isNotEmpty(code) && code.equals("200") ? true : false;
-                if (hasTested) {
-                    //发送查看报告的消息
-                    executeHasTested(messages, wxUser);
-                } else {
-                    //发送推送用户使用测评工具的消息
-                    executeHasNotTested(messages, wxUser);
-                }
-            }
-        } catch (Exception e) {
-            log.error("【DiabetesTestingReport】diabetes testing request error",e);
-        }
+//        //查询糖知家，看该openId有没有做过测评
+//        try {
+//            String url = "http://gzh.supplus.cn/diabetes/api/report/"+openId;
+//            String result = HttpUtils.sendGet(url, openId);
+//            if(StringUtils.isNotEmpty(result)){
+//                JSONObject jsonObject = JSONUtil.parseObj(result);
+//                String code = jsonObject.get("code").toString();
+//
+//                Boolean hasTested = StringUtils.isNotEmpty(code) && code.equals("200") ? true : false;
+//                if (hasTested) {
+//                    //发送查看报告的消息
+//                    executeHasTested(messages, wxUser);
+//                } else {
+//                    //发送推送用户使用测评工具的消息
+//                    executeHasNotTested(messages, wxUser);
+//                }
+//            }
+//        } catch (Exception e) {
+//            log.error("【DiabetesTestingReport】diabetes testing request error",e);
+//        }
 
     }
 
