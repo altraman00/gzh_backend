@@ -48,12 +48,6 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
     /**糖知家URL**/
     private final static String DIABETES_URL = "http://gzh.supplus.cn/diabetes/api/";
 
-    /**查看报告的地址**/
-    private final static String URL_TESTING_REPORT = DIABETES_URL + "/diabetes-testing-report.html";
-
-    /**进入测评的地址**/
-    private final static String URL_ENTRY_TESTING = DIABETES_URL + "/diabetes-testing-entry.html";
-
     @Autowired
     private WxUserMapper wxUserMapper;
 

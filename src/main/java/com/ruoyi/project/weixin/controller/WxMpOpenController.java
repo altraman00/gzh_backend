@@ -1,15 +1,18 @@
 package com.ruoyi.project.weixin.controller;
 
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
+import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.entity.WxActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMp;
 import com.ruoyi.project.weixin.entity.WxUser;
 import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
 import com.ruoyi.project.weixin.service.IWxMpService;
 import com.ruoyi.project.weixin.service.WxUserService;
+import com.ruoyi.project.weixin.utils.LocalDateTimeUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -18,10 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.result.WxMpOAuth2AccessToken;
 import me.chanjar.weixin.mp.bean.result.WxMpUser;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +49,63 @@ public class WxMpOpenController extends BaseController {
     private final IWxActivityTemplateService wxActivityTemplateService;
 
     private final WxMpService wxMpService;
+
+    @Autowired
+    private WxUserService wxUserService;
+
+
+    @ApiOperation("测试用open接口")
+    @GetMapping("/hello")
+    public String openHello(@RequestParam(required = false, defaultValue = "gzh") String str) {
+        String result = "hello_env_" + str;
+        logger.debug("hello,env:{},str:{}", str);
+        return result;
+    }
+
+
+    @ApiOperation("根据openId和appId创建微信用户，默认是没有关注公众号的")
+    @PostMapping("/create_wxuser")
+    public AjaxResult createWxuser(@RequestBody WxUser wxUser) {
+        logger.info("【createWxuser】wxUser:{}", wxUser);
+
+        String appId = wxUser.getAppId();
+        String openId = wxUser.getOpenId();
+        if(wxUser == null || StringUtils.isEmpty(appId) || StringUtils.isEmpty(openId)){
+            return AjaxResult.error("wxUser缺少openId或者appId");
+        }
+        WxUser byOpenIdAndAppId = wxUserService.getByOpenIdAndAppId(openId, appId);
+        if(byOpenIdAndAppId == null){
+            byOpenIdAndAppId = new WxUser();
+            setWxUserValue(byOpenIdAndAppId,wxUser);
+            wxUserService.save(byOpenIdAndAppId);
+        }
+
+        return AjaxResult.success();
+    }
+
+    public static WxUser setWxUserValue(WxUser wxUserEntity,WxUser userWxParam){
+        wxUserEntity.setAppType(ConfigConstant.SUBSCRIBE_TYPE_WEBLICENS);
+        wxUserEntity.setSubscribe(ConfigConstant.SUBSCRIBE_TYPE_NO);
+        wxUserEntity.setSubscribeScene("ADD_SCENE_OTHERS");
+        wxUserEntity.setSubscribeTime(LocalDateTimeUtils.timestamToDatetime(System.currentTimeMillis()));
+        wxUserEntity.setOpenId(userWxParam.getOpenId());
+        wxUserEntity.setNickName(userWxParam.getNickName());
+        wxUserEntity.setSex(String.valueOf(userWxParam.getSex()));
+        wxUserEntity.setCity(userWxParam.getCity());
+        wxUserEntity.setCountry(userWxParam.getCountry());
+        wxUserEntity.setProvince(userWxParam.getProvince());
+        wxUserEntity.setLanguage(userWxParam.getLanguage());
+        wxUserEntity.setRemark(userWxParam.getRemark());
+        wxUserEntity.setHeadimgUrl(userWxParam.getHeadimgUrl());
+        wxUserEntity.setUnionId(userWxParam.getUnionId());
+        wxUserEntity.setGroupId(JSONUtil.toJsonStr(userWxParam.getGroupId()));
+        wxUserEntity.setTagidList(userWxParam.getTagidList());
+        wxUserEntity.setQrSceneStr(userWxParam.getQrSceneStr());
+        wxUserEntity.setRemark(userWxParam.getRemark());
+        return wxUserEntity;
+    }
+
+
 
     @ApiOperation("获取公众号基本信息")
     @ApiImplicitParam(name = "appIdentify", value = "公众号身份标识，目前单公众号，固定为online_study", dataType = "String",required = true)
@@ -96,4 +154,8 @@ public class WxMpOpenController extends BaseController {
         }
         return AjaxResult.success(map);
     }
+
+
+
+
 }
