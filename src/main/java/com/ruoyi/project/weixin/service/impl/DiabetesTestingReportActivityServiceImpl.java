@@ -40,10 +40,10 @@ import java.util.List;
 public class DiabetesTestingReportActivityServiceImpl implements ActivityService {
 
     /**糖知家，场景，已经关注公众号**/
-    private final static String DIABETES_SCENE_FOLLOWED_VIPCN_YES = "has_followed_vipcn";
+    private final static String DIABETES_SCENE_SUBSCRIBED_VIPCN_YES = "has_subscribed_vipcn";
 
     /**糖知家，场景，未关注公众号**/
-    private final static String DIABETES_SCENE_FOLLOWED_VIPCN_NO = "hasnot_followed_vipcn";
+    private final static String DIABETES_SCENE_SUBSCRIBED_VIPCN_NO = "hasnot_subscribed_vipcn";
 
     /**糖知家URL**/
     @Value("${sunlands.diabetes-testing.url}")
@@ -82,8 +82,6 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
                 .eq(WxUser::getOpenId, openId).eq(WxUser::getAppId, appId));
         log.info("【DiabetesTestingReport】event key:[{}],openId:[{}],appId[{}]", eventKey, openId, appId);
 
-        executeHasTested(messages, wxUser);
-
         //查询糖知家，看该openId有没有做过测评
         try {
             String reportUrl =  DIABETES_TESTING_URL + DIABETES_TESTING_REPORT_API;
@@ -116,7 +114,7 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
      */
     private void executeHasTested(List<WxMpTemplateMessage> messages, WxUser wxUser) {
         WxMpTemplateMessage templateMessage = messages.stream()
-                .filter(t -> DIABETES_SCENE_FOLLOWED_VIPCN_YES.equals(t.getScene()))
+                .filter(t -> DIABETES_SCENE_SUBSCRIBED_VIPCN_YES.equals(t.getScene()))
                 .findFirst().orElse(null);
         boolean hasAvailableMessage = templateMessage != null && StringUtils.isNotBlank(templateMessage.getRepContent());
         if(hasAvailableMessage){
@@ -134,7 +132,7 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
     private void executeHasNotTested(List<WxMpTemplateMessage> messages, WxUser wxUser) {
 
         WxMpTemplateMessage templateMessage = messages.stream()
-                .filter(t -> DIABETES_SCENE_FOLLOWED_VIPCN_NO.equals(t.getScene()))
+                .filter(t -> DIABETES_SCENE_SUBSCRIBED_VIPCN_NO.equals(t.getScene()))
                 .findFirst().orElse(null);
         boolean hasAvailableMessage = templateMessage != null && StringUtils.isNotBlank(templateMessage.getRepContent());
         if(hasAvailableMessage){
