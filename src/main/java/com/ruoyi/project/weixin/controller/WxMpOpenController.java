@@ -76,35 +76,16 @@ public class WxMpOpenController extends BaseController {
         WxUser byOpenIdAndAppId = wxUserService.getByOpenIdAndAppId(openId, appId);
         if(byOpenIdAndAppId == null){
             byOpenIdAndAppId = new WxUser();
-            setWxUserValue(byOpenIdAndAppId,wxUser);
+            byOpenIdAndAppId.setAppType(ConfigConstant.SUBSCRIBE_TYPE_WEBLICENS);
+            byOpenIdAndAppId.setSubscribe(ConfigConstant.SUBSCRIBE_TYPE_NO);
+            byOpenIdAndAppId.setSubscribeScene("ADD_SCENE_OTHERS");
+            byOpenIdAndAppId.setOpenId(openId);
+            byOpenIdAndAppId.setAppId(appId);
             wxUserService.save(byOpenIdAndAppId);
         }
 
         return AjaxResult.success();
     }
-
-    public static WxUser setWxUserValue(WxUser wxUserEntity,WxUser userWxParam){
-        wxUserEntity.setAppType(ConfigConstant.SUBSCRIBE_TYPE_WEBLICENS);
-        wxUserEntity.setSubscribe(ConfigConstant.SUBSCRIBE_TYPE_NO);
-        wxUserEntity.setSubscribeScene("ADD_SCENE_OTHERS");
-        wxUserEntity.setSubscribeTime(LocalDateTimeUtils.timestamToDatetime(System.currentTimeMillis()));
-        wxUserEntity.setOpenId(userWxParam.getOpenId());
-        wxUserEntity.setNickName(userWxParam.getNickName());
-        wxUserEntity.setSex(String.valueOf(userWxParam.getSex()));
-        wxUserEntity.setCity(userWxParam.getCity());
-        wxUserEntity.setCountry(userWxParam.getCountry());
-        wxUserEntity.setProvince(userWxParam.getProvince());
-        wxUserEntity.setLanguage(userWxParam.getLanguage());
-        wxUserEntity.setRemark(userWxParam.getRemark());
-        wxUserEntity.setHeadimgUrl(userWxParam.getHeadimgUrl());
-        wxUserEntity.setUnionId(userWxParam.getUnionId());
-        wxUserEntity.setGroupId(JSONUtil.toJsonStr(userWxParam.getGroupId()));
-        wxUserEntity.setTagidList(userWxParam.getTagidList());
-        wxUserEntity.setQrSceneStr(userWxParam.getQrSceneStr());
-        wxUserEntity.setRemark(userWxParam.getRemark());
-        return wxUserEntity;
-    }
-
 
 
     @ApiOperation("获取公众号基本信息")
