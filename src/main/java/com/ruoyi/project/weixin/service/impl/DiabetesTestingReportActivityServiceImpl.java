@@ -8,7 +8,6 @@ import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.http.HttpUtils;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.constant.DiabetesConstant;
-import com.ruoyi.project.weixin.constant.HelpActivityConstant;
 import com.ruoyi.project.weixin.entity.*;
 import com.ruoyi.project.weixin.service.ActivityService;
 import com.ruoyi.project.weixin.service.IWxMpTemplateMessageService;
@@ -44,9 +43,6 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
     @Value("${sunlands.diabetes-testing.url}")
     private String DIABETES_TESTING_URL;
 
-    /**糖知家查看报告 /testing/report/{openId}**/
-    private final static String DIABETES_TESTING_REPORT_API = "/testing/report";
-
     @Autowired
     private WxUserService wxUserService;
 
@@ -79,7 +75,7 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
 
         //查询糖知家，看该openId有没有做过测评
         try {
-            String reportUrl =  DIABETES_TESTING_URL + DIABETES_TESTING_REPORT_API;
+            String reportUrl =  DIABETES_TESTING_URL + DiabetesConstant.DIABETES_TESTING_REPORT_API;
             String param = "openId=" + openId;
             log.info("【DiabetesTestingReport】event,reportUrl:{},param:{}",reportUrl,param);
             String result = HttpUtils.sendGet(reportUrl, param);

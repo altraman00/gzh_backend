@@ -11,6 +11,13 @@ package com.ruoyi.project.weixin.constant;
  */
 public interface DiabetesConstant {
 
+    /**糖知家查看报告 /testing/report?openId=xxx**/
+    String DIABETES_TESTING_REPORT_API = "/testing/report";
+
+    /**糖知家更新公众号关注状态**/
+    String DIABETES_TESTING_USER_SUBCRIBE_API = "/user/gzh/subscribe";
+
+
     /**糖知家，场景，已经关注公众号**/
     String DIABETES_SCENE_SUBSCRIBED_VIPCN_YES = "has_subscribed_vipcn";
 
