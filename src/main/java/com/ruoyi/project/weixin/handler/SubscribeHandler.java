@@ -1,6 +1,5 @@
 package com.ruoyi.project.weixin.handler;
 
-import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.common.utils.http.HttpClient;
@@ -13,7 +12,6 @@ import com.ruoyi.project.weixin.mapper.WxUserMapper;
 import com.ruoyi.project.weixin.service.WxAutoReplyService;
 import com.ruoyi.project.weixin.service.WxMsgService;
 import com.ruoyi.project.weixin.utils.LocalDateTimeUtils;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.session.WxSessionManager;
 import me.chanjar.weixin.mp.api.WxMpService;

@@ -1,19 +1,14 @@
 package com.ruoyi.project.weixin.handler;
 
-import ch.qos.logback.core.net.SyslogOutputStream;
-import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.common.utils.http.HttpClient;
-import com.ruoyi.common.utils.http.HttpUtils;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.constant.DiabetesConstant;
 import com.ruoyi.project.weixin.dto.WxMpXmlMessageDTO;
 import com.ruoyi.project.weixin.entity.WxUser;
 import com.ruoyi.project.weixin.mapper.WxUserMapper;
 import com.ruoyi.project.weixin.service.WxMsgService;
-import com.ruoyi.project.weixin.service.WxUserService;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.session.WxSessionManager;
 import me.chanjar.weixin.mp.api.WxMpService;
