@@ -9,16 +9,18 @@ import com.ruoyi.common.utils.http.HttpUtils;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.constant.HelpActivityConstant;
 import com.ruoyi.project.weixin.entity.*;
-import com.ruoyi.project.weixin.mapper.WxUserMapper;
 import com.ruoyi.project.weixin.service.ActivityService;
 import com.ruoyi.project.weixin.service.IWxMpTemplateMessageService;
 import com.ruoyi.project.weixin.service.WxMsgService;
-import lombok.AllArgsConstructor;
+import com.ruoyi.project.weixin.service.WxUserService;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.kefu.WxMpKefuMessage;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,10 +34,9 @@ import java.util.List;
  * @ModificationHistory Who   When     What
  * ------------    --------------    ---------------------------------
  */
-
+@Component
 @Service
 @Slf4j
-@AllArgsConstructor
 public class DiabetesTestingReportActivityServiceImpl implements ActivityService {
 
     /**糖知家，场景，已经关注公众号**/
@@ -45,10 +46,14 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
     private final static String DIABETES_SCENE_FOLLOWED_VIPCN_NO = "hasnot_followed_vipcn";
 
     /**糖知家URL**/
-    private final static String DIABETES_URL = "http://gzh.supplus.cn/diabetes/api/";
+    @Value("${sunlands.diabetes-testing.url}")
+    private String DIABETES_TESTING_URL;
+
+    /**糖知家查看报告 /testing/report/{openId}**/
+    private final static String DIABETES_TESTING_REPORT_API = "/testing/report";
 
     @Autowired
-    private WxUserMapper wxUserMapper;
+    private WxUserService wxUserService;
 
     @Autowired
     private WxMpService wxMpService;
@@ -60,6 +65,7 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
     private IWxMpTemplateMessageService wxMpTemplateMessageService;
 
     @Override
+    @Async
     public void execute(WxMpXmlMessage inMessage, WxMp wxMp, WxActivityTemplate template, String openId) {
 
         log.info("【DiabetesTestingReport】event inMessage:[{}],wxMp:[{}],template[{}],openId[{}]", inMessage, wxMp, template,openId);
@@ -72,33 +78,34 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
         queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId, templateId);
         List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
 
-        WxUser wxUser = wxUserMapper.selectOne(Wrappers.<WxUser>lambdaQuery()
+        WxUser wxUser = wxUserService.getOne(Wrappers.<WxUser>lambdaQuery()
                 .eq(WxUser::getOpenId, openId).eq(WxUser::getAppId, appId));
-        String wxUserId = wxUser.getId();
         log.info("【DiabetesTestingReport】event key:[{}],openId:[{}],appId[{}]", eventKey, openId, appId);
 
         executeHasTested(messages, wxUser);
 
-//        //查询糖知家，看该openId有没有做过测评
-//        try {
-//            String url = "http://gzh.supplus.cn/diabetes/api/report/"+openId;
-//            String result = HttpUtils.sendGet(url, openId);
-//            if(StringUtils.isNotEmpty(result)){
-//                JSONObject jsonObject = JSONUtil.parseObj(result);
-//                String code = jsonObject.get("code").toString();
-//
-//                Boolean hasTested = StringUtils.isNotEmpty(code) && code.equals("200") ? true : false;
-//                if (hasTested) {
-//                    //发送查看报告的消息
-//                    executeHasTested(messages, wxUser);
-//                } else {
-//                    //发送推送用户使用测评工具的消息
-//                    executeHasNotTested(messages, wxUser);
-//                }
-//            }
-//        } catch (Exception e) {
-//            log.error("【DiabetesTestingReport】diabetes testing request error",e);
-//        }
+        //查询糖知家，看该openId有没有做过测评
+        try {
+            String reportUrl =  DIABETES_TESTING_URL + DIABETES_TESTING_REPORT_API;
+            String param = "openId=" + openId;
+            log.info("【DiabetesTestingReport】event,reportUrl:{},param:{}",reportUrl,param);
+            String result = HttpUtils.sendGet(reportUrl, param);
+            if(StringUtils.isNotEmpty(result)){
+                JSONObject jsonObject = JSONUtil.parseObj(result);
+                String code = jsonObject.get("code").toString();
+
+                Boolean hasTested = StringUtils.isNotEmpty(code) && code.equals("200") ? true : false;
+                if (hasTested) {
+                    //发送查看报告的消息
+                    executeHasTested(messages, wxUser);
+                } else {
+                    //发送推送用户使用测评工具的消息
+                    executeHasNotTested(messages, wxUser);
+                }
+            }
+        } catch (Exception e) {
+            log.error("【DiabetesTestingReport】diabetes testing request error",e);
+        }
 
     }
 

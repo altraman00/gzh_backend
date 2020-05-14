@@ -73,3 +73,8 @@ wx:
 #              secret: 180ac29acee722e1f82862100eb85bcf
 #              token: smallprogram
 #              aesKey:
+
+# 糖知家测评项目地址
+sunlands:
+    diabetes-testing:
+        url: http://act-fec.ministudy.com/diabetes/api
