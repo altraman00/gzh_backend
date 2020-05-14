@@ -15,22 +15,4 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractHandler implements WxMpMessageHandler {
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
-    class SubscribeVO{
-        private String appId;
-        private String openId;
-        private Integer subscribed;
-
-        public void setAppId(String appId) {
-            this.appId = appId;
-        }
-
-        public void setOpenId(String openId) {
-            this.openId = openId;
-        }
-
-        public void setSubscribed(Integer subscribed) {
-            this.subscribed = subscribed;
-        }
-    }
-
 }

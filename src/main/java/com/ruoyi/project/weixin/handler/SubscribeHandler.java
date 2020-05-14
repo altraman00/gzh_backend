@@ -3,6 +3,7 @@ package com.ruoyi.project.weixin.handler;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.ruoyi.common.utils.http.HttpClient;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.constant.DiabetesConstant;
 import com.ruoyi.project.weixin.dto.WxMpXmlMessageDTO;
@@ -19,6 +20,7 @@ import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlOutMessage;
 import me.chanjar.weixin.mp.bean.result.WxMpUser;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +33,7 @@ import java.util.Map;
  */
 @Slf4j
 @Component
-@AllArgsConstructor
+//@AllArgsConstructor
 public class SubscribeHandler extends AbstractHandler {
 
     /**
@@ -43,10 +45,14 @@ public class SubscribeHandler extends AbstractHandler {
     @Value("${sunlands.diabetes-testing.appid}")
     private String DIABETES_TESTING_APPID;
 
-    private final WxAutoReplyService wxAutoReplyService;
-    private final WxUserMapper wxUserMapper;
-    private final WxMsgService wxMsgService;
+    @Autowired
+    private WxAutoReplyService wxAutoReplyService;
 
+    @Autowired
+    private WxUserMapper wxUserMapper;
+
+    @Autowired
+    private WxMsgService wxMsgService;
 
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage,
@@ -80,20 +86,21 @@ public class SubscribeHandler extends AbstractHandler {
                 List<WxAutoReply> listWxAutoReply = wxAutoReplyService.list(Wrappers.<WxAutoReply>query()
                         .lambda().eq(WxAutoReply::getType, ConfigConstant.WX_AUTO_REPLY_TYPE_1).eq(WxAutoReply::getAppId, wxMpXmlMessageDTO.getAppId()));
                 WxMpXmlOutMessage wxMpXmlOutMessage = MsgHandler.getWxMpXmlOutMessage(wxMpXmlMessageDTO, listWxAutoReply, wxUser, wxMsgService);
+
+                //如果是糖知家的用户关注，调取糖知家接口更新状态
+                try {
+                    String appId = ((WxMpXmlMessageDTO) wxMessage).getAppId();
+                    if (appId.equals(DIABETES_TESTING_APPID)) {
+                        newUserSubscribe(wxMessage);
+                    }
+                } catch (Exception e) {
+                    log.error("【SubscribeHandler】更新糖知家用户关注公众状态出错：" + e.getMessage());
+                }
+
                 return wxMpXmlOutMessage;
             }
         } catch (Exception e) {
             log.error("用户关注出错：" + e.getMessage());
-        }
-
-        //如果是糖知家的用户关注，调取糖知家接口更新状态
-        try {
-            String appId = ((WxMpXmlMessageDTO) wxMessage).getAppId();
-            if (appId.equals(DIABETES_TESTING_APPID)) {
-                newUserSubscribe(wxMessage);
-            }
-        } catch (Exception e) {
-            log.error("【SubscribeHandler】更新糖知家用户关注公众状态出错：" + e.getMessage());
         }
 
         return null;
@@ -105,15 +112,16 @@ public class SubscribeHandler extends AbstractHandler {
      * @param wxMessage
      */
     private void newUserSubscribe(WxMpXmlMessage wxMessage) {
-        String openId = wxMessage.getOpenId();
-        SubscribeVO subVo = new SubscribeVO();
-        subVo.setAppId(((WxMpXmlMessageDTO) wxMessage).getAppId());
-        subVo.setOpenId(openId);
-        subVo.setSubscribed(1);
+        String openId = wxMessage.getFromUser();
+        Map<String,Object> map = new HashMap<>();
+        map.put("openId",openId);
+        map.put("appId",((WxMpXmlMessageDTO) wxMessage).getAppId());
+        map.put("subscribed",1);
         String url = DIABETES_TESTING_URL + DiabetesConstant.DIABETES_TESTING_USER_SUBCRIBE_API;
-        String params = JSONUtil.toJsonStr(subVo);
+        String params = JSONUtil.toJsonStr(map);
         logger.info("【SubscribeHandler】更新糖知家用户关注公众状态，url:{},params:{}", url, params);
-        HttpUtil.post(url, params);
+        String result = HttpClient.doPost(url, params);
+        logger.info("【SubscribeHandler】newUserSubscribe result:{}",result);
     }
 
 
