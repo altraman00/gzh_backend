@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.http.HttpUtils;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
+import com.ruoyi.project.weixin.constant.DiabetesConstant;
 import com.ruoyi.project.weixin.constant.HelpActivityConstant;
 import com.ruoyi.project.weixin.entity.*;
 import com.ruoyi.project.weixin.service.ActivityService;
@@ -38,12 +39,6 @@ import java.util.List;
 @Service
 @Slf4j
 public class DiabetesTestingReportActivityServiceImpl implements ActivityService {
-
-    /**糖知家，场景，已经关注公众号**/
-    private final static String DIABETES_SCENE_SUBSCRIBED_VIPCN_YES = "has_subscribed_vipcn";
-
-    /**糖知家，场景，未关注公众号**/
-    private final static String DIABETES_SCENE_SUBSCRIBED_VIPCN_NO = "hasnot_subscribed_vipcn";
 
     /**糖知家URL**/
     @Value("${sunlands.diabetes-testing.url}")
@@ -114,12 +109,13 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
      */
     private void executeHasTested(List<WxMpTemplateMessage> messages, WxUser wxUser) {
         WxMpTemplateMessage templateMessage = messages.stream()
-                .filter(t -> DIABETES_SCENE_SUBSCRIBED_VIPCN_YES.equals(t.getScene()))
+                .filter(t -> DiabetesConstant.DIABETES_SCENE_SUBSCRIBED_VIPCN_YES.equals(t.getScene()))
                 .findFirst().orElse(null);
         boolean hasAvailableMessage = templateMessage != null && StringUtils.isNotBlank(templateMessage.getRepContent());
         if(hasAvailableMessage){
             String content = templateMessage.getRepContent();
-            content = content.replace(HelpActivityConstant.PLACEHOLDER_SUBSCRIBE_NICKNAME,wxUser.getNickName());
+            content = content.replace(DiabetesConstant.DIABETES_SUBSCRIBE_NICKNAME,wxUser.getNickName())
+                             .replace(DiabetesConstant.DIABETES_SUBSCRIBE_OPENID,wxUser.getOpenId());;
             sendTextMessage(content,wxUser);
         }
     }
@@ -132,12 +128,13 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
     private void executeHasNotTested(List<WxMpTemplateMessage> messages, WxUser wxUser) {
 
         WxMpTemplateMessage templateMessage = messages.stream()
-                .filter(t -> DIABETES_SCENE_SUBSCRIBED_VIPCN_NO.equals(t.getScene()))
+                .filter(t -> DiabetesConstant.DIABETES_SCENE_SUBSCRIBED_VIPCN_NO.equals(t.getScene()))
                 .findFirst().orElse(null);
         boolean hasAvailableMessage = templateMessage != null && StringUtils.isNotBlank(templateMessage.getRepContent());
         if(hasAvailableMessage){
             String content = templateMessage.getRepContent();
-            content = content.replace(HelpActivityConstant.PLACEHOLDER_SUBSCRIBE_NICKNAME,wxUser.getNickName());
+            content = content.replace(DiabetesConstant.DIABETES_SUBSCRIBE_NICKNAME,wxUser.getNickName())
+                             .replace(DiabetesConstant.DIABETES_SUBSCRIBE_OPENID,wxUser.getOpenId());
             sendTextMessage(content,wxUser);
         }
 
