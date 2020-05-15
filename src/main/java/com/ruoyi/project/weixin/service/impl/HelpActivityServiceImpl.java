@@ -121,7 +121,8 @@ public class HelpActivityServiceImpl implements ActivityService {
         // 推送活动规则消息
         executeActivityRule(messages,wxUser,templateId,appId);
         // 推送活动海报
-        wxSendMsgServer.sendPosterMessage(messages,wxUser);
+        WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
+        wxSendMsgServer.sendPosterMessage(message,wxUser);
     }
 
     @Override

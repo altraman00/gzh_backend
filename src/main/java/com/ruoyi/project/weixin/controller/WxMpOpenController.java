@@ -96,16 +96,16 @@ public class WxMpOpenController extends BaseController {
             String content = t.getContent();
             wxSendMsgServer.sendTextMessage(content,wxUser);
         });
-
-
-
     }
 
     @ApiOperation("发送海报消息")
     @PostMapping("/send/poster_msg")
     public void sendGzhPosterMsg(@RequestBody List<WxMsgDTO> wxMsgDTO) {
 
+        WxMpTemplateMessage message = null;
+        WxUser wxUser = null;
 
+        wxSendMsgServer.sendPosterMessage(message,wxUser);
 
     }
 

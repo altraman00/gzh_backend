@@ -48,6 +48,11 @@ public class WxSendMsgServer {
     private WxMsgService wxMsgService;
 
 
+    /**
+     * 发送文本消息
+     * @param content
+     * @param wxUser
+     */
     public void sendTextMessage(String content, WxUser wxUser) {
         try {
             WxMpKefuMessage wxMpKefuMessage = WxMpKefuMessage
@@ -73,9 +78,13 @@ public class WxSendMsgServer {
     }
 
 
-    public void sendPosterMessage(List<WxMpTemplateMessage> messages, WxUser wxUser){
+    /**
+     * 发送海报消息
+     * @param message
+     * @param wxUser
+     */
+    public void sendPosterMessage(WxMpTemplateMessage message, WxUser wxUser){
         String openId = wxUser.getOpenId();
-        WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent()) && StringUtils.isNotBlank(message.getRepMediaId());
         if (hasAvailableMessage) {
             File poster = getPosterFile(openId, message, wxUser.getAppId());
