@@ -1,30 +1,31 @@
 package com.ruoyi.project.weixin.controller;
 
-import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
-import com.ruoyi.project.weixin.entity.WxActivityTemplate;
-import com.ruoyi.project.weixin.entity.WxMp;
-import com.ruoyi.project.weixin.entity.WxUser;
-import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
-import com.ruoyi.project.weixin.service.IWxMpService;
-import com.ruoyi.project.weixin.service.WxUserService;
-import com.ruoyi.project.weixin.utils.LocalDateTimeUtils;
+import com.ruoyi.project.weixin.dto.WxMsgDTO;
+import com.ruoyi.project.weixin.entity.*;
+import com.ruoyi.project.weixin.mapper.WxActivityTemplateMessageMapper;
+import com.ruoyi.project.weixin.server.WxSendMsgServer;
+import com.ruoyi.project.weixin.service.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpService;
+import me.chanjar.weixin.mp.bean.kefu.WxMpKefuMessage;
 import me.chanjar.weixin.mp.bean.result.WxMpOAuth2AccessToken;
 import me.chanjar.weixin.mp.bean.result.WxMpUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,14 +45,25 @@ public class WxMpOpenController extends BaseController {
 
     private final IWxMpService myWxMpService;
 
-//    private final WxUserService wxUserService;
+    private final WxSendMsgServer wxSendMsgServer;
 
     private final IWxActivityTemplateService wxActivityTemplateService;
+
+    private final IWxMpTemplateMessageService wxMpTemplateMessageService;
 
     private final WxMpService wxMpService;
 
     @Autowired
     private WxUserService wxUserService;
+
+
+    @ApiOperation("获取access_token")
+    @ApiImplicitParam(name = "appId", value = "获取access_token", dataType = "String",required = true)
+    @GetMapping("/access_token")
+    public AjaxResult getAccessToken(@RequestParam(value = "appId") String appId) throws WxErrorException {
+        String accessToken = wxMpService.switchoverTo(appId).getAccessToken();
+        return AjaxResult.success(accessToken);
+    }
 
 
     @ApiOperation("测试用open接口")
@@ -60,6 +72,41 @@ public class WxMpOpenController extends BaseController {
         String result = "hello_env_" + str;
         logger.debug("hello,env:{},str:{}", str);
         return result;
+    }
+
+
+    @ApiOperation("获取活动模版")
+    @GetMapping("/template")
+    public List<WxMpTemplateMessage> getActivityTemplate(@RequestParam(value = "appId") String appId) {
+        logger.debug("【getActivityTemplate】appId:{}",appId);
+        List<WxMpTemplateMessage> list = wxMpTemplateMessageService.list(
+                Wrappers.<WxMpTemplateMessage>lambdaQuery()
+                        .eq(WxMpTemplateMessage::getAppId, appId));
+        return list;
+    }
+
+
+    @ApiOperation("发送文本消息")
+    @PostMapping("/send/text_msg")
+    public void sendGzhTextMsg(@RequestBody List<WxMsgDTO> wxMsgDTOs) {
+        wxMsgDTOs.forEach(t -> {
+            String openId = t.getOpenId();
+            //查询用户
+            WxUser wxUser = wxUserService.getOne(Wrappers.<WxUser>lambdaQuery().eq(WxUser::getOpenId, openId).last("limit 0,1"), false);
+            String content = t.getContent();
+            wxSendMsgServer.sendTextMessage(content,wxUser);
+        });
+
+
+
+    }
+
+    @ApiOperation("发送海报消息")
+    @PostMapping("/send/poster_msg")
+    public void sendGzhPosterMsg(@RequestBody List<WxMsgDTO> wxMsgDTO) {
+
+
+
     }
 
 
@@ -135,8 +182,5 @@ public class WxMpOpenController extends BaseController {
         }
         return AjaxResult.success(map);
     }
-
-
-
 
 }

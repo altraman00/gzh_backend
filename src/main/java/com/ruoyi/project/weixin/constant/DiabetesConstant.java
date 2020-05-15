@@ -18,10 +18,10 @@ public class DiabetesConstant {
     public static String DIABETES_TESTING_USER_SUBCRIBE_API = "/user/gzh/subscribe";
 
     /**糖知家，场景，已经关注公众号**/
-    public static String DIABETES_SCENE_SUBSCRIBED_VIPCN_YES = "has_subscribed_vipcn";
+    public static String DIABETES_SCENE_HAS_TESTING_REPORT = "has_testing_report";
 
     /**糖知家，场景，未关注公众号**/
-    public static String DIABETES_SCENE_SUBSCRIBED_VIPCN_NO = "hasnot_subscribed_vipcn";
+    public static String DIABETES_SCENE_NOT_HAS_TESTING_REPORT = "not_has_testing_report";
 
     /**
      * 占位信息
