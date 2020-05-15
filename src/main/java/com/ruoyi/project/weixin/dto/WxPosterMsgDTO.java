@@ -21,6 +21,6 @@ public class WxPosterMsgDTO {
     private String openId;
 
     @ApiModelProperty( "海报消息模版")
-    WxMpTemplateMessage posterMsgTemplate;
+    WxMpTemplateMessage wxMpTemplateMessage;
 
 }
