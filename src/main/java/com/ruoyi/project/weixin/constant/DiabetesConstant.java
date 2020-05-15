@@ -11,11 +11,14 @@ package com.ruoyi.project.weixin.constant;
  */
 public class DiabetesConstant {
 
-    /**糖知家查看报告 /testing/report?openId=xxx**/
-    public static String DIABETES_TESTING_REPORT_API = "/testing/report";
+    public final static String EVENT_SUBSCRIBE = "subscribe";
+    public final static String EVENT_UNSUBSCRIBE = "unsubscribe";
+
+    /**糖知家查看报告 /open/portal**/
+    public static String DIABETES_TESTING_PORTAL_API = "/open/portal";
 
     /**糖知家更新公众号关注状态**/
-    public static String DIABETES_TESTING_USER_SUBCRIBE_API = "/user/gzh/subscribe";
+    public static String DIABETES_TESTING_USER_SUBCRIBE_API = "/open/portal";
 
     /**糖知家，场景，已经关注公众号**/
     public static String DIABETES_SCENE_HAS_TESTING_REPORT = "has_testing_report";
