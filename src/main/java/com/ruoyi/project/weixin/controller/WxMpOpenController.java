@@ -7,10 +7,16 @@ import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.dto.WxMsgDTO;
-import com.ruoyi.project.weixin.entity.*;
-import com.ruoyi.project.weixin.mapper.WxActivityTemplateMessageMapper;
+import com.ruoyi.project.weixin.dto.WxPosterMsgDTO;
+import com.ruoyi.project.weixin.entity.WxActivityTemplate;
+import com.ruoyi.project.weixin.entity.WxMp;
+import com.ruoyi.project.weixin.entity.WxMpTemplateMessage;
+import com.ruoyi.project.weixin.entity.WxUser;
 import com.ruoyi.project.weixin.server.WxSendMsgServer;
-import com.ruoyi.project.weixin.service.*;
+import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
+import com.ruoyi.project.weixin.service.IWxMpService;
+import com.ruoyi.project.weixin.service.IWxMpTemplateMessageService;
+import com.ruoyi.project.weixin.service.WxUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -18,7 +24,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpService;
-import me.chanjar.weixin.mp.bean.kefu.WxMpKefuMessage;
 import me.chanjar.weixin.mp.bean.result.WxMpOAuth2AccessToken;
 import me.chanjar.weixin.mp.bean.result.WxMpUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,12 +105,11 @@ public class WxMpOpenController extends BaseController {
 
     @ApiOperation("发送海报消息")
     @PostMapping("/send/poster_msg")
-    public void sendGzhPosterMsg(@RequestBody List<WxMsgDTO> wxMsgDTO) {
-
-        WxMpTemplateMessage message = null;
-        WxUser wxUser = null;
-
-        wxSendMsgServer.sendPosterMessage(message,wxUser);
+    public void sendGzhPosterMsg(@RequestBody WxPosterMsgDTO posterMsgDTO) {
+        WxMpTemplateMessage posterMsgTemplate = posterMsgDTO.getPosterMsgTemplate();
+        String openId = posterMsgDTO.getOpenId();
+        WxUser wxUser = wxUserService.getOne(Wrappers.<WxUser>lambdaQuery().eq(WxUser::getOpenId, openId).last("limit 0,1"), false);
+        wxSendMsgServer.sendPosterMessage(posterMsgTemplate,wxUser);
 
     }
 

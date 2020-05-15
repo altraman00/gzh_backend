@@ -31,4 +31,7 @@ public class WxMsgDTO {
     @ApiModelProperty( "消息分类（1、用户发给公众号；2、公众号发给用户；")
     private String type;
 
+    @ApiModelProperty( "消息id")
+    private String wxMpTempleteMsgId;
+
 }
