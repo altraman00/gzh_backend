@@ -12,6 +12,7 @@ import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.entity.*;
 import com.ruoyi.project.weixin.schedule.SchedulingRunnable;
 import com.ruoyi.project.weixin.schedule.config.CronTaskRegistrar;
+import com.ruoyi.project.weixin.server.WxSendMsgServer;
 import com.ruoyi.project.weixin.service.IWxActivityTemplateMessageService;
 import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
 import com.ruoyi.project.weixin.service.IWxMpService;
@@ -79,6 +80,8 @@ public class WxActivityTemplateController extends BaseController {
     private final HelpActivityServiceImpl helpActivityService;
 
     private final CronTaskRegistrar cronTaskRegistrar;
+
+    private final WxSendMsgServer wxSendMsgServer;
 
     @ApiOperation("查询默认活动模板")
     @GetMapping("/template/list")
@@ -238,7 +241,7 @@ public class WxActivityTemplateController extends BaseController {
                 roundHead = Thumbnails.of(roundHead).size(message.getAvatarSize(), message.getAvatarSize()).asBufferedImage();
                 // 处理海报
                 File poster = File.createTempFile("temp",".jpg");
-                helpActivityService.generatorPoster(message,inputStream,poster,qrCodeBuffer,roundHead);
+                wxSendMsgServer.generatorPoster(message,inputStream,poster,qrCodeBuffer,roundHead);
                 Map<String,Object> result = new HashMap<>(4);
                 String posterBase64 = null;
                 try {

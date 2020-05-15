@@ -10,6 +10,7 @@ import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.constant.HelpActivityConstant;
 import com.ruoyi.project.weixin.dto.HelpInfoDTO;
 import com.ruoyi.project.weixin.entity.*;
+import com.ruoyi.project.weixin.server.WxSendMsgServer;
 import com.ruoyi.project.weixin.service.*;
 import com.ruoyi.project.weixin.service.impl.HelpActivityServiceImpl;
 import io.swagger.annotations.ApiImplicitParam;
@@ -60,6 +61,8 @@ public class WxActivityTaskController extends BaseController {
     private final IWxMpTemplateMessageService wxMpTemplateMessageService;
 
     private final HelpActivityServiceImpl helpActivityService;
+
+    private final WxSendMsgServer wxSendMsgServer;
 
     @ApiOperation("获取助力任务完成信息")
     @ApiImplicitParams({
@@ -152,7 +155,7 @@ public class WxActivityTaskController extends BaseController {
             Map<String,Object> result = new HashMap<>(4);
             StopWatch stopWatch = new StopWatch();
             stopWatch.start("create poster");
-            File poster = helpActivityService.getPosterFile(openId, message, appId);
+            File poster = wxSendMsgServer.getPosterFile(openId, message, appId);
             stopWatch.stop();
             try {
                 stopWatch.start("encode base64");
