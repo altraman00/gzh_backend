@@ -52,11 +52,21 @@ public class QRCodeUtil {
             return image;
         }
         // 插入图片
-        QRCodeUtil.insertImage(image, avatarImgPath, needCompress, avatarWidth, avatarHeight, qrcodeSize);
+        QRCodeUtil.insertAvatarImage(image, avatarImgPath, needCompress, avatarWidth, avatarHeight, qrcodeSize);
         return image;
     }
 
-    private static void insertImage(BufferedImage source, String avatarImgPath, boolean needCompress, int avatarWidth, int avatarHeight, int qrcodeSize) throws Exception {
+    /**
+     * 二维码中间插入头像
+     * @param source
+     * @param avatarImgPath
+     * @param needCompress
+     * @param avatarWidth
+     * @param avatarHeight
+     * @param qrcodeSize
+     * @throws Exception
+     */
+    private static void insertAvatarImage(BufferedImage source, String avatarImgPath, boolean needCompress, int avatarWidth, int avatarHeight, int qrcodeSize) throws Exception {
         File file = new File(avatarImgPath);
         if (!file.exists()) {
             System.err.println("" + avatarImgPath + "   该文件不存在！");

@@ -49,10 +49,10 @@ public class QrCodeMain {
         // 嵌入二维码的图片路径,如果不写或者为null则生成一个没有嵌入图片的纯净的二维码
         String imgPath = "/Users/admin/Desktop/hanlp/timg.jpeg";
         // 生成的二维码的路径及名称
-        String destPath = "/Users/admin/Desktop/hanlp/jam.jpg";
+        String destPath = "/Users/admin/Desktop/hanlp/jam2.jpg";
         //生成二维码,needCompress=true 表示将嵌入二维码的图片进行压缩，如果为“false”则表示不压缩
 //        QRCodeUtil.encode(text, imgPath, destPath, true,60,60,300);
-        QRCodeUtil.encode(text, null, destPath, true,0,0,300);
+        QRCodeUtil.encode(text, null, destPath, false,0,0,430);
         // 解析二维码,destPath：将要解析的二维码的存放路径
         String str = QRCodeUtil.decode(destPath);
         // 打印出解析出的内容
