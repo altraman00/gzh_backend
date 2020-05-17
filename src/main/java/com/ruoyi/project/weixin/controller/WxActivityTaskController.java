@@ -155,7 +155,7 @@ public class WxActivityTaskController extends BaseController {
             Map<String,Object> result = new HashMap<>(4);
             StopWatch stopWatch = new StopWatch();
             stopWatch.start("create poster");
-            File poster = wxSendMsgServer.getPosterFile(openId, message, appId);
+            File poster = wxSendMsgServer.getPosterFile(openId, message, appId,null);
             stopWatch.stop();
             try {
                 stopWatch.start("encode base64");

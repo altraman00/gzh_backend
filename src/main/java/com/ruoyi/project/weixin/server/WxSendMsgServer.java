@@ -26,7 +26,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.List;
 
 /**
  * @Project : gzh_backend
@@ -84,17 +83,19 @@ public class WxSendMsgServer {
      * @param wxUser
      */
     public void sendPosterMessage(WxMpTemplateMessage message, WxUser wxUser){
+        log.info("【sendPosterMessage】,message:{},wxUser:{}",message,wxUser);
         String openId = wxUser.getOpenId();
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent()) && StringUtils.isNotBlank(message.getRepMediaId());
         if (hasAvailableMessage) {
-            File poster = getPosterFile(openId, message, wxUser.getAppId());
+            String qrCodeUrl = message.getRepContent();
+            File poster = getPosterFile(openId, message, wxUser.getAppId(),qrCodeUrl);
             try {
                 // 将海报上传到临时素材库
                 WxMediaUploadResult uploadResult = wxMpService.switchoverTo(wxUser.getAppId()).getMaterialService().mediaUpload(ConfigConstant.MESSAGE_REP_TYPE_IMAGE, poster);
-                log.info("上传海报到临时素材库，上传结果:{}",uploadResult);
+                log.info("【sendPosterMessage】上传海报到临时素材库，上传结果:{}",uploadResult);
                 sendImageMessage(uploadResult,wxUser);
             } catch (WxErrorException e) {
-                log.error("发送活动海报消息异常，消息模板id:{},openId:{}",message.getId(),openId,e);
+                log.error("【sendPosterMessage】发送活动海报消息异常，消息模板id:{},openId:{}",message.getId(),openId,e);
             } finally {
                 if (poster.exists()) {
                     poster.delete();
@@ -113,7 +114,7 @@ public class WxSendMsgServer {
                     .build();
             wxMpService.switchoverTo(wxUser.getAppId()).getKefuService().sendKefuMessage(wxMpKefuMessage);
         } catch (Exception e) {
-            log.error("发送客服消息失败，openId：{}",wxUser.getOpenId());
+            log.error("sendImageMessage发送客服消息失败，openId：{}",wxUser.getOpenId());
         }
         // 记录数据库
         WxMsg wxMsg = new WxMsg();
@@ -129,7 +130,7 @@ public class WxSendMsgServer {
     }
 
 
-    public File getPosterFile(String openId, WxMpTemplateMessage message, String appId) {
+    public File getPosterFile(String openId, WxMpTemplateMessage message, String appId,String qrCodeUrl) {
         StopWatch stopWatch = new StopWatch();
         String messageId = message.getId();
         // 先获取海报图片
@@ -170,7 +171,14 @@ public class WxSendMsgServer {
         try {
             poster = File.createTempFile("temp",".jpg");
             // 先处理二维码 设置长宽
-            BufferedImage qrCodeBuffer = Thumbnails.of(qrCode).size(message.getQrcodeSize(), message.getQrcodeSize()).asBufferedImage();
+            BufferedImage qrCodeBuffer = null;
+            //如果指定的二维码路径为空，则使用appId自动生成二维码，否则使用指定的路径生成二维码
+            if(StringUtils.isEmpty(qrCodeUrl)){
+                qrCodeBuffer = Thumbnails.of(qrCode).size(message.getQrcodeSize(), message.getQrcodeSize()).asBufferedImage();
+            }else{
+                //通过Java生成二维码
+
+            }
             // 处理头像
             URL url = new URL(headImgUrl);
             // 获取圆形头像
@@ -193,6 +201,7 @@ public class WxSendMsgServer {
         builder.watermark(new Coordinate(Integer.parseInt(avatarCoordinate[0]),Integer.parseInt(avatarCoordinate[1])), roundHead,1.0f);
         // 拼接二维码
         String[] qrcodeCoordinate = message.getQrcodeCoordinate().split(",");
+        log.info("【sendPosterMessage】generatorPoster:{}",qrcodeCoordinate);
         builder.watermark(new Coordinate(Integer.parseInt(qrcodeCoordinate[0]),Integer.parseInt(qrcodeCoordinate[1])), qrCodeBuffer,1.0f);
         builder.toFile(poster);
         if (poster.length() > HelpActivityConstant.POSTER_SIZE ) {
