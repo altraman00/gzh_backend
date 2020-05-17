@@ -34,7 +34,7 @@ public class QRCodeUtil {
 //    // 二维码尺寸
 //    private static final int QRCODE_SIZE = 300;
 
-    private static BufferedImage createImage(String content, String imgPath, boolean needCompress, int qrcodeWidth, int qrcodeHeight, int qrcodeSize) throws Exception {
+    private static BufferedImage createImage(String content, String avatarImgPath, boolean needCompress, int avatarWidth, int avatarHeight, int qrcodeSize) throws Exception {
         Hashtable hints = new Hashtable();
         hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
         hints.put(EncodeHintType.CHARACTER_SET, CHARSET);
@@ -48,30 +48,30 @@ public class QRCodeUtil {
                 image.setRGB(x, y, bitMatrix.get(x, y) ? 0xFF000000 : 0xFFFFFFFF);
             }
         }
-        if (imgPath == null || "".equals(imgPath)) {
+        if (avatarImgPath == null || "".equals(avatarImgPath)) {
             return image;
         }
         // 插入图片
-        QRCodeUtil.insertImage(image, imgPath, needCompress, qrcodeWidth, qrcodeHeight, qrcodeSize);
+        QRCodeUtil.insertImage(image, avatarImgPath, needCompress, avatarWidth, avatarHeight, qrcodeSize);
         return image;
     }
 
-    private static void insertImage(BufferedImage source, String imgPath, boolean needCompress, int qrcodeWidth, int qrcodeHeight, int qrcodeSize) throws Exception {
-        File file = new File(imgPath);
+    private static void insertImage(BufferedImage source, String avatarImgPath, boolean needCompress, int avatarWidth, int avatarHeight, int qrcodeSize) throws Exception {
+        File file = new File(avatarImgPath);
         if (!file.exists()) {
-            System.err.println("" + imgPath + "   该文件不存在！");
+            System.err.println("" + avatarImgPath + "   该文件不存在！");
             return;
         }
-        Image src = ImageIO.read(new File(imgPath));
+        Image src = ImageIO.read(new File(avatarImgPath));
         int width = src.getWidth(null);
         int height = src.getHeight(null);
         // 压缩LOGO
         if (needCompress) {
-            if (width > qrcodeWidth) {
-                width = qrcodeWidth;
+            if (width > avatarWidth) {
+                width = avatarWidth;
             }
-            if (height > qrcodeHeight) {
-                height = qrcodeHeight;
+            if (height > avatarHeight) {
+                height = avatarHeight;
             }
             Image image = src.getScaledInstance(width, height, Image.SCALE_SMOOTH);
             BufferedImage tag = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -92,16 +92,16 @@ public class QRCodeUtil {
         graph.dispose();
     }
 
-    public static void encode(String content, String imgPath, String destPath, boolean needCompress, int qrcodeWidth, int qrcodeHeight, int qrcodeSize) throws Exception {
-        BufferedImage image = QRCodeUtil.createImage(content, imgPath, needCompress, qrcodeWidth, qrcodeHeight, qrcodeSize);
+    public static void encode(String content, String avatarImgPath, String destPath, boolean needCompress, int avatarWidth, int avatarHeight, int qrcodeSize) throws Exception {
+        BufferedImage image = QRCodeUtil.createImage(content, avatarImgPath, needCompress, avatarWidth, avatarHeight, qrcodeSize);
         mkdirs(destPath);
         // String file = new Random().nextInt(99999999)+".jpg";
         // ImageIO.write(image, FORMAT_NAME, new File(destPath+"/"+file));
         ImageIO.write(image, FORMAT_NAME, new File(destPath));
     }
 
-    public static BufferedImage encode(String content, String imgPath, boolean needCompress, int qrcodeWidth, int qrcodeHeight, int qrcodeSize) throws Exception {
-        BufferedImage image = QRCodeUtil.createImage(content, imgPath, needCompress, qrcodeWidth, qrcodeHeight, qrcodeSize);
+    public static BufferedImage encode(String content, String avatarImgPath, boolean needCompress, int avatarWidth, int avatarHeight, int qrcodeSize) throws Exception {
+        BufferedImage image = QRCodeUtil.createImage(content, avatarImgPath, needCompress, avatarWidth, avatarHeight, qrcodeSize);
         return image;
     }
 
@@ -113,8 +113,8 @@ public class QRCodeUtil {
         }
     }
 
-    public static void encode(String content, String imgPath, String destPath, int qrcodeWidth, int qrcodeHeight, int qrcodeSize) throws Exception {
-        QRCodeUtil.encode(content, imgPath, destPath, false, qrcodeWidth, qrcodeHeight, qrcodeSize);
+    public static void encode(String content, String avatarImgPath, String destPath, int avatarWidth, int avatarHeight, int qrcodeSize) throws Exception {
+        QRCodeUtil.encode(content, avatarImgPath, destPath, false, avatarWidth, avatarHeight, qrcodeSize);
     }
     // 被注释的方法
     /*
@@ -123,18 +123,18 @@ public class QRCodeUtil {
      * needCompress); }
      */
 
-    public static void encode(String content, String destPath, int qrcodeWidth, int qrcodeHeight, int qrcodeSize) throws Exception {
-        QRCodeUtil.encode(content, null, destPath, false, qrcodeWidth, qrcodeHeight, qrcodeSize);
+    public static void encode(String content, String destPath, int avatarWidth, int avatarHeight, int qrcodeSize) throws Exception {
+        QRCodeUtil.encode(content, null, destPath, false, avatarWidth, avatarHeight, qrcodeSize);
     }
 
-    public static void encode(String content, String imgPath, OutputStream output, boolean needCompress, int qrcodeWidth, int qrcodeHeight, int qrcodeSize)
+    public static void encode(String content, String avatarImgPath, OutputStream output, boolean needCompress, int avatarWidth, int avatarHeight, int qrcodeSize)
             throws Exception {
-        BufferedImage image = QRCodeUtil.createImage(content, imgPath, needCompress, qrcodeWidth, qrcodeHeight, qrcodeSize);
+        BufferedImage image = QRCodeUtil.createImage(content, avatarImgPath, needCompress, avatarWidth, avatarHeight, qrcodeSize);
         ImageIO.write(image, FORMAT_NAME, output);
     }
 
-    public static void encode(String content, OutputStream output, int qrcodeWidth, int qrcodeHeight, int qrcodeSize) throws Exception {
-        QRCodeUtil.encode(content, null, output, false, qrcodeWidth, qrcodeHeight, qrcodeSize);
+    public static void encode(String content, OutputStream output, int avatarWidth, int avatarHeight, int qrcodeSize) throws Exception {
+        QRCodeUtil.encode(content, null, output, false, avatarWidth, avatarHeight, qrcodeSize);
     }
 
     public static String decode(File file) throws Exception {

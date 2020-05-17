@@ -1,6 +1,7 @@
 package com.ruoyi.project.weixin.server;
 
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.qrcode.QRCodeUtil;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.constant.HelpActivityConstant;
 import com.ruoyi.project.weixin.entity.WxMpTemplateMessage;
@@ -87,7 +88,8 @@ public class WxSendMsgServer {
         String openId = wxUser.getOpenId();
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent()) && StringUtils.isNotBlank(message.getRepMediaId());
         if (hasAvailableMessage) {
-            String qrCodeUrl = message.getRepContent();
+            String qrCodeUrl = message.getRepUrl();
+            //qrCodeUrl=null时，生成的是公众号的二维码，不为null时生成的qrCodeUrl里面带的链接地址的二维码
             File poster = getPosterFile(openId, message, wxUser.getAppId(),qrCodeUrl);
             try {
                 // 将海报上传到临时素材库
@@ -130,6 +132,15 @@ public class WxSendMsgServer {
     }
 
 
+    /**
+     * qrCodeUrl为null时，生成的是公众号的二维码，
+     * qrCodeUrl不为null时生成的qrCodeUrl里面带的链接地址的二维码
+     * @param openId
+     * @param message
+     * @param appId
+     * @param qrCodeUrl
+     * @return
+     */
     public File getPosterFile(String openId, WxMpTemplateMessage message, String appId,String qrCodeUrl) {
         StopWatch stopWatch = new StopWatch();
         String messageId = message.getId();
@@ -177,7 +188,7 @@ public class WxSendMsgServer {
                 qrCodeBuffer = Thumbnails.of(qrCode).size(message.getQrcodeSize(), message.getQrcodeSize()).asBufferedImage();
             }else{
                 //通过Java生成二维码
-
+                qrCodeBuffer = QRCodeUtil.encode(qrCodeUrl,null,true,0,0,message.getQrcodeSize());
             }
             // 处理头像
             URL url = new URL(headImgUrl);
