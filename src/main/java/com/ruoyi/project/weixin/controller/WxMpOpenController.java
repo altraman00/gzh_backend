@@ -80,6 +80,18 @@ public class WxMpOpenController extends BaseController {
     }
 
 
+    @ApiOperation("查询用户信息")
+    @GetMapping("/userinfo")
+    public AjaxResult checkUserSubscribeState(
+            @RequestParam(value = "openId") String openId
+            ,@RequestParam(value = "appId") String appId) {
+        logger.debug("【getActivityTemplate】appId:{}",appId);
+        WxUser one = wxUserService.getOne(Wrappers.<WxUser>lambdaQuery()
+                .eq(WxUser::getOpenId, openId)
+                .eq(WxUser::getAppId, appId).last("limit 0,1"), false);
+        return AjaxResult.success(one);
+    }
+
     @ApiOperation("获取活动模版")
     @GetMapping("/template")
     public List<WxMpTemplateMessage> getActivityTemplate(@RequestParam(value = "appId") String appId) {
@@ -110,7 +122,6 @@ public class WxMpOpenController extends BaseController {
         String openId = posterMsgDTO.getOpenId();
         WxUser wxUser = wxUserService.getOne(Wrappers.<WxUser>lambdaQuery().eq(WxUser::getOpenId, openId).last("limit 0,1"), false);
         wxSendMsgServer.sendPosterMessage(posterMsgTemplate,wxUser);
-
     }
 
 
