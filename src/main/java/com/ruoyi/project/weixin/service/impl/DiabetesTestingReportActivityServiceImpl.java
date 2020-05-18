@@ -44,7 +44,11 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
     @Async
     public void subscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxActivityTemplate template, String openId) {
         log.info("【DiabetesTestingSubscrib】subscrib event inMessage:[{}],wxMp:[{}],template[{}],openId[{}]", inMessage, wxMp, template, openId);
-        sendSubscribeState(wxMp, openId,DiabetesConstant.EVENT_SUBSCRIBE);
+        try {
+            sendSubscribeState(wxMp, openId,DiabetesConstant.EVENT_SUBSCRIBE);
+        } catch (Exception e) {
+            log.error("【DiabetesTestingSubscrib】调取糖知家关注接口异常");
+        }
     }
 
     /**
@@ -59,7 +63,11 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
     @Async
     public void unsubscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxActivityTemplate template, String openId) {
         log.info("【DiabetesTestingSubscrib】unsubscrib event inMessage:[{}],wxMp:[{}],template[{}],openId[{}]", inMessage, wxMp, template, openId);
-        sendSubscribeState(wxMp, openId,DiabetesConstant.EVENT_UNSUBSCRIBE);
+        try {
+            sendSubscribeState(wxMp, openId,DiabetesConstant.EVENT_UNSUBSCRIBE);
+        } catch (Exception e) {
+            log.error("【DiabetesTestingSubscrib】调取糖知家取消关注接口异常");
+        }
     }
 
 
