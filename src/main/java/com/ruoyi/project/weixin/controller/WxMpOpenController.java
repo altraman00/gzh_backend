@@ -138,11 +138,13 @@ public class WxMpOpenController extends BaseController {
         WxUser byOpenIdAndAppId = wxUserService.getByOpenIdAndAppId(openId, appId);
         if(byOpenIdAndAppId == null){
             byOpenIdAndAppId = new WxUser();
+            byOpenIdAndAppId.setAppId(appId);
+            byOpenIdAndAppId.setOpenId(openId);
             byOpenIdAndAppId.setAppType(ConfigConstant.SUBSCRIBE_TYPE_WEBLICENS);
             byOpenIdAndAppId.setSubscribe(ConfigConstant.SUBSCRIBE_TYPE_NO);
             byOpenIdAndAppId.setSubscribeScene("ADD_SCENE_OTHERS");
-            byOpenIdAndAppId.setOpenId(openId);
-            byOpenIdAndAppId.setAppId(appId);
+            byOpenIdAndAppId.setUserSource(wxUser.getUserSource());
+            byOpenIdAndAppId.setParentOpenid(wxUser.getParentOpenid());
             wxUserService.save(byOpenIdAndAppId);
         }
 
