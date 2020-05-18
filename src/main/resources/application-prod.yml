@@ -77,4 +77,4 @@ wx:
 # 糖知家测评项目地址
 sunlands:
     diabetes-testing:
-        url: http://act-fec.ministudy.com/diabetes/api
+        url: http://192.168.1.13:8381
