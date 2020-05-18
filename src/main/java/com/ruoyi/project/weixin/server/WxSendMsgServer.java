@@ -187,6 +187,8 @@ public class WxSendMsgServer {
             if(StringUtils.isEmpty(qrCodeUrl)){
                 qrCodeBuffer = Thumbnails.of(qrCode).size(message.getQrcodeSize(), message.getQrcodeSize()).asBufferedImage();
             }else{
+                //将分享着的openId带到二维码中
+                qrCodeUrl = String.format(qrCodeUrl,openId);
                 //通过Java生成二维码
                 qrCodeBuffer = QRCodeUtil.encode(qrCodeUrl,null,true,0,0,message.getQrcodeSize());
             }
