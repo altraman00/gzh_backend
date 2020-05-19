@@ -152,4 +152,14 @@ private static final long serialVersionUID = 1L;
 	 * 商城用户ID
 	 */
 	private String mallUserId;
+
+    /**
+     * 上一级用户openid
+     */
+	private String parentOpenid;
+
+    /**
+     * 用户来源 diabetes_h5:糖知家
+     */
+	private String userSource;
 }

@@ -65,3 +65,8 @@ wx:
               token: smallprogram
               aesKey:
               name: 测试微信号
+
+# 糖知家测评项目地址
+sunlands:
+    diabetes-testing:
+        url: http://127.0.0.1:8081
