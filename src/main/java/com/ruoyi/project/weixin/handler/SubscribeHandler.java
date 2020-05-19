@@ -67,7 +67,7 @@ public class SubscribeHandler extends AbstractHandler {
                 return wxMpXmlOutMessage;
             }
         } catch (Exception e) {
-            log.error("用户关注出错："+e.getMessage());
+            log.error("用户关注出错："+e.getMessage(),e);
         }
         return null;
     }

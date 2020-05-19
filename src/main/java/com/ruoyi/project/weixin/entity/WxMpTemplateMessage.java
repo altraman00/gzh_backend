@@ -99,4 +99,7 @@ public class WxMpTemplateMessage extends BaseEntity {
      * 排序
      */
     private Integer sortNo;
+
+
+
 }
