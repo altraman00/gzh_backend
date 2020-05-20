@@ -79,26 +79,6 @@ public class WxActivityTemplateController extends BaseController {
 
     private final IWxMpActivityTemplateService IWxMpActivityTemplateService;
 
-
-    @ApiOperation("查询公众号绑定的活动模版")
-    @GetMapping("/mp/template/list")
-    @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")
-    public AjaxResult getMpWxActivityTemplateList(@RequestParam(value = "appId") String appId){
-        log.info("getMpWxActivityTemplateList,appId:{}",appId);
-        List<WxMpActivityTemplate> activityTemplatesByAppId = IWxMpActivityTemplateService.getActivityTemplatesByAppId(appId);
-        return AjaxResult.success(activityTemplatesByAppId);
-    }
-
-    @ApiOperation("启动/停止公众号绑定的活动模版")
-    @GetMapping("/mp/template/list")
-    @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")
-    public AjaxResult operMpWxActivityTemplateList(@RequestParam(value = "appId") String appId){
-        log.info("getMpWxActivityTemplateList,appId:{}",appId);
-        List<WxMpActivityTemplate> activityTemplatesByAppId = IWxMpActivityTemplateService.getActivityTemplatesByAppId(appId);
-        return AjaxResult.success(activityTemplatesByAppId);
-    }
-
-
     @ApiOperation("查询默认活动模板")
     @GetMapping("/template/list")
     @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")

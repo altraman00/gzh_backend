@@ -1,5 +1,6 @@
 package com.ruoyi.project.weixin.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.project.weixin.entity.WxMp;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
@@ -55,6 +56,24 @@ public class WxMpActivityTemplateServiceImpl implements IWxMpActivityTemplateSer
                 .eq(WxMpActivityTemplate::getAppId, appId)
                 .eq(WxMpActivityTemplate::getTemplateId, templateId));
         return wxMpActivityTemplate;
+    }
+
+    @Override
+    public void enableActivityTemplates(String id, boolean activityEnable) {
+        WxMpActivityTemplate template = new WxMpActivityTemplate();
+        template.setActivityEnable(activityEnable);
+        UpdateWrapper<WxMpActivityTemplate> templateUpdateWrapper = new UpdateWrapper<>();
+        templateUpdateWrapper.eq("id", id);
+        wxMpActivityTemplateMapper.update(template,templateUpdateWrapper);
+    }
+
+    @Override
+    public void deletedActivityTemplates(String id, boolean deletedFlag) {
+        WxMpActivityTemplate template = new WxMpActivityTemplate();
+        template.setDelFlag(deletedFlag ? "1" : "0");
+        UpdateWrapper<WxMpActivityTemplate> templateUpdateWrapper = new UpdateWrapper<>();
+        templateUpdateWrapper.eq("id", id);
+        wxMpActivityTemplateMapper.update(template,templateUpdateWrapper);
     }
 
 
