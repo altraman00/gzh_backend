@@ -77,8 +77,8 @@ public class WxActivityTaskController extends BaseController {
         WxMp wxMp = iWxMpService.getByAppId(appId);
         if(wxMp != null){
             WxUser wxuser = wxUserService.getByOpenIdAndAppId(openId, appId);
-            WxMpActivityTemplete wxMpActivityTemplete = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndClassName(appId,helpActivityService.getActivityServiceImplClassName());
-            String templateId = wxMpActivityTemplete.getTemplateId();
+            WxMpActivityTemplate wxMpActivityTemplate = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndClassName(appId,helpActivityService.getActivityServiceImplClassName());
+            String templateId = wxMpActivityTemplate.getTemplateId();
             String wxUserId = wxuser.getId();
             WxActivityTask wxActivityTask = wxActivityTaskService.getOne(Wrappers.<WxActivityTask>lambdaQuery()
                     .eq(WxActivityTask::getWxUserId, wxUserId)
@@ -149,8 +149,8 @@ public class WxActivityTaskController extends BaseController {
     @GetMapping("/help/poster")
     public AjaxResult getTaskPoster(@RequestParam(value = "openId") String openId,@RequestParam(value = "appId") String appId){
         QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
-        WxMpActivityTemplete wxMpActivityTemplete = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndClassName(appId,helpActivityService.getActivityServiceImplClassName());
-        String templateId = wxMpActivityTemplete.getTemplateId();
+        WxMpActivityTemplate wxMpActivityTemplate = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndClassName(appId,helpActivityService.getActivityServiceImplClassName());
+        String templateId = wxMpActivityTemplate.getTemplateId();
         queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,templateId);
         List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
         WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);

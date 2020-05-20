@@ -4,11 +4,10 @@ import com.ruoyi.common.utils.SpringBeanUtil;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.project.weixin.constant.WxEvenConstant;
 import com.ruoyi.project.weixin.entity.WxMp;
-import com.ruoyi.project.weixin.entity.WxMpActivityTemplete;
+import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 import com.ruoyi.project.weixin.service.ActivityService;
-import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
 import com.ruoyi.project.weixin.service.IWxMpService;
-import com.ruoyi.project.weixin.service.impl.WxMpActivityTempleteServiceImpl;
+import com.ruoyi.project.weixin.service.impl.WxMpActivityTemplateServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
@@ -32,7 +31,7 @@ public class PortalAspect {
 
     private final IWxMpService iWxMpService;
 
-    private final WxMpActivityTempleteServiceImpl IWxMpActivityTemplateService;
+    private final WxMpActivityTemplateServiceImpl IWxMpActivityTemplateService;
 
     @Pointcut("execution(* com.ruoyi.project.weixin.controller.WxPortalController.post(..))")
     public void portal() {
@@ -52,13 +51,13 @@ public class PortalAspect {
             throw new IllegalArgumentException(String.format("未找到对应appid=[%s]的配置，请核实！", appId));
         }
         //遍历当前公众号所关联的所有活动模板
-        List<WxMpActivityTemplete> templateList =  IWxMpActivityTemplateService.getActivityTemplatesByAppId(wxMp.getAppId());
+        List<WxMpActivityTemplate> templateList =  IWxMpActivityTemplateService.getActivityTemplatesByAppId(wxMp.getAppId());
 
-        for(WxMpActivityTemplete wxMpActivityTemplete : templateList){
-            if(!wxMpActivityTemplete.isActivityEnable()){
+        for(WxMpActivityTemplate wxMpActivityTemplate : templateList){
+            if(!wxMpActivityTemplate.isActivityEnable()){
                 continue;
             }
-            String templateId = wxMpActivityTemplete.getTemplateId();
+            String templateId = wxMpActivityTemplate.getTemplateId();
 
             if (StringUtils.isBlank(templateId)) {
                 log.info("appId:[{}]无绑定活动模板，流程结束",appId);
@@ -70,7 +69,7 @@ public class PortalAspect {
             }
             String openId= (String) args[5];
 
-            WxMpActivityTemplete template = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndTemplateId(appId, templateId);
+            WxMpActivityTemplate template = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndTemplateId(appId, templateId);
 
             if(null != template){
                 String templateClass = template.getTemplateClass();

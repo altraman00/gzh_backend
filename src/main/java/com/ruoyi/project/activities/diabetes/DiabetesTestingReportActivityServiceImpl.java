@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.common.utils.http.HttpClient;
 import com.ruoyi.project.weixin.constant.DiabetesConstant;
 import com.ruoyi.project.weixin.entity.WxMp;
-import com.ruoyi.project.weixin.entity.WxMpActivityTemplete;
+import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxUser;
 import com.ruoyi.project.weixin.service.ActivityService;
 import com.ruoyi.project.weixin.service.WxUserService;
@@ -49,7 +49,7 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
 
     @Override
     @Async
-    public void subscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplete template, String openId) {
+    public void subscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplate template, String openId) {
         log.info("【DiabetesTestingSubscrib】subscrib event inMessage:[{}],wxMp:[{}],template[{}],openId[{}]", inMessage, wxMp, template, openId);
         try {
             sendSubscribeState(wxMp, openId,DiabetesConstant.EVENT_SUBSCRIBE);
@@ -68,7 +68,7 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
      */
     @Override
     @Async
-    public void unsubscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplete template, String openId) {
+    public void unsubscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplate template, String openId) {
         log.info("【DiabetesTestingSubscrib】unsubscrib event inMessage:[{}],wxMp:[{}],template[{}],openId[{}]", inMessage, wxMp, template, openId);
         try {
             sendSubscribeState(wxMp, openId,DiabetesConstant.EVENT_UNSUBSCRIBE);

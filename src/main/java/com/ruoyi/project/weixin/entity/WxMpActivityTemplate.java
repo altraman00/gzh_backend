@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.time.LocalDateTime;
+
 /**
  * @Project : gzh_backend
  * @Package Name : com.ruoyi.project.weixin.entity
@@ -17,7 +19,7 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-public class WxMpActivityTemplete extends BaseEntity {
+public class WxMpActivityTemplate extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
@@ -48,6 +50,11 @@ public class WxMpActivityTemplete extends BaseEntity {
     private Integer needNum;
 
     private String rewardUrl;
+
+    /**
+     * 活动启动时间
+     */
+    private LocalDateTime startTime;
 
 
     /**

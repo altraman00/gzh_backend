@@ -1,7 +1,7 @@
 package com.ruoyi.project.weixin.service;
 
 import com.ruoyi.project.weixin.entity.WxMp;
-import com.ruoyi.project.weixin.entity.WxMpActivityTemplete;
+import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 
 public interface ActivityService {
@@ -16,17 +16,17 @@ public interface ActivityService {
      * 关注公众号事件
      * @param inMessage
      * @param wxMp
-     * @param wxMpActivityTemplete
+     * @param wxMpActivityTemplate
      * @param openId
      */
-    void subscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplete wxMpActivityTemplete, String openId);
+    void subscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplate wxMpActivityTemplate, String openId);
 
     /**
      * 取消关注公众号事件
      * @param inMessage
      * @param wxMp
-     * @param wxMpActivityTemplete
+     * @param wxMpActivityTemplate
      * @param openId
      */
-    void unsubscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplete wxMpActivityTemplete, String openId);
+    void unsubscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplate wxMpActivityTemplate, String openId);
 }

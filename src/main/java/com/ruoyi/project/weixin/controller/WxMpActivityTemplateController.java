@@ -15,7 +15,7 @@ import com.ruoyi.framework.web.controller.BaseController;
  * @since 2020-05-20
  */
 @RestController
-@RequestMapping("/wx-mp-activity-templete")
+@RequestMapping("/wx-mp-activity-template")
 public class WxMpActivityTemplateController extends BaseController {
 
 }

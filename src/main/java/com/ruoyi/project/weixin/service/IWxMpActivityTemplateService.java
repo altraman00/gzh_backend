@@ -1,6 +1,6 @@
 package com.ruoyi.project.weixin.service;
 
-import com.ruoyi.project.weixin.entity.WxMpActivityTemplete;
+import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 
 import java.util.List;
 
@@ -15,11 +15,11 @@ import java.util.List;
  */
 public interface IWxMpActivityTemplateService {
 
-    List<WxMpActivityTemplete> getActivityTemplatesByAppId(String appId);
+    List<WxMpActivityTemplate> getActivityTemplatesByAppId(String appId);
 
-    List<WxMpActivityTemplete> getActivityTemplatesByAppIdentify(String appIdentify);
+    List<WxMpActivityTemplate> getActivityTemplatesByAppIdentify(String appIdentify);
 
-    WxMpActivityTemplete findActivityTemplateByAppIdAndClassName(String appId, String activityClassName);
+    WxMpActivityTemplate findActivityTemplateByAppIdAndClassName(String appId, String activityClassName);
 
-    WxMpActivityTemplete findActivityTemplateByAppIdAndTemplateId(String appId, String templateId);
+    WxMpActivityTemplate findActivityTemplateByAppIdAndTemplateId(String appId, String templateId);
 }

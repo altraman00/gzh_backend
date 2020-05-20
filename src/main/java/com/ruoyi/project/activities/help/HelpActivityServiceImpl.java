@@ -52,7 +52,7 @@ public class HelpActivityServiceImpl implements ActivityService {
 
     @Override
     @Async
-    public void subscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplete template, String openId) {
+    public void subscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplate template, String openId) {
         String eventKey = inMessage.getEventKey();
         String appId = wxMp.getAppId();
         String templateId = template.getTemplateId();
@@ -121,7 +121,7 @@ public class HelpActivityServiceImpl implements ActivityService {
     }
 
     @Override
-    public void unsubscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplete template, String openId) {
+    public void unsubscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplate template, String openId) {
 
     }
 
@@ -225,14 +225,14 @@ public class HelpActivityServiceImpl implements ActivityService {
             log.info("appId:[{}]已暂停活动，流程结束",appId);
             return;
         }
-        WxMpActivityTemplete wxMpActivityTemplete = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndClassName(appId,this.getActivityServiceImplClassName());
+        WxMpActivityTemplate wxMpActivityTemplate = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndClassName(appId,this.getActivityServiceImplClassName());
         QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId, wxMpActivityTemplete.getTemplateId());
+        queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId, wxMpActivityTemplate.getTemplateId());
         List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
         WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_SCHEDULE_INVITER)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
         if (hasAvailableMessage) {
-            List<WxUser> users =  wxUserMapper.getNotCompleteUser(appId, wxMpActivityTemplete.getTemplateId());
+            List<WxUser> users =  wxUserMapper.getNotCompleteUser(appId, wxMpActivityTemplate.getTemplateId());
             log.info("共查询到：{}个需要发送消息的用户",users.size());
             String content = message.getRepContent();
             for (WxUser wxUser : users) {

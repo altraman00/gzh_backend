@@ -2,7 +2,7 @@ package com.ruoyi.project.weixin.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
-import com.ruoyi.project.weixin.entity.WxMpActivityTemplete;
+import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMp;
 import com.ruoyi.project.weixin.entity.WxMpTemplateMessage;
 import com.ruoyi.project.weixin.mapper.WxMpTemplateMessageMapper;
@@ -49,9 +49,9 @@ public class WxMpTemplateMessageServiceImpl extends ServiceImpl<WxMpTemplateMess
         List<WxMpTemplateMessage> needPublishSchedule = new ArrayList<>();
         for (WxMp wxMp : list) {
             String appId = wxMp.getAppId();
-            List<WxMpActivityTemplete> activityTemplatesByAppId = IWxMpActivityTemplateService.getActivityTemplatesByAppId(appId);
+            List<WxMpActivityTemplate> activityTemplatesByAppId = IWxMpActivityTemplateService.getActivityTemplatesByAppId(appId);
             if(activityTemplatesByAppId != null && activityTemplatesByAppId.size()>0){
-                for(WxMpActivityTemplete template : activityTemplatesByAppId){
+                for(WxMpActivityTemplate template : activityTemplatesByAppId){
                     String templateId = template.getTemplateId();
                     List<WxMpTemplateMessage> scheduleMessages = wxMpTemplateMessageService.list(Wrappers.<WxMpTemplateMessage>lambdaQuery()
                             .eq(WxMpTemplateMessage::getTemplateId, templateId)

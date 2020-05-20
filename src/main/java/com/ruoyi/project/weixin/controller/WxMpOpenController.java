@@ -164,9 +164,9 @@ public class WxMpOpenController extends BaseController {
         queryWrapper.eq("app_identify",appIdentify);
         WxMp wxMp = myWxMpService.getOne(queryWrapper);
         map.put("wxMp", wxMp);
-        List<WxMpActivityTemplete> activityTemplates = IWxMpActivityTemplateService.getActivityTemplatesByAppIdentify(appIdentify);
+        List<WxMpActivityTemplate> activityTemplates = IWxMpActivityTemplateService.getActivityTemplatesByAppIdentify(appIdentify);
         List<WxActivityTemplate> templates = Lists.newArrayList();
-        for(WxMpActivityTemplete template : activityTemplates){
+        for(WxMpActivityTemplate template : activityTemplates){
             String templateId = template.getTemplateId();
             // 查询当前公众号配置的活动模板
             WxActivityTemplate wxActivityTemplate;

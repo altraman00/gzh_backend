@@ -79,6 +79,26 @@ public class WxActivityTemplateController extends BaseController {
 
     private final IWxMpActivityTemplateService IWxMpActivityTemplateService;
 
+
+    @ApiOperation("查询公众号绑定的活动模版")
+    @GetMapping("/mp/template/list")
+    @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")
+    public AjaxResult getMpWxActivityTemplateList(@RequestParam(value = "appId") String appId){
+        log.info("getMpWxActivityTemplateList,appId:{}",appId);
+        List<WxMpActivityTemplate> activityTemplatesByAppId = IWxMpActivityTemplateService.getActivityTemplatesByAppId(appId);
+        return AjaxResult.success(activityTemplatesByAppId);
+    }
+
+    @ApiOperation("启动/停止公众号绑定的活动模版")
+    @GetMapping("/mp/template/list")
+    @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")
+    public AjaxResult operMpWxActivityTemplateList(@RequestParam(value = "appId") String appId){
+        log.info("getMpWxActivityTemplateList,appId:{}",appId);
+        List<WxMpActivityTemplate> activityTemplatesByAppId = IWxMpActivityTemplateService.getActivityTemplatesByAppId(appId);
+        return AjaxResult.success(activityTemplatesByAppId);
+    }
+
+
     @ApiOperation("查询默认活动模板")
     @GetMapping("/template/list")
     @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")
@@ -99,8 +119,8 @@ public class WxActivityTemplateController extends BaseController {
     public AjaxResult bindWxActivityTemplate(@RequestParam(value = "templateId") String templateId,@RequestParam(value = "appId") String appId){
         WxMp wxMp = wxMpService.getByAppId(appId);
 
-        List<WxMpActivityTemplete> wxMpActivityTempletes = IWxMpActivityTemplateService.getActivityTemplatesByAppId(appId);
-        boolean match = wxMpActivityTempletes.stream().allMatch(t -> t.getTemplateId().equals(templateId) && t.isActivityEnable());
+        List<WxMpActivityTemplate> wxMpActivityTemplates = IWxMpActivityTemplateService.getActivityTemplatesByAppId(appId);
+        boolean match = wxMpActivityTemplates.stream().allMatch(t -> t.getTemplateId().equals(templateId) && t.isActivityEnable());
         if(match){
             return AjaxResult.success(wxMp);
         }
@@ -156,11 +176,11 @@ public class WxActivityTemplateController extends BaseController {
     public AjaxResult getMpTemplateMessage(@RequestParam(value = "appId") String appId) {
         // 查询出公众号绑定的活动消息
         Map<String,List<WxMpTemplateMessage>> map = Maps.newHashMap();
-        List<WxMpActivityTemplete> wxMpActivityTempletes = IWxMpActivityTemplateService.getActivityTemplatesByAppId(appId);
+        List<WxMpActivityTemplate> wxMpActivityTemplates = IWxMpActivityTemplateService.getActivityTemplatesByAppId(appId);
 
-        for(WxMpActivityTemplete wxMpActivityTemplete : wxMpActivityTempletes){
-            String templateId = wxMpActivityTemplete.getTemplateId();
-            String templateName = wxMpActivityTemplete.getTemplateName();
+        for(WxMpActivityTemplate wxMpActivityTemplate : wxMpActivityTemplates){
+            String templateId = wxMpActivityTemplate.getTemplateId();
+            String templateName = wxMpActivityTemplate.getTemplateName();
             if (StringUtils.isBlank(templateId)) {
                 return AjaxResult.success();
             }
