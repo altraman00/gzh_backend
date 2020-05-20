@@ -43,7 +43,7 @@ public class WxMp extends BaseEntity {
     /**
      * 活动模板id
      */
-    private String templateId;
+    private String templateId_xxx;
 
     /**
      * 公众号名称

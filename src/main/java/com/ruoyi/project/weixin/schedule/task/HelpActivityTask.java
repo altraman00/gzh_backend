@@ -1,6 +1,6 @@
 package com.ruoyi.project.weixin.schedule.task;
 
-import com.ruoyi.project.weixin.service.impl.HelpActivityServiceImpl;
+import com.ruoyi.project.activities.help.HelpActivityServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

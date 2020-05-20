@@ -3,11 +3,12 @@ package com.ruoyi.project.aop;
 import com.ruoyi.common.utils.SpringBeanUtil;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.project.weixin.constant.WxEvenConstant;
-import com.ruoyi.project.weixin.entity.WxActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMp;
+import com.ruoyi.project.weixin.entity.WxMpActivityTemplete;
 import com.ruoyi.project.weixin.service.ActivityService;
 import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
 import com.ruoyi.project.weixin.service.IWxMpService;
+import com.ruoyi.project.weixin.service.impl.WxMpActivityTempleteServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
@@ -18,6 +19,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author zhangbin
@@ -30,7 +32,7 @@ public class PortalAspect {
 
     private final IWxMpService iWxMpService;
 
-    private final IWxActivityTemplateService iWxActivityTemplateService;
+    private final WxMpActivityTempleteServiceImpl IWxMpActivityTemplateService;
 
     @Pointcut("execution(* com.ruoyi.project.weixin.controller.WxPortalController.post(..))")
     public void portal() {
@@ -49,32 +51,45 @@ public class PortalAspect {
         if (wxMp == null) {
             throw new IllegalArgumentException(String.format("未找到对应appid=[%s]的配置，请核实！", appId));
         }
-        String templateId = wxMp.getTemplateId();
-        if (StringUtils.isBlank(templateId)) {
-            log.info("appId:[{}]无绑定活动模板，流程结束",appId);
-            return;
-        }
-        if (!wxMp.isActivityEnable()) {
-            log.info("appId:[{}]已暂停活动，流程结束",appId);
-            return;
-        }
-        String openId= (String) args[5];
-        WxActivityTemplate template = iWxActivityTemplateService.getById(templateId);
+        //遍历当前公众号所关联的所有活动模板
+        List<WxMpActivityTemplete> templateList =  IWxMpActivityTemplateService.getActivityTemplatesByAppId(wxMp.getAppId());
 
-        if(null != template){
-            String templateClass = template.getTemplateClass();
-            log.info("appId:{}所绑定活动为：{}，开始执行活动流程",appId,template.getTemplateName());
-            ActivityService activityService  = (ActivityService) SpringBeanUtil.getBean(templateClass);
+        for(WxMpActivityTemplete wxMpActivityTemplete : templateList){
+            if(!wxMpActivityTemplete.isActivityEnable()){
+                continue;
+            }
+            String templateId = wxMpActivityTemplete.getTemplateId();
 
-            if (WxEvenConstant.EVENT_SUBSCRIBE.equals(inMessage.getEvent())) {
-                log.info("此事件为关注事件，开始执行活动流程");
-                activityService.subscrib(inMessage,wxMp,template,openId);
+            if (StringUtils.isBlank(templateId)) {
+                log.info("appId:[{}]无绑定活动模板，流程结束",appId);
+                return;
+            }
+            if (!wxMp.isActivityEnable()) {
+                log.info("appId:[{}]已暂停活动，流程结束",appId);
+                return;
+            }
+            String openId= (String) args[5];
+
+            WxMpActivityTemplete template = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndTemplateId(appId, templateId);
+
+            if(null != template){
+                String templateClass = template.getTemplateClass();
+                log.info("appId:{}所绑定活动为：{}，开始执行活动流程",appId,template.getTemplateName());
+                ActivityService activityService  = (ActivityService) SpringBeanUtil.getBean(templateClass);
+
+                if (WxEvenConstant.EVENT_SUBSCRIBE.equals(inMessage.getEvent())) {
+                    log.info("此事件为关注事件，开始执行活动流程");
+                    activityService.subscrib(inMessage,wxMp,template,openId);
+                }
+
+                if(WxEvenConstant.EVENT_UNSUBSCRIBE.equals(inMessage.getEvent())){
+                    activityService.unsubscrib(inMessage,wxMp,template,openId);
+                }
+
             }
 
-            if(WxEvenConstant.EVENT_UNSUBSCRIBE.equals(inMessage.getEvent())){
-                activityService.unsubscrib(inMessage,wxMp,template,openId);
-            }
-
         }
+
+
     }
 }

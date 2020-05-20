@@ -42,7 +42,7 @@ public class CodeGenerator {
         GlobalConfig gc = new GlobalConfig();
         String projectPath = System.getProperty("user.dir");
         gc.setOutputDir(projectPath + "/src/main/java");
-        gc.setAuthor("zhangbin");
+        gc.setAuthor("xiekun");
         gc.setOpen(false);
         // gc.setSwagger2(true); 实体属性 Swagger2 注解
         mpg.setGlobalConfig(gc);
@@ -51,7 +51,7 @@ public class CodeGenerator {
         DataSourceConfig dsc = new DataSourceConfig();
         dsc.setUrl("jdbc:mysql://111.230.70.125:3389/db_feo_ruo?useUnicode=true&useSSL=false&characterEncoding=utf8");
         // dsc.setSchemaName("public");
-        dsc.setDriverName("com.mysql.jdbc.Driver");
+        dsc.setDriverName("com.mysql.cj.jdbc.Driver");
         dsc.setUsername("root");
         dsc.setPassword("123456");
         mpg.setDataSource(dsc);

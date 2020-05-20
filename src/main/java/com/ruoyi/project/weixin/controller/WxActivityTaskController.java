@@ -12,7 +12,7 @@ import com.ruoyi.project.weixin.dto.HelpInfoDTO;
 import com.ruoyi.project.weixin.entity.*;
 import com.ruoyi.project.weixin.server.WxSendMsgServer;
 import com.ruoyi.project.weixin.service.*;
-import com.ruoyi.project.weixin.service.impl.HelpActivityServiceImpl;
+import com.ruoyi.project.activities.help.HelpActivityServiceImpl;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -64,6 +64,9 @@ public class WxActivityTaskController extends BaseController {
 
     private final WxSendMsgServer wxSendMsgServer;
 
+    private final IWxMpActivityTemplateService IWxMpActivityTemplateService;
+
+
     @ApiOperation("获取助力任务完成信息")
     @ApiImplicitParams({
             @ApiImplicitParam(name="openId",value="openId",required=true,paramType="String"),
@@ -74,7 +77,8 @@ public class WxActivityTaskController extends BaseController {
         WxMp wxMp = iWxMpService.getByAppId(appId);
         if(wxMp != null){
             WxUser wxuser = wxUserService.getByOpenIdAndAppId(openId, appId);
-            String templateId = wxMp.getTemplateId();
+            WxMpActivityTemplete wxMpActivityTemplete = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndClassName(appId,helpActivityService.getActivityServiceImplClassName());
+            String templateId = wxMpActivityTemplete.getTemplateId();
             String wxUserId = wxuser.getId();
             WxActivityTask wxActivityTask = wxActivityTaskService.getOne(Wrappers.<WxActivityTask>lambdaQuery()
                     .eq(WxActivityTask::getWxUserId, wxUserId)
@@ -144,9 +148,10 @@ public class WxActivityTaskController extends BaseController {
     })
     @GetMapping("/help/poster")
     public AjaxResult getTaskPoster(@RequestParam(value = "openId") String openId,@RequestParam(value = "appId") String appId){
-        WxMp wxMp = iWxMpService.getByAppId(appId);
         QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,wxMp.getTemplateId());
+        WxMpActivityTemplete wxMpActivityTemplete = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndClassName(appId,helpActivityService.getActivityServiceImplClassName());
+        String templateId = wxMpActivityTemplete.getTemplateId();
+        queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,templateId);
         List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
         WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent()) && StringUtils.isNotBlank(message.getRepMediaId());

@@ -1,14 +1,15 @@
-package com.ruoyi.project.weixin.service.impl;
+package com.ruoyi.project.activities.diabetes;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.common.utils.http.HttpClient;
 import com.ruoyi.project.weixin.constant.DiabetesConstant;
-import com.ruoyi.project.weixin.entity.WxActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMp;
+import com.ruoyi.project.weixin.entity.WxMpActivityTemplete;
 import com.ruoyi.project.weixin.entity.WxUser;
 import com.ruoyi.project.weixin.service.ActivityService;
 import com.ruoyi.project.weixin.service.WxUserService;
+import com.ruoyi.project.weixin.utils.SpringContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +42,14 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
     private String sunlandsDiabetesUrl;
 
     @Override
+    public String getActivityServiceImplClassName() {
+        String classFullName = Thread.currentThread().getStackTrace()[1].getClassName();
+        return SpringContextUtils.getCurrentClassName(classFullName);
+    }
+
+    @Override
     @Async
-    public void subscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxActivityTemplate template, String openId) {
+    public void subscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplete template, String openId) {
         log.info("【DiabetesTestingSubscrib】subscrib event inMessage:[{}],wxMp:[{}],template[{}],openId[{}]", inMessage, wxMp, template, openId);
         try {
             sendSubscribeState(wxMp, openId,DiabetesConstant.EVENT_SUBSCRIBE);
@@ -61,7 +68,7 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
      */
     @Override
     @Async
-    public void unsubscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxActivityTemplate template, String openId) {
+    public void unsubscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplete template, String openId) {
         log.info("【DiabetesTestingSubscrib】unsubscrib event inMessage:[{}],wxMp:[{}],template[{}],openId[{}]", inMessage, wxMp, template, openId);
         try {
             sendSubscribeState(wxMp, openId,DiabetesConstant.EVENT_UNSUBSCRIBE);

@@ -2,6 +2,7 @@ package com.ruoyi.project.weixin.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
+import com.ruoyi.project.weixin.entity.WxMpActivityTemplete;
 import com.ruoyi.project.weixin.entity.WxMp;
 import com.ruoyi.project.weixin.entity.WxMpTemplateMessage;
 import com.ruoyi.project.weixin.mapper.WxMpTemplateMessageMapper;
@@ -10,9 +11,9 @@ import com.ruoyi.project.weixin.schedule.config.CronTaskRegistrar;
 import com.ruoyi.project.weixin.service.IWxMpService;
 import com.ruoyi.project.weixin.service.IWxMpTemplateMessageService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ruoyi.project.weixin.service.IWxMpActivityTemplateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.config.CronTask;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -39,17 +40,26 @@ public class WxMpTemplateMessageServiceImpl extends ServiceImpl<WxMpTemplateMess
     @Autowired
     private CronTaskRegistrar cronTaskRegistrar;
 
+    @Autowired
+    private IWxMpActivityTemplateService IWxMpActivityTemplateService;
+
     @Override
     public void pushAllScheduleMessageTask() {
         List<WxMp> list = wxMpService.list();
         List<WxMpTemplateMessage> needPublishSchedule = new ArrayList<>();
         for (WxMp wxMp : list) {
-            String templateId = wxMp.getTemplateId();
-            List<WxMpTemplateMessage> scheduleMessages = wxMpTemplateMessageService.list(Wrappers.<WxMpTemplateMessage>lambdaQuery()
-                    .eq(WxMpTemplateMessage::getTemplateId, templateId)
-                    .eq(WxMpTemplateMessage::getAppId, wxMp.getAppId())
-                    .eq(WxMpTemplateMessage::getRepType, ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE));
-            needPublishSchedule.addAll(scheduleMessages);
+            String appId = wxMp.getAppId();
+            List<WxMpActivityTemplete> activityTemplatesByAppId = IWxMpActivityTemplateService.getActivityTemplatesByAppId(appId);
+            if(activityTemplatesByAppId != null && activityTemplatesByAppId.size()>0){
+                for(WxMpActivityTemplete template : activityTemplatesByAppId){
+                    String templateId = template.getTemplateId();
+                    List<WxMpTemplateMessage> scheduleMessages = wxMpTemplateMessageService.list(Wrappers.<WxMpTemplateMessage>lambdaQuery()
+                            .eq(WxMpTemplateMessage::getTemplateId, templateId)
+                            .eq(WxMpTemplateMessage::getAppId, wxMp.getAppId())
+                            .eq(WxMpTemplateMessage::getRepType, ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE));
+                    needPublishSchedule.addAll(scheduleMessages);
+                }
+            }
         }
         for (WxMpTemplateMessage wxMpTemplateMessage : needPublishSchedule) {
             SchedulingRunnable task = new SchedulingRunnable(wxMpTemplateMessage.getScheduleClass(), wxMpTemplateMessage.getScheduleMethod(), wxMpTemplateMessage.getAppId());

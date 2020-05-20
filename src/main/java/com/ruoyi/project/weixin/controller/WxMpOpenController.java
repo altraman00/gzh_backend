@@ -2,21 +2,17 @@ package com.ruoyi.project.weixin.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.google.common.collect.Lists;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
+import com.ruoyi.project.activities.diabetes.DiabetesTestingReportActivityServiceImpl;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.dto.WxMsgDTO;
 import com.ruoyi.project.weixin.dto.WxPosterMsgDTO;
-import com.ruoyi.project.weixin.entity.WxActivityTemplate;
-import com.ruoyi.project.weixin.entity.WxMp;
-import com.ruoyi.project.weixin.entity.WxMpTemplateMessage;
-import com.ruoyi.project.weixin.entity.WxUser;
+import com.ruoyi.project.weixin.entity.*;
 import com.ruoyi.project.weixin.server.WxSendMsgServer;
-import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
-import com.ruoyi.project.weixin.service.IWxMpService;
-import com.ruoyi.project.weixin.service.IWxMpTemplateMessageService;
-import com.ruoyi.project.weixin.service.WxUserService;
+import com.ruoyi.project.weixin.service.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -58,8 +54,13 @@ public class WxMpOpenController extends BaseController {
 
     private final WxMpService wxMpService;
 
+    private final IWxMpActivityTemplateService IWxMpActivityTemplateService;
+
     @Autowired
     private WxUserService wxUserService;
+
+    @Autowired
+    private DiabetesTestingReportActivityServiceImpl activityService;
 
 
     @ApiOperation("获取access_token")
@@ -76,7 +77,8 @@ public class WxMpOpenController extends BaseController {
     public String openHello(@RequestParam(required = false, defaultValue = "gzh") String str) {
         String result = "hello_env_" + str;
         logger.debug("hello,env:{},str:{}", str);
-        return result;
+        String actityServiceImplClassName = activityService.getActivityServiceImplClassName();
+        return result + "_" + actityServiceImplClassName;
     }
 
 
@@ -162,13 +164,19 @@ public class WxMpOpenController extends BaseController {
         queryWrapper.eq("app_identify",appIdentify);
         WxMp wxMp = myWxMpService.getOne(queryWrapper);
         map.put("wxMp", wxMp);
-        // 查询当前公众号配置的活动模板
-        WxActivityTemplate wxActivityTemplate = null;
-        if (StringUtils.isNotEmpty(wxMp.getTemplateId())) {
-            wxActivityTemplate = wxActivityTemplateService.getById(wxMp.getTemplateId());
+        List<WxMpActivityTemplete> activityTemplates = IWxMpActivityTemplateService.getActivityTemplatesByAppIdentify(appIdentify);
+        List<WxActivityTemplate> templates = Lists.newArrayList();
+        for(WxMpActivityTemplete template : activityTemplates){
+            String templateId = template.getTemplateId();
+            // 查询当前公众号配置的活动模板
+            WxActivityTemplate wxActivityTemplate;
+            if (StringUtils.isNotEmpty(templateId)) {
+                wxActivityTemplate = wxActivityTemplateService.getById(templateId);
+                templates.add(wxActivityTemplate);
+            }
         }
-        map.put("template",wxActivityTemplate);
-        return AjaxResult.success(map);
+        map.put("template",templates);
+        return AjaxResult.success(activityTemplates);
     }
 
     @ApiOperation("移动端微信授权")
