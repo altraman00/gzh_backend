@@ -8,11 +8,8 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.framework.web.controller.BaseController;
 
 import java.util.List;
@@ -55,9 +52,9 @@ public class WxMpActivityTemplateController extends BaseController {
     }
 
     @ApiOperation("删除公众号绑定的活动模版")
-    @GetMapping("/activity/template/delete")
+    @PostMapping("/activity/template/delete/{id}")
     @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")
-    public AjaxResult deleteMpWxActivityTemplate(@RequestParam(value = "id") String id){
+    public AjaxResult deleteMpWxActivityTemplate(@PathVariable(value = "id") String id){
         log.info("deleteMpWxActivityTemplate，id:{}",id);
         iWxMpActivityTemplateService.deletedActivityTemplates(id);
         return AjaxResult.success();
