@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.project.weixin.entity.WxMp;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 import com.ruoyi.project.weixin.mapper.WxMpActivityTemplateMapper;
-import com.ruoyi.project.weixin.mapper.WxMpMapper;
 import com.ruoyi.project.weixin.service.IWxMpActivityTemplateService;
 import com.ruoyi.project.weixin.service.IWxMpService;
 import org.springframework.beans.factory.annotation.Autowired;
