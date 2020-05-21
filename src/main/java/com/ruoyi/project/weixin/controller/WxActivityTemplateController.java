@@ -53,10 +53,11 @@ import java.util.Map;
  * @author zhangbin
  * @since 2020-03-11
  */
+
+@Api(value = "WxActivityTemplateController", tags = "公众号多活动相关接口")
 @RestController
 @RequestMapping("/wxactivity")
 @AllArgsConstructor
-@Api("活动模板管理")
 @Slf4j
 public class WxActivityTemplateController extends BaseController {
 

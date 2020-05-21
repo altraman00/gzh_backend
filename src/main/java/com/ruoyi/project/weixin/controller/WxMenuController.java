@@ -6,6 +6,7 @@ import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.weixin.service.WxMenuService;
 import com.ruoyi.project.weixin.utils.ThreadLocalUtil;
+import io.swagger.annotations.Api;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
@@ -19,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
  * @author JL
  * @date 2019-03-27 16:52:10
  */
+
+@Api(value = "WxMenuController", tags = "自定义菜单 相关接口")
 @Slf4j
 @RestController
 @AllArgsConstructor

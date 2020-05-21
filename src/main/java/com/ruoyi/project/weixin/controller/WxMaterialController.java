@@ -9,6 +9,7 @@ import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.weixin.entity.ImageManager;
 import com.ruoyi.project.weixin.utils.FileUtils;
 import com.ruoyi.project.weixin.utils.ThreadLocalUtil;
+import io.swagger.annotations.Api;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.api.WxConsts;
@@ -39,6 +40,8 @@ import java.util.Map;
  * @author JL
  * @date 2019-03-23 21:26:35
  */
+
+@Api(value = "WxMaterialController", tags = "微信素材相关接口")
 @Slf4j
 @RestController
 @AllArgsConstructor

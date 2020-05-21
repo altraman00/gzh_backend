@@ -9,6 +9,7 @@ import com.ruoyi.project.weixin.service.WxAutoReplyService;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.entity.WxAutoReply;
 import com.ruoyi.project.weixin.utils.ThreadLocalUtil;
+import io.swagger.annotations.Api;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,6 +22,8 @@ import java.util.List;
  * @author JL
  * @date 2019-04-18 15:40:39
  */
+
+@Api(value = "WxAutoReplyController", tags = "消息自动回复相关接口")
 @RestController
 @AllArgsConstructor
 @RequestMapping("/wxautoreply")

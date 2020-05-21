@@ -6,6 +6,7 @@ import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMpTemplateMessage;
 import com.ruoyi.project.weixin.service.IWxMpActivityTemplateService;
 import com.ruoyi.project.weixin.service.IWxMpTemplateMessageService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import java.util.List;
  * @since 2020-05-20
  */
 
+@Api(value = "WxMpActivityTemplateController", tags = "公众号活动模版 相关接口")
 @Slf4j
 @RestController
 @RequestMapping("/wxmp")

@@ -13,6 +13,7 @@ import com.ruoyi.project.weixin.entity.*;
 import com.ruoyi.project.weixin.server.WxSendMsgServer;
 import com.ruoyi.project.weixin.service.*;
 import com.ruoyi.project.activities.help.HelpActivityServiceImpl;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -42,6 +43,8 @@ import java.util.stream.Collectors;
  * @author zhangbin
  * @since 2020-03-11
  */
+
+@Api(value = "WxActivityTaskController", tags = "助力相关接口")
 @RestController
 @RequestMapping("/open/wxtask")
 @AllArgsConstructor
