@@ -54,7 +54,7 @@ import java.util.Map;
  * @since 2020-03-11
  */
 
-@Api(value = "WxActivityTemplateController", tags = "公众号多活动相关接口")
+@Api(value = "WxActivityTemplateController", tags = "公众号模版 相关接口")
 @RestController
 @RequestMapping("/wxactivity")
 @AllArgsConstructor
@@ -159,7 +159,6 @@ public class WxActivityTemplateController extends BaseController {
     public AjaxResult getMpTemplateMessage(
              @RequestParam(value = "appId") String appId
             ,@RequestParam(value = "id") String id) {
-
         WxMpActivityTemplate wxMpActivityTemplate =
                 IWxMpActivityTemplateService.getOne(Wrappers.<WxMpActivityTemplate>lambdaQuery()
                         .eq(WxMpActivityTemplate::getAppId,appId)
@@ -170,7 +169,6 @@ public class WxActivityTemplateController extends BaseController {
             return AjaxResult.success("活动不存在");
         }
         // 查询出公众号绑定的活动消息
-        Map<String,List<WxMpTemplateMessage>> map = Maps.newHashMap();
         String templateId = wxMpActivityTemplate.getTemplateId();
         String templateName = wxMpActivityTemplate.getTemplateName();
         if (StringUtils.isBlank(templateId)) {
@@ -181,8 +179,7 @@ public class WxActivityTemplateController extends BaseController {
                 .eq(WxMpTemplateMessage::getAppId,wxMpActivityTemplate.getAppId())
                 .eq(WxMpTemplateMessage::getTemplateId,templateId).orderByAsc(WxMpTemplateMessage::getSortNo);
         List<WxMpTemplateMessage> list = wxMpTemplateMessageService.list(queryWrapper);
-        map.put(templateName,list);
-        return AjaxResult.success(map);
+        return AjaxResult.success(list);
     }
 
     @ApiOperation("编辑消息内容")

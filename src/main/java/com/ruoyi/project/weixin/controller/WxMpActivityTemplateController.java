@@ -26,7 +26,7 @@ import java.util.List;
  * @since 2020-05-20
  */
 
-@Api(value = "WxMpActivityTemplateController", tags = "公众号活动模版 相关接口")
+@Api(value = "WxMpActivityTemplateController", tags = "公众号多活动模版管理 相关接口")
 @Slf4j
 @RestController
 @RequestMapping("/wxmp")
