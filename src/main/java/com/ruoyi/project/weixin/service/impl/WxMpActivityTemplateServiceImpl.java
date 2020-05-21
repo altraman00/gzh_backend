@@ -71,14 +71,5 @@ public class WxMpActivityTemplateServiceImpl extends ServiceImpl<WxMpActivityTem
         wxMpActivityTemplateMapper.update(template,templateUpdateWrapper);
     }
 
-    @Override
-    public void deletedActivityTemplates(String id) {
-        WxMpActivityTemplate template = new WxMpActivityTemplate();
-        template.setDelFlag("1");
-        UpdateWrapper<WxMpActivityTemplate> templateUpdateWrapper = new UpdateWrapper<>();
-        templateUpdateWrapper.eq("id", id);
-        wxMpActivityTemplateMapper.update(template,templateUpdateWrapper);
-    }
-
 
 }

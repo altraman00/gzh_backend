@@ -59,11 +59,15 @@ public class WxMpActivityTemplateController extends BaseController {
     }
 
     @ApiOperation("删除公众号绑定的活动模版")
-    @PostMapping("/activity/template/delete/{id}")
+    @DeleteMapping("/activity/template/{id}")
     @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")
     public AjaxResult deleteMpWxActivityTemplate(@PathVariable(value = "id") String id){
         log.info("deleteMpWxActivityTemplate，id:{}",id);
-        iWxMpActivityTemplateService.deletedActivityTemplates(id);
+        iWxMpActivityTemplateService.lambdaUpdate()
+                .eq(WxMpActivityTemplate::getId,id)
+                .set(WxMpActivityTemplate::getDelFlag,"1")
+                .set(WxMpActivityTemplate::isActivityEnable,false).update();
+
         return AjaxResult.success();
     }
 

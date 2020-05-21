@@ -57,11 +57,5 @@ public interface IWxMpActivityTemplateService extends IService<WxMpActivityTempl
      */
     void enableActivityTemplates(String id, boolean activityEnable);
 
-    /**
-     * 删除活动
-     * @param id
-     */
-    void deletedActivityTemplates(String id);
-
 
 }
