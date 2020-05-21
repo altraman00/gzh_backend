@@ -101,24 +101,14 @@ public class WxActivityTemplateController extends BaseController {
     public AjaxResult bindWxActivityTemplate(@RequestParam(value = "templateId") String templateId,@RequestParam(value = "appId") String appId){
         WxMp wxMp = wxMpService.getByAppId(appId);
 
-        List<WxMpActivityTemplate> wxMpActivityTemplates = IWxMpActivityTemplateService.getActivityTemplatesByAppId(appId);
-        boolean match = wxMpActivityTemplates.stream().allMatch(t -> t.getTemplateId().equals(templateId) && t.isActivityEnable());
-        if(match){
-            return AjaxResult.success(wxMp);
-        }
-
         // 判定是否已经复制过模板信息
-        List<WxMpTemplateMessage> mpTemplateMessages = wxMpTemplateMessageService.list(Wrappers.<WxMpTemplateMessage>lambdaQuery()
-                .eq(WxMpTemplateMessage::getTemplateId, templateId)
-                .eq(WxMpTemplateMessage::getAppId, appId));
-        if (!mpTemplateMessages.isEmpty()) {
+        WxMpActivityTemplate one = IWxMpActivityTemplateService.getOne(Wrappers.<WxMpActivityTemplate>lambdaQuery()
+                .eq(WxMpActivityTemplate::getAppId, appId)
+                .eq(WxMpActivityTemplate::getTemplateId, templateId), false);
+
+        if(one != null) {
             return AjaxResult.success(wxMp);
         }
-        // 查询出模板详细信息
-        QueryWrapper<WxActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(WxActivityTemplateMessage::getTemplateId,templateId);
-        List<WxActivityTemplateMessage> list = wxActivityTemplateMessageService.list(queryWrapper);
-        List<WxMpTemplateMessage> needPublishSchedule = new ArrayList<>();
 
         WxActivityTemplate activityTemplate = wxActivityTemplateService.getOne(Wrappers.<WxActivityTemplate>lambdaQuery().eq(WxActivityTemplate::getId, templateId), false);
         WxMpActivityTemplate wxMpActivityTemplate = new WxMpActivityTemplate();
@@ -130,6 +120,12 @@ public class WxActivityTemplateController extends BaseController {
         wxMpActivityTemplate.setNeedNum(activityTemplate.getNeedNum());
         wxMpActivityTemplate.setRewardUrl(activityTemplate.getRewardUrl());
         IWxMpActivityTemplateService.save(wxMpActivityTemplate);
+
+        // 查询出模板详细信息
+        QueryWrapper<WxActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(WxActivityTemplateMessage::getTemplateId,templateId);
+        List<WxActivityTemplateMessage> list = wxActivityTemplateMessageService.list(queryWrapper);
+        List<WxMpTemplateMessage> needPublishSchedule = new ArrayList<>();
 
         for (WxActivityTemplateMessage wxActivityTemplateMessage : list) {
             // 复制到公众号模板信息表
