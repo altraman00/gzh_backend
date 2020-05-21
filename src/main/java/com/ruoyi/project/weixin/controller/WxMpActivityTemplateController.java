@@ -46,10 +46,10 @@ public class WxMpActivityTemplateController extends BaseController {
     }
 
     @ApiOperation("启动/停止公众号绑定的活动模版")
-    @PostMapping("/activity/template/do")
+    @PostMapping("/activity/template/{id}/do")
     @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")
     public AjaxResult operMpWxActivityTemplate(
-            @RequestParam(value = "id") String id
+            @PathVariable(value = "id") String id
             ,@RequestParam(value = "activityEnable") boolean activityEnable){
         log.info("operMpWxActivityTemplateList,activityEnable:{}",activityEnable);
         iWxMpActivityTemplateService.enableActivityTemplates(id,activityEnable);
@@ -66,10 +66,10 @@ public class WxMpActivityTemplateController extends BaseController {
     }
 
     @ApiOperation("启动/停止活动的具体某个消息")
-    @PostMapping("/activity/template/msg/do")
+    @PostMapping("/activity/template/msg/{id}/do")
     @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")
     public AjaxResult operMpWxActivityMsg(
-             @RequestParam(value = "id") String id
+             @PathVariable(value = "id") String id
             ,@RequestParam(value = "activityEnable") boolean activityEnable){
         log.info("operMpWxActivityTemplateList,activityEnable:{}",activityEnable);
         boolean update = wxMpTemplateMessageService.lambdaUpdate()
