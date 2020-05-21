@@ -119,6 +119,18 @@ public class WxActivityTemplateController extends BaseController {
         queryWrapper.lambda().eq(WxActivityTemplateMessage::getTemplateId,templateId);
         List<WxActivityTemplateMessage> list = wxActivityTemplateMessageService.list(queryWrapper);
         List<WxMpTemplateMessage> needPublishSchedule = new ArrayList<>();
+
+        WxActivityTemplate activityTemplate = wxActivityTemplateService.getOne(Wrappers.<WxActivityTemplate>lambdaQuery().eq(WxActivityTemplate::getId, templateId), false);
+        WxMpActivityTemplate wxMpActivityTemplate = new WxMpActivityTemplate();
+        wxMpActivityTemplate.setAppId(appId);
+        wxMpActivityTemplate.setAppName(wxMp.getAppName());
+        wxMpActivityTemplate.setTemplateId(activityTemplate.getId());
+        wxMpActivityTemplate.setTemplateClass(activityTemplate.getTemplateClass());
+        wxMpActivityTemplate.setTemplateName(activityTemplate.getTemplateName());
+        wxMpActivityTemplate.setNeedNum(activityTemplate.getNeedNum());
+        wxMpActivityTemplate.setRewardUrl(activityTemplate.getRewardUrl());
+        IWxMpActivityTemplateService.save(wxMpActivityTemplate);
+
         for (WxActivityTemplateMessage wxActivityTemplateMessage : list) {
             // 复制到公众号模板信息表
             WxMpTemplateMessage wxMpTemplateMessage = new WxMpTemplateMessage();

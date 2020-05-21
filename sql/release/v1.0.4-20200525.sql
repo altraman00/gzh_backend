@@ -43,3 +43,8 @@ CREATE TABLE `wx_mp_activity_template` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+
+ALTER TABLE `db_feo_ruo`.`wx_mp_activity_template`
+MODIFY COLUMN `activity_enable` tinyint(4) NOT NULL DEFAULT 0 COMMENT '活动是否启用' AFTER `template_class`;
+
