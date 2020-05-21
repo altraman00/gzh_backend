@@ -3,7 +3,9 @@ package com.ruoyi.project.weixin.controller;
 
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
+import com.ruoyi.project.weixin.entity.WxMpTemplateMessage;
 import com.ruoyi.project.weixin.service.IWxMpActivityTemplateService;
+import com.ruoyi.project.weixin.service.IWxMpTemplateMessageService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,9 @@ public class WxMpActivityTemplateController extends BaseController {
     @Autowired
     private IWxMpActivityTemplateService iWxMpActivityTemplateService;
 
+    @Autowired
+    private IWxMpTemplateMessageService wxMpTemplateMessageService;
+
     @ApiOperation("查询公众号绑定的活动模版")
     @GetMapping("/activity/template/list")
     @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")
@@ -41,7 +46,7 @@ public class WxMpActivityTemplateController extends BaseController {
     }
 
     @ApiOperation("启动/停止公众号绑定的活动模版")
-    @GetMapping("/activity/template/do")
+    @PostMapping("/activity/template/do")
     @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")
     public AjaxResult operMpWxActivityTemplate(
             @RequestParam(value = "id") String id
@@ -58,6 +63,21 @@ public class WxMpActivityTemplateController extends BaseController {
         log.info("deleteMpWxActivityTemplate，id:{}",id);
         iWxMpActivityTemplateService.deletedActivityTemplates(id);
         return AjaxResult.success();
+    }
+
+    @ApiOperation("启动/停止活动的具体某个消息")
+    @PostMapping("/activity/template/msg/do")
+    @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")
+    public AjaxResult operMpWxActivityMsg(
+             @RequestParam(value = "id") String id
+            ,@RequestParam(value = "activityEnable") boolean activityEnable){
+        log.info("operMpWxActivityTemplateList,activityEnable:{}",activityEnable);
+        boolean update = wxMpTemplateMessageService.lambdaUpdate()
+                .eq(WxMpTemplateMessage::getId, id)
+                .set(WxMpTemplateMessage::isActivityEnable, activityEnable)
+                .update();
+
+        return AjaxResult.success(update);
     }
 
 }
