@@ -2,9 +2,11 @@ package com.ruoyi.project.weixin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.project.weixin.entity.WxMp;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 import com.ruoyi.project.weixin.mapper.WxMpActivityTemplateMapper;
+import com.ruoyi.project.weixin.mapper.WxMpMapper;
 import com.ruoyi.project.weixin.service.IWxMpActivityTemplateService;
 import com.ruoyi.project.weixin.service.IWxMpService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +25,7 @@ import java.util.List;
  */
 
 @Service
-public class WxMpActivityTemplateServiceImpl implements IWxMpActivityTemplateService {
+public class WxMpActivityTemplateServiceImpl extends ServiceImpl<WxMpActivityTemplateMapper, WxMpActivityTemplate> implements IWxMpActivityTemplateService {
 
     @Autowired
     private WxMpActivityTemplateMapper wxMpActivityTemplateMapper;
@@ -33,7 +35,10 @@ public class WxMpActivityTemplateServiceImpl implements IWxMpActivityTemplateSer
 
     @Override
     public List<WxMpActivityTemplate> getActivityTemplatesByAppId(String appId) {
-        return wxMpActivityTemplateMapper.selectList(Wrappers.<WxMpActivityTemplate>lambdaQuery().eq(WxMpActivityTemplate::getAppId, appId));
+        return wxMpActivityTemplateMapper.selectList(Wrappers.<WxMpActivityTemplate>lambdaQuery()
+                .eq(WxMpActivityTemplate::getAppId, appId)
+                .eq(WxMpActivityTemplate::getDelFlag,"0")
+        );
     }
 
     @Override
@@ -68,9 +73,9 @@ public class WxMpActivityTemplateServiceImpl implements IWxMpActivityTemplateSer
     }
 
     @Override
-    public void deletedActivityTemplates(String id, boolean deletedFlag) {
+    public void deletedActivityTemplates(String id) {
         WxMpActivityTemplate template = new WxMpActivityTemplate();
-        template.setDelFlag(deletedFlag ? "1" : "0");
+        template.setDelFlag("1");
         UpdateWrapper<WxMpActivityTemplate> templateUpdateWrapper = new UpdateWrapper<>();
         templateUpdateWrapper.eq("id", id);
         wxMpActivityTemplateMapper.update(template,templateUpdateWrapper);

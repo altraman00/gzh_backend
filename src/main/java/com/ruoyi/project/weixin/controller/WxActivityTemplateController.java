@@ -79,6 +79,7 @@ public class WxActivityTemplateController extends BaseController {
 
     private final IWxMpActivityTemplateService IWxMpActivityTemplateService;
 
+
     @ApiOperation("查询默认活动模板")
     @GetMapping("/template/list")
     @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")
@@ -147,30 +148,39 @@ public class WxActivityTemplateController extends BaseController {
         return AjaxResult.success(wxMp);
     }
 
-    @ApiOperation("查询公众号绑定的活动消息详情")
+    @ApiOperation("查询公众号绑定的某一个活动的活动详情")
     @ApiImplicitParams({
             @ApiImplicitParam(name="appId",value="appId",required=true,paramType="String")
+            ,@ApiImplicitParam(name="id",value="公众号下绑定的具体某个活动的id",required=true,paramType="String")
     })
     @GetMapping("/template/message/list")
     @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")
-    public AjaxResult getMpTemplateMessage(@RequestParam(value = "appId") String appId) {
+    public AjaxResult getMpTemplateMessage(
+             @RequestParam(value = "appId") String appId
+            ,@RequestParam(value = "id") String id) {
+
+        WxMpActivityTemplate wxMpActivityTemplate =
+                IWxMpActivityTemplateService.getOne(Wrappers.<WxMpActivityTemplate>lambdaQuery()
+                        .eq(WxMpActivityTemplate::getAppId,appId)
+                        .eq(WxMpActivityTemplate::getId,id)
+                        .eq(WxMpActivityTemplate::getDelFlag,"0")
+                );
+        if(wxMpActivityTemplate == null){
+            return AjaxResult.success("活动不存在");
+        }
         // 查询出公众号绑定的活动消息
         Map<String,List<WxMpTemplateMessage>> map = Maps.newHashMap();
-        List<WxMpActivityTemplate> wxMpActivityTemplates = IWxMpActivityTemplateService.getActivityTemplatesByAppId(appId);
-
-        for(WxMpActivityTemplate wxMpActivityTemplate : wxMpActivityTemplates){
-            String templateId = wxMpActivityTemplate.getTemplateId();
-            String templateName = wxMpActivityTemplate.getTemplateName();
-            if (StringUtils.isBlank(templateId)) {
-                return AjaxResult.success();
-            }
-            QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
-            queryWrapper.lambda()
-                    .eq(WxMpTemplateMessage::getAppId,appId)
-                    .eq(WxMpTemplateMessage::getTemplateId,templateId).orderByAsc(WxMpTemplateMessage::getSortNo);
-            List<WxMpTemplateMessage> list = wxMpTemplateMessageService.list(queryWrapper);
-            map.put(templateName,list);
+        String templateId = wxMpActivityTemplate.getTemplateId();
+        String templateName = wxMpActivityTemplate.getTemplateName();
+        if (StringUtils.isBlank(templateId)) {
+            return AjaxResult.success();
         }
+        QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda()
+                .eq(WxMpTemplateMessage::getAppId,wxMpActivityTemplate.getAppId())
+                .eq(WxMpTemplateMessage::getTemplateId,templateId).orderByAsc(WxMpTemplateMessage::getSortNo);
+        List<WxMpTemplateMessage> list = wxMpTemplateMessageService.list(queryWrapper);
+        map.put(templateName,list);
         return AjaxResult.success(map);
     }
 

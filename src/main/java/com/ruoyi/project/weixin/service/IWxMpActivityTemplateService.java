@@ -1,5 +1,6 @@
 package com.ruoyi.project.weixin.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
  * @ModificationHistory Who   When     What
  * ------------    --------------    ---------------------------------
  */
-public interface IWxMpActivityTemplateService {
+public interface IWxMpActivityTemplateService extends IService<WxMpActivityTemplate> {
 
 
     /**
@@ -56,7 +57,11 @@ public interface IWxMpActivityTemplateService {
      */
     void enableActivityTemplates(String id, boolean activityEnable);
 
-    void deletedActivityTemplates(String id,boolean deletedFlag);
+    /**
+     * 删除活动
+     * @param id
+     */
+    void deletedActivityTemplates(String id);
 
 
 }
