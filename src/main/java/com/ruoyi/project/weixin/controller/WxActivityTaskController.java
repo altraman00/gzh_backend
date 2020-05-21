@@ -135,7 +135,10 @@ public class WxActivityTaskController extends BaseController {
 //        Map<String,WxMpTemplateMessage> messageMap = new HashMap<>();
         // 查询奖品名称返回到前端
         QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,templateId);
+        queryWrapper.lambda()
+                .eq(WxMpTemplateMessage::getAppId, appId)
+                .eq(WxMpTemplateMessage::getActivityEnable,true)
+                .eq(WxMpTemplateMessage::getTemplateId,templateId);
         List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
 
         Map<String,WxMpTemplateMessage> messageMap = messages.stream().collect(Collectors.toMap(WxMpTemplateMessage::getScene,p-> p));
@@ -154,7 +157,10 @@ public class WxActivityTaskController extends BaseController {
         QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
         WxMpActivityTemplate wxMpActivityTemplate = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndClassName(appId,helpActivityService.getActivityServiceImplClassName());
         String templateId = wxMpActivityTemplate.getTemplateId();
-        queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,templateId);
+        queryWrapper.lambda()
+                .eq(WxMpTemplateMessage::getAppId, appId)
+                .eq(WxMpTemplateMessage::getActivityEnable,true)
+                .eq(WxMpTemplateMessage::getTemplateId,templateId);
         List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
         WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent()) && StringUtils.isNotBlank(message.getRepMediaId());

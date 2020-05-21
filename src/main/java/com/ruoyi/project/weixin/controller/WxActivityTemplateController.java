@@ -177,7 +177,9 @@ public class WxActivityTemplateController extends BaseController {
         QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda()
                 .eq(WxMpTemplateMessage::getAppId,wxMpActivityTemplate.getAppId())
-                .eq(WxMpTemplateMessage::getTemplateId,templateId).orderByAsc(WxMpTemplateMessage::getSortNo);
+                .eq(WxMpTemplateMessage::getTemplateId,templateId)
+                .eq(WxMpTemplateMessage::getActivityEnable,true)
+                .orderByAsc(WxMpTemplateMessage::getSortNo);
         List<WxMpTemplateMessage> list = wxMpTemplateMessageService.list(queryWrapper);
         return AjaxResult.success(list);
     }

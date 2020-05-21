@@ -76,7 +76,7 @@ public class WxMpActivityTemplateController extends BaseController {
         log.info("operMpWxActivityTemplateList,activityEnable:{}",activityEnable);
         boolean update = wxMpTemplateMessageService.lambdaUpdate()
                 .eq(WxMpTemplateMessage::getId, id)
-                .set(WxMpTemplateMessage::isActivityEnable, activityEnable)
+                .set(WxMpTemplateMessage::getActivityEnable, activityEnable)
                 .update();
 
         return AjaxResult.success(update);

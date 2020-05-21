@@ -103,7 +103,7 @@ public class WxMpTemplateMessage extends BaseEntity {
     /**
      * 活动是否启用
      */
-    private boolean activityEnable;
+    private Boolean activityEnable;
 
 
 

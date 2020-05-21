@@ -100,7 +100,9 @@ public class WxMpOpenController extends BaseController {
         logger.debug("【getActivityTemplate】appId:{}",appId);
         List<WxMpTemplateMessage> list = wxMpTemplateMessageService.list(
                 Wrappers.<WxMpTemplateMessage>lambdaQuery()
-                        .eq(WxMpTemplateMessage::getAppId, appId));
+                        .eq(WxMpTemplateMessage::getAppId, appId)
+                        .eq(WxMpTemplateMessage::getActivityEnable,true)
+        );
         return list;
     }
 
@@ -192,9 +194,6 @@ public class WxMpOpenController extends BaseController {
                 WxMpOAuth2AccessToken wxMpOAuth2AccessToken = wxMpService.switchoverTo(appId).oauth2getAccessToken(code);
                 WxMpUser wxMpUser = wxMpService.switchoverTo(appId).oauth2getUserInfo(wxMpOAuth2AccessToken, null);
                 //根据openId获取对应的APPID
-//            QueryWrapper<WxUser> queryWrapper = new QueryWrapper<>();
-//            queryWrapper.lambda().eq(WxUser::getOpenId,wxMpUser.getOpenId());
-//            WxUser wxUser = wxUserService.getOne(queryWrapper);
                 map.put("accessToken",wxMpOAuth2AccessToken);
                 map.put("wxMpUser",wxMpUser);
                 map.put("wxMp",wxMp);

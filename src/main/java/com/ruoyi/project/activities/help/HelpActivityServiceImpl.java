@@ -57,7 +57,10 @@ public class HelpActivityServiceImpl implements ActivityService {
         String appId = wxMp.getAppId();
         String templateId = template.getTemplateId();
         QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,templateId);
+        queryWrapper.lambda()
+                .eq(WxMpTemplateMessage::getAppId, appId)
+                .eq(WxMpTemplateMessage::getTemplateId,templateId)
+                .eq(WxMpTemplateMessage::getActivityEnable,true);
         List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
         WxUser wxUser = wxUserMapper.selectOne(Wrappers.<WxUser>lambdaQuery()
                 .eq(WxUser::getOpenId,openId).eq(WxUser::getAppId,appId));
@@ -227,7 +230,10 @@ public class HelpActivityServiceImpl implements ActivityService {
         }
         WxMpActivityTemplate wxMpActivityTemplate = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndClassName(appId,this.getActivityServiceImplClassName());
         QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId, wxMpActivityTemplate.getTemplateId());
+        queryWrapper.lambda()
+                .eq(WxMpTemplateMessage::getAppId, appId)
+                .eq(WxMpTemplateMessage::getActivityEnable,true)
+                .eq(WxMpTemplateMessage::getTemplateId, wxMpActivityTemplate.getTemplateId());
         List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
         WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_SCHEDULE_INVITER)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());

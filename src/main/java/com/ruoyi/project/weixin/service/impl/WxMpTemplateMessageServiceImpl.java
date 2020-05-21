@@ -56,6 +56,7 @@ public class WxMpTemplateMessageServiceImpl extends ServiceImpl<WxMpTemplateMess
                     List<WxMpTemplateMessage> scheduleMessages = wxMpTemplateMessageService.list(Wrappers.<WxMpTemplateMessage>lambdaQuery()
                             .eq(WxMpTemplateMessage::getTemplateId, templateId)
                             .eq(WxMpTemplateMessage::getAppId, wxMp.getAppId())
+                            .eq(WxMpTemplateMessage::getActivityEnable,true)
                             .eq(WxMpTemplateMessage::getRepType, ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE));
                     needPublishSchedule.addAll(scheduleMessages);
                 }

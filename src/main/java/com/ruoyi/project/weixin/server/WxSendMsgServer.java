@@ -60,7 +60,6 @@ public class WxSendMsgServer {
                     .toUser(wxUser.getOpenId())
                     .content(content)
                     .build();
-//            wxMpService.getKefuService().sendKefuMessage(wxMpKefuMessage);
             wxMpService.switchoverTo(wxUser.getAppId()).getKefuService().sendKefuMessage(wxMpKefuMessage);
         } catch (Exception e) {
             log.error("发送客服消息失败，appId:{} openId：{}", wxUser.getAppId(), wxUser.getOpenId());
