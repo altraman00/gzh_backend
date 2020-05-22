@@ -4,7 +4,7 @@ import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.qrcode.QRCodeUtil;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.constant.HelpActivityConstant;
-import com.ruoyi.project.weixin.entity.WxMpTemplateMessage;
+import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
 import com.ruoyi.project.weixin.entity.WxMsg;
 import com.ruoyi.project.weixin.entity.WxUser;
 import com.ruoyi.project.weixin.service.WxMsgService;
@@ -82,7 +82,7 @@ public class WxSendMsgServer {
      * @param message
      * @param wxUser
      */
-    public void sendPosterMessage(WxMpTemplateMessage message, WxUser wxUser){
+    public void sendPosterMessage(WxMpActivityTemplateMessage message, WxUser wxUser){
         log.info("【sendPosterMessage】,message:{},wxUser:{}",message,wxUser);
         String openId = wxUser.getOpenId();
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent()) && StringUtils.isNotBlank(message.getRepMediaId());
@@ -140,7 +140,7 @@ public class WxSendMsgServer {
      * @param qrCodeUrl
      * @return
      */
-    public File getPosterFile(String openId, WxMpTemplateMessage message, String appId,String qrCodeUrl) {
+    public File getPosterFile(String openId, WxMpActivityTemplateMessage message, String appId, String qrCodeUrl) {
         StopWatch stopWatch = new StopWatch();
         String messageId = message.getId();
         // 先获取海报图片
@@ -205,7 +205,7 @@ public class WxSendMsgServer {
         return poster;
     }
 
-    public void generatorPoster(WxMpTemplateMessage message, InputStream inputStream, File poster, BufferedImage qrCodeBuffer, BufferedImage roundHead) throws IOException {
+    public void generatorPoster(WxMpActivityTemplateMessage message, InputStream inputStream, File poster, BufferedImage qrCodeBuffer, BufferedImage roundHead) throws IOException {
         // 处理海报
         Thumbnails.Builder<? extends InputStream> builder = Thumbnails.of(inputStream).scale(1.0);
         // 拼接头像

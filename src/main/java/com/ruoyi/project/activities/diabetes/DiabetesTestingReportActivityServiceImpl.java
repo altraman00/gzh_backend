@@ -43,7 +43,7 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
 
     @Override
     public String getActivityServiceImplClassName() {
-        String classFullName = Thread.currentThread().getStackTrace()[1].getClassName();
+        String classFullName = this.getClass().getName();
         return SpringContextUtils.getCurrentClassName(classFullName);
     }
 

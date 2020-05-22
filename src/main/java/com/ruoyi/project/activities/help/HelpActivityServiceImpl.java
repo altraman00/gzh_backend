@@ -27,7 +27,7 @@ import java.util.List;
 @AllArgsConstructor
 public class HelpActivityServiceImpl implements ActivityService {
 
-    private final IWxMpTemplateMessageService wxMpTemplateMessageService;
+    private final IWxMpActivityTemplateMessageService wxMpActivityTemplateMessageService;
 
     private final IWxTaskHelpRecordService wxTaskHelpRecordService;
 
@@ -46,7 +46,7 @@ public class HelpActivityServiceImpl implements ActivityService {
 
     @Override
     public String getActivityServiceImplClassName() {
-        String classFullName = Thread.currentThread().getStackTrace()[1].getClassName();
+        String classFullName = this.getClass().getName();
         return SpringContextUtils.getCurrentClassName(classFullName);
     }
 
@@ -56,12 +56,12 @@ public class HelpActivityServiceImpl implements ActivityService {
         String eventKey = inMessage.getEventKey();
         String appId = wxMp.getAppId();
         String templateId = template.getTemplateId();
-        QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<WxMpActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda()
-                .eq(WxMpTemplateMessage::getAppId, appId)
-                .eq(WxMpTemplateMessage::getTemplateId,templateId)
-                .eq(WxMpTemplateMessage::getActivityEnable,true);
-        List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
+                .eq(WxMpActivityTemplateMessage::getAppId, appId)
+                .eq(WxMpActivityTemplateMessage::getTemplateId,templateId)
+                .eq(WxMpActivityTemplateMessage::getActivityEnable,true);
+        List<WxMpActivityTemplateMessage> messages = wxMpActivityTemplateMessageService.list(queryWrapper);
         WxUser wxUser = wxUserMapper.selectOne(Wrappers.<WxUser>lambdaQuery()
                 .eq(WxUser::getOpenId,openId).eq(WxUser::getAppId,appId));
         String wxUserId = wxUser.getId();
@@ -119,7 +119,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         // 推送活动规则消息
         executeActivityRule(messages,wxUser,templateId,appId);
         // 推送活动海报
-        WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
+        WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
         wxSendMsgServer.sendPosterMessage(message,wxUser);
     }
 
@@ -128,9 +128,9 @@ public class HelpActivityServiceImpl implements ActivityService {
 
     }
 
-    private void executeHasComplete(List<WxMpTemplateMessage> messages, WxUser wxUser) {
+    private void executeHasComplete(List<WxMpActivityTemplateMessage> messages, WxUser wxUser) {
         log.info("开始执行助理活动流程：{}",HelpActivityConstant.SCENE_HAS_COMPLETE);
-        WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_HAS_COMPLETE)).findFirst().orElse(null);
+        WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_HAS_COMPLETE)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
         if (hasAvailableMessage) {
             String content = message.getRepContent();
@@ -139,9 +139,9 @@ public class HelpActivityServiceImpl implements ActivityService {
     }
 
 
-    private void executeActivityRule(List<WxMpTemplateMessage> messages, WxUser wxUser, String templateId, String appId) {
+    private void executeActivityRule(List<WxMpActivityTemplateMessage> messages, WxUser wxUser, String templateId, String appId) {
         log.info("开始执行助理活动流程：{}",HelpActivityConstant.SCENE_ACTIVITY_RULE);
-        WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_RULE)).findFirst().orElse(null);
+        WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_RULE)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
         if (hasAvailableMessage) {
             String content = message.getRepContent();
@@ -165,9 +165,9 @@ public class HelpActivityServiceImpl implements ActivityService {
         }
     }
 
-    private void executeHasHelp(List<WxMpTemplateMessage> messages, WxUser wxUser, WxUser inviter) {
+    private void executeHasHelp(List<WxMpActivityTemplateMessage> messages, WxUser wxUser, WxUser inviter) {
         log.info("开始执行助理活动流程：{}",HelpActivityConstant.SCENE_HAS_HELP);
-        WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_HAS_HELP)).findFirst().orElse(null);
+        WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_HAS_HELP)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
         if (hasAvailableMessage) {
             String content = message.getRepContent();
@@ -176,10 +176,10 @@ public class HelpActivityServiceImpl implements ActivityService {
         }
     }
 
-    private void executeBeHelped(List<WxMpTemplateMessage> messages, WxUser wxUser, WxUser inviter, WxActivityTask wxActivityTask, Integer needNum) {
+    private void executeBeHelped(List<WxMpActivityTemplateMessage> messages, WxUser wxUser, WxUser inviter, WxActivityTask wxActivityTask, Integer needNum) {
         log.info("开始执行助理活动流程：{}",HelpActivityConstant.SCENE_BE_HELPED);
         if (wxActivityTask.getCompleteNum() < needNum) {
-            WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_BE_HELPED)).findFirst().orElse(null);
+            WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_BE_HELPED)).findFirst().orElse(null);
             boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
             if (hasAvailableMessage) {
                 String content = message.getRepContent();
@@ -187,7 +187,7 @@ public class HelpActivityServiceImpl implements ActivityService {
                 wxSendMsgServer.sendTextMessage(content,inviter);
             }
         } else {
-            WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_TASK_COMPLETE)).findFirst().orElse(null);
+            WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_TASK_COMPLETE)).findFirst().orElse(null);
             boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
             if (hasAvailableMessage) {
                 String content = message.getRepContent();
@@ -196,7 +196,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         }
     }
 
-    private void executeHelpSuccess(List<WxMpTemplateMessage> list, WxUser wxUser, WxUser inviter, WxActivityTask wxActivityTask, Integer needNum) {
+    private void executeHelpSuccess(List<WxMpActivityTemplateMessage> list, WxUser wxUser, WxUser inviter, WxActivityTask wxActivityTask, Integer needNum) {
         log.info("开始执行助理活动流程：{}",HelpActivityConstant.SCENE_HELP_SUCCESS);
         String wxUserId = wxUser.getId();
         String inviterId = inviter.getId();
@@ -213,7 +213,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         wxTaskHelpRecord.setWxUserTaskId(wxActivityTask.getId());
         wxTaskHelpRecordService.save(wxTaskHelpRecord);
         // 推送助力成功消息
-        WxMpTemplateMessage message = list.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_HELP_SUCCESS)).findFirst().orElse(null);
+        WxMpActivityTemplateMessage message = list.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_HELP_SUCCESS)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
         if (hasAvailableMessage) {
             String content = message.getRepContent();
@@ -229,13 +229,13 @@ public class HelpActivityServiceImpl implements ActivityService {
             return;
         }
         WxMpActivityTemplate wxMpActivityTemplate = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndClassName(appId,this.getActivityServiceImplClassName());
-        QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<WxMpActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda()
-                .eq(WxMpTemplateMessage::getAppId, appId)
-                .eq(WxMpTemplateMessage::getActivityEnable,true)
-                .eq(WxMpTemplateMessage::getTemplateId, wxMpActivityTemplate.getTemplateId());
-        List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
-        WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_SCHEDULE_INVITER)).findFirst().orElse(null);
+                .eq(WxMpActivityTemplateMessage::getAppId, appId)
+                .eq(WxMpActivityTemplateMessage::getActivityEnable,true)
+                .eq(WxMpActivityTemplateMessage::getTemplateId, wxMpActivityTemplate.getTemplateId());
+        List<WxMpActivityTemplateMessage> messages = wxMpActivityTemplateMessageService.list(queryWrapper);
+        WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_SCHEDULE_INVITER)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
         if (hasAvailableMessage) {
             List<WxUser> users =  wxUserMapper.getNotCompleteUser(appId, wxMpActivityTemplate.getTemplateId());

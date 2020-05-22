@@ -3,7 +3,6 @@ package com.ruoyi.project.weixin.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.google.common.collect.Maps;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
@@ -66,7 +65,7 @@ public class WxActivityTemplateController extends BaseController {
 
     private final IWxActivityTemplateMessageService wxActivityTemplateMessageService;
 
-    private final IWxMpTemplateMessageService wxMpTemplateMessageService;
+    private final IWxMpActivityTemplateMessageService wxMpActivityTemplateMessageService;
 
     private final IWxMpService wxMpService;
 
@@ -125,33 +124,33 @@ public class WxActivityTemplateController extends BaseController {
         QueryWrapper<WxActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(WxActivityTemplateMessage::getTemplateId,templateId);
         List<WxActivityTemplateMessage> list = wxActivityTemplateMessageService.list(queryWrapper);
-        List<WxMpTemplateMessage> needPublishSchedule = new ArrayList<>();
+        List<WxMpActivityTemplateMessage> needPublishSchedule = new ArrayList<>();
 
         for (WxActivityTemplateMessage wxActivityTemplateMessage : list) {
             // 复制到公众号模板信息表
-            WxMpTemplateMessage wxMpTemplateMessage = new WxMpTemplateMessage();
-            wxMpTemplateMessage.setAppId(appId);
-            BeanUtils.copyProperties(wxActivityTemplateMessage,wxMpTemplateMessage,"id","createId","createTime","updateId","updateTime","delFlag");
-            wxMpTemplateMessage.setRepContent(wxMpTemplateMessage.getRepContent().replace("appid=","appid="+appId).replace("state=","state="+appId));
-            wxMpTemplateMessageService.save(wxMpTemplateMessage);
-            if (wxMpTemplateMessage.getRepType().equals(ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE)) {
-                needPublishSchedule.add(wxMpTemplateMessage);
+            WxMpActivityTemplateMessage wxMpActivityTemplateMessage = new WxMpActivityTemplateMessage();
+            wxMpActivityTemplateMessage.setAppId(appId);
+            BeanUtils.copyProperties(wxActivityTemplateMessage, wxMpActivityTemplateMessage,"id","createId","createTime","updateId","updateTime","delFlag");
+            wxMpActivityTemplateMessage.setRepContent(wxMpActivityTemplateMessage.getRepContent().replace("appid=","appid="+appId).replace("state=","state="+appId));
+            wxMpActivityTemplateMessageService.save(wxMpActivityTemplateMessage);
+            if (wxMpActivityTemplateMessage.getRepType().equals(ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE)) {
+                needPublishSchedule.add(wxMpActivityTemplateMessage);
             }
         }
         // 发布定时任务
         // 先移除原绑定任务
-        List<WxMpTemplateMessage> originalScheduleMessages = wxMpTemplateMessageService.list(Wrappers.<WxMpTemplateMessage>lambdaQuery()
-                .eq(WxMpTemplateMessage::getTemplateId, templateId)
-                .eq(WxMpTemplateMessage::getAppId, appId)
-                .eq(WxMpTemplateMessage::getRepType, ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE));
-        for (WxMpTemplateMessage originalScheduleMessage : originalScheduleMessages) {
+        List<WxMpActivityTemplateMessage> originalScheduleMessages = wxMpActivityTemplateMessageService.list(Wrappers.<WxMpActivityTemplateMessage>lambdaQuery()
+                .eq(WxMpActivityTemplateMessage::getTemplateId, templateId)
+                .eq(WxMpActivityTemplateMessage::getAppId, appId)
+                .eq(WxMpActivityTemplateMessage::getRepType, ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE));
+        for (WxMpActivityTemplateMessage originalScheduleMessage : originalScheduleMessages) {
             cronTaskRegistrar.removeCronTask(originalScheduleMessage.getId());
         }
         // 再发布新的定时任务
-        for (WxMpTemplateMessage wxMpTemplateMessage : needPublishSchedule) {
-            SchedulingRunnable task = new SchedulingRunnable(wxMpTemplateMessage.getScheduleClass(), wxMpTemplateMessage.getScheduleMethod(), appId);
-            cronTaskRegistrar.addCronTask(task,wxMpTemplateMessage.getScheduleCron(), wxMpTemplateMessage.getId());
-            log.info("成功发布定时任务:messageId:[{}]",wxMpTemplateMessage.getId());
+        for (WxMpActivityTemplateMessage wxMpActivityTemplateMessage : needPublishSchedule) {
+            SchedulingRunnable task = new SchedulingRunnable(wxMpActivityTemplateMessage.getScheduleClass(), wxMpActivityTemplateMessage.getScheduleMethod(), appId);
+            cronTaskRegistrar.addCronTask(task, wxMpActivityTemplateMessage.getScheduleCron(), wxMpActivityTemplateMessage.getId());
+            log.info("成功发布定时任务:messageId:[{}]", wxMpActivityTemplateMessage.getId());
         }
 
         return AjaxResult.success(wxMp);
@@ -182,12 +181,12 @@ public class WxActivityTemplateController extends BaseController {
         if (StringUtils.isBlank(templateId)) {
             return AjaxResult.success();
         }
-        QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<WxMpActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda()
-                .eq(WxMpTemplateMessage::getAppId,wxMpActivityTemplate.getAppId())
-                .eq(WxMpTemplateMessage::getTemplateId,templateId)
-                .orderByAsc(WxMpTemplateMessage::getSortNo);
-        List<WxMpTemplateMessage> list = wxMpTemplateMessageService.list(queryWrapper);
+                .eq(WxMpActivityTemplateMessage::getAppId,wxMpActivityTemplate.getAppId())
+                .eq(WxMpActivityTemplateMessage::getTemplateId,templateId)
+                .orderByAsc(WxMpActivityTemplateMessage::getSortNo);
+        List<WxMpActivityTemplateMessage> list = wxMpActivityTemplateMessageService.list(queryWrapper);
         return AjaxResult.success(list);
     }
 
@@ -195,7 +194,7 @@ public class WxActivityTemplateController extends BaseController {
     @PatchMapping("/template/message/{messageId}")
     public AjaxResult updateMpTemplateMessage(@PathVariable("messageId") String id,@RequestBody EditWxTemplateVO editWxTemplateVO){
         String cron = editWxTemplateVO.getScheduleCron();
-        WxMpTemplateMessage query = wxMpTemplateMessageService.getById(id);
+        WxMpActivityTemplateMessage query = wxMpActivityTemplateMessageService.getById(id);
         if (query.getRepType().equals(ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE)) {
             boolean validExpression = CronExpression.isValidExpression(cron);
             if (!validExpression) {
@@ -204,7 +203,7 @@ public class WxActivityTemplateController extends BaseController {
         }
         String originalCron = query.getScheduleCron();
         BeanUtils.copyProperties(editWxTemplateVO,query);
-        wxMpTemplateMessageService.updateById(query);
+        wxMpActivityTemplateMessageService.updateById(query);
         if (query.getRepType().equals(ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE) && !originalCron.equals(cron)) {
             // 重新发布定时任务
             SchedulingRunnable task = new SchedulingRunnable(query.getScheduleClass(), query.getScheduleMethod(), query.getAppId());
@@ -234,7 +233,7 @@ public class WxActivityTemplateController extends BaseController {
     })
     @GetMapping("/template/{messageId}/poster/preview")
     public AjaxResult previewPoster(@PathVariable("messageId") String messageId) {
-        WxMpTemplateMessage message = wxMpTemplateMessageService.getById(messageId);
+        WxMpActivityTemplateMessage message = wxMpActivityTemplateMessageService.getById(messageId);
         String mediaId = message.getRepMediaId();
         String appId = ThreadLocalUtil.getAppId();
         logger.debug("previewPoster 当前操作的APPID:{}", appId);

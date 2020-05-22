@@ -50,7 +50,7 @@ public class WxMpOpenController extends BaseController {
 
     private final IWxActivityTemplateService wxActivityTemplateService;
 
-    private final IWxMpTemplateMessageService wxMpTemplateMessageService;
+    private final IWxMpActivityTemplateMessageService wxMpActivityTemplateMessageService;
 
     private final WxMpService wxMpService;
 
@@ -96,12 +96,12 @@ public class WxMpOpenController extends BaseController {
 
     @ApiOperation("获取活动模版")
     @GetMapping("/template")
-    public List<WxMpTemplateMessage> getActivityTemplate(@RequestParam(value = "appId") String appId) {
+    public List<WxMpActivityTemplateMessage> getActivityTemplate(@RequestParam(value = "appId") String appId) {
         logger.debug("【getActivityTemplate】appId:{}",appId);
-        List<WxMpTemplateMessage> list = wxMpTemplateMessageService.list(
-                Wrappers.<WxMpTemplateMessage>lambdaQuery()
-                        .eq(WxMpTemplateMessage::getAppId, appId)
-                        .eq(WxMpTemplateMessage::getActivityEnable,true)
+        List<WxMpActivityTemplateMessage> list = wxMpActivityTemplateMessageService.list(
+                Wrappers.<WxMpActivityTemplateMessage>lambdaQuery()
+                        .eq(WxMpActivityTemplateMessage::getAppId, appId)
+                        .eq(WxMpActivityTemplateMessage::getActivityEnable,true)
         );
         return list;
     }
@@ -122,7 +122,7 @@ public class WxMpOpenController extends BaseController {
     @ApiOperation("发送海报消息")
     @PostMapping("/send/poster_msg")
     public void sendGzhPosterMsg(@RequestBody WxPosterMsgDTO posterMsgDTO) {
-        WxMpTemplateMessage posterMsgTemplate = posterMsgDTO.getWxMpTemplateMessage();
+        WxMpActivityTemplateMessage posterMsgTemplate = posterMsgDTO.getWxMpTemplateMessage();
         String openId = posterMsgDTO.getOpenId();
         WxUser wxUser = wxUserService.getOne(Wrappers.<WxUser>lambdaQuery().eq(WxUser::getOpenId, openId).last("limit 0,1"), false);
         wxSendMsgServer.sendPosterMessage(posterMsgTemplate,wxUser);

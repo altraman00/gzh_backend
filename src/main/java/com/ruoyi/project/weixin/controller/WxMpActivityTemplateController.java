@@ -3,9 +3,9 @@ package com.ruoyi.project.weixin.controller;
 
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
-import com.ruoyi.project.weixin.entity.WxMpTemplateMessage;
+import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
 import com.ruoyi.project.weixin.service.IWxMpActivityTemplateService;
-import com.ruoyi.project.weixin.service.IWxMpTemplateMessageService;
+import com.ruoyi.project.weixin.service.IWxMpActivityTemplateMessageService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ public class WxMpActivityTemplateController extends BaseController {
     private IWxMpActivityTemplateService iWxMpActivityTemplateService;
 
     @Autowired
-    private IWxMpTemplateMessageService wxMpTemplateMessageService;
+    private IWxMpActivityTemplateMessageService wxMpActivityTemplateMessageService;
 
     @ApiOperation("查询公众号绑定的活动模版")
     @GetMapping("/activity/template/list")
@@ -78,9 +78,9 @@ public class WxMpActivityTemplateController extends BaseController {
              @PathVariable(value = "id") String id
             ,@RequestParam(value = "activityEnable") boolean activityEnable){
         log.info("operMpWxActivityTemplateList,activityEnable:{}",activityEnable);
-        boolean update = wxMpTemplateMessageService.lambdaUpdate()
-                .eq(WxMpTemplateMessage::getId, id)
-                .set(WxMpTemplateMessage::getActivityEnable, activityEnable)
+        boolean update = wxMpActivityTemplateMessageService.lambdaUpdate()
+                .eq(WxMpActivityTemplateMessage::getId, id)
+                .set(WxMpActivityTemplateMessage::getActivityEnable, activityEnable)
                 .update();
 
         return AjaxResult.success(update);

@@ -48,3 +48,9 @@ SET FOREIGN_KEY_CHECKS = 1;
 ALTER TABLE `db_feo_ruo`.`wx_mp_activity_template`
 MODIFY COLUMN `activity_enable` tinyint(4) NOT NULL DEFAULT 0 COMMENT '活动是否启用' AFTER `template_class`;
 
+
+
+
+rename table wx_mp_template_message to wx_mp_activity_template_message
+
+

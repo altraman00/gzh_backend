@@ -61,7 +61,7 @@ public class WxActivityTaskController extends BaseController {
 
     private final IWxTaskHelpRecordService wxTaskHelpRecordService;
 
-    private final IWxMpTemplateMessageService wxMpTemplateMessageService;
+    private final IWxMpActivityTemplateMessageService wxMpActivityTemplateMessageService;
 
     private final HelpActivityServiceImpl helpActivityService;
 
@@ -111,9 +111,9 @@ public class WxActivityTaskController extends BaseController {
             }
 
 
-            Map<String,WxMpTemplateMessage> messageMap = getTemplateMessage(appId, templateId);
-            WxMpTemplateMessage msgJpTitle = messageMap.get(HelpActivityConstant.SCENE_JP_TITLE);
-            WxMpTemplateMessage msgJpUrl = messageMap.get(HelpActivityConstant.SCENE_JP_URL);
+            Map<String, WxMpActivityTemplateMessage> messageMap = getTemplateMessage(appId, templateId);
+            WxMpActivityTemplateMessage msgJpTitle = messageMap.get(HelpActivityConstant.SCENE_JP_TITLE);
+            WxMpActivityTemplateMessage msgJpUrl = messageMap.get(HelpActivityConstant.SCENE_JP_URL);
             helpInfoDTO.setJpTitleName(msgJpTitle != null? msgJpTitle.getRepContent():"");
             helpInfoDTO.setRewardUrl(msgJpUrl != null ? msgJpUrl.getRepContent():"");
 
@@ -131,17 +131,17 @@ public class WxActivityTaskController extends BaseController {
      * @param appId
      * @return
      */
-    private Map<String, WxMpTemplateMessage> getTemplateMessage(String appId, String templateId) {
+    private Map<String, WxMpActivityTemplateMessage> getTemplateMessage(String appId, String templateId) {
 //        Map<String,WxMpTemplateMessage> messageMap = new HashMap<>();
         // 查询奖品名称返回到前端
-        QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<WxMpActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda()
-                .eq(WxMpTemplateMessage::getAppId, appId)
-                .eq(WxMpTemplateMessage::getActivityEnable,true)
-                .eq(WxMpTemplateMessage::getTemplateId,templateId);
-        List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
+                .eq(WxMpActivityTemplateMessage::getAppId, appId)
+                .eq(WxMpActivityTemplateMessage::getActivityEnable,true)
+                .eq(WxMpActivityTemplateMessage::getTemplateId,templateId);
+        List<WxMpActivityTemplateMessage> messages = wxMpActivityTemplateMessageService.list(queryWrapper);
 
-        Map<String,WxMpTemplateMessage> messageMap = messages.stream().collect(Collectors.toMap(WxMpTemplateMessage::getScene,p-> p));
+        Map<String, WxMpActivityTemplateMessage> messageMap = messages.stream().collect(Collectors.toMap(WxMpActivityTemplateMessage::getScene, p-> p));
         return messageMap;
     }
 
@@ -154,15 +154,15 @@ public class WxActivityTaskController extends BaseController {
     })
     @GetMapping("/help/poster")
     public AjaxResult getTaskPoster(@RequestParam(value = "openId") String openId,@RequestParam(value = "appId") String appId){
-        QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<WxMpActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
         WxMpActivityTemplate wxMpActivityTemplate = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndClassName(appId,helpActivityService.getActivityServiceImplClassName());
         String templateId = wxMpActivityTemplate.getTemplateId();
         queryWrapper.lambda()
-                .eq(WxMpTemplateMessage::getAppId, appId)
-                .eq(WxMpTemplateMessage::getActivityEnable,true)
-                .eq(WxMpTemplateMessage::getTemplateId,templateId);
-        List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
-        WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
+                .eq(WxMpActivityTemplateMessage::getAppId, appId)
+                .eq(WxMpActivityTemplateMessage::getActivityEnable,true)
+                .eq(WxMpActivityTemplateMessage::getTemplateId,templateId);
+        List<WxMpActivityTemplateMessage> messages = wxMpActivityTemplateMessageService.list(queryWrapper);
+        WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent()) && StringUtils.isNotBlank(message.getRepMediaId());
         String posterBase64 = null;
         if (hasAvailableMessage) {
