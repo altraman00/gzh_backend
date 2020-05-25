@@ -11,6 +11,8 @@ import com.ruoyi.project.weixin.service.IWxMpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -66,6 +68,12 @@ public class WxMpActivityTemplateServiceImpl extends ServiceImpl<WxMpActivityTem
     public void enableActivityTemplates(String id, boolean activityEnable) {
         WxMpActivityTemplate template = new WxMpActivityTemplate();
         template.setActivityEnable(activityEnable);
+        if(true == activityEnable){
+            template.setStartTime(LocalDateTime.now());
+        }else{
+            template.setStartTime(null);
+        }
+
         UpdateWrapper<WxMpActivityTemplate> templateUpdateWrapper = new UpdateWrapper<>();
         templateUpdateWrapper.eq("id", id);
         wxMpActivityTemplateMapper.update(template,templateUpdateWrapper);
