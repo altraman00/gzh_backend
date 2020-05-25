@@ -223,12 +223,16 @@ public class HelpActivityServiceImpl implements ActivityService {
     }
 
     public void sendInviteMessage(String appId) {
+
         WxMp wxMp = iWxMpService.getByAppId(appId);
-        if (!wxMp.isActivityEnable()) {
+
+        WxMpActivityTemplate wxMpActivityTemplate = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndClassName(appId,this.getActivityServiceImplClassName());
+
+        if (!wxMpActivityTemplate.isActivityEnable()) {
             log.info("appId:[{}]已暂停活动，流程结束",appId);
             return;
         }
-        WxMpActivityTemplate wxMpActivityTemplate = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndClassName(appId,this.getActivityServiceImplClassName());
+
         QueryWrapper<WxMpActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda()
                 .eq(WxMpActivityTemplateMessage::getAppId, appId)
