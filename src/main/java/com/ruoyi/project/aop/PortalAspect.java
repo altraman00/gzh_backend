@@ -54,15 +54,19 @@ public class PortalAspect {
         List<WxMpActivityTemplate> templateList =  IWxMpActivityTemplateService.getActivityTemplatesByAppId(wxMp.getAppId());
 
         for(WxMpActivityTemplate wxMpActivityTemplate : templateList){
+            log.info("发现活动模板:{},状态为：{},template id is : {},实现类：{}",wxMpActivityTemplate.getTemplateName(),wxMpActivityTemplate.isActivityEnable(),wxMpActivityTemplate.getTemplateId(),wxMpActivityTemplate.getTemplateClass());
+
             if(!wxMpActivityTemplate.isActivityEnable()){
                 continue;
             }
+
             String templateId = wxMpActivityTemplate.getTemplateId();
 
             if (StringUtils.isBlank(templateId)) {
                 log.info("appId:[{}]无绑定活动模板，流程结束",appId);
                 return;
             }
+
             if (!wxMp.isActivityEnable()) {
                 log.info("appId:[{}]已暂停活动，流程结束",appId);
                 return;
