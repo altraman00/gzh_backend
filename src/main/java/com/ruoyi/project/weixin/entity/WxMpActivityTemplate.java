@@ -1,5 +1,7 @@
 package com.ruoyi.project.weixin.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.ruoyi.project.common.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -54,6 +56,7 @@ public class WxMpActivityTemplate extends BaseEntity {
     /**
      * 活动启动时间
      */
+    @TableField(updateStrategy = FieldStrategy.IGNORED) //可以设置为null值
     private LocalDateTime startTime;
 
 
