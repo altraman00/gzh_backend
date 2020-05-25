@@ -68,6 +68,7 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
             } catch (Exception e) {
                 log.error("【DiabetesTestingSubscrib】调取糖知家关注接口异常");
             }
+            return;
         }
 
         //如果公众号二维码中带有场景参数，则执行对应的活动
@@ -77,13 +78,9 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
             } catch (Exception e) {
                 log.error("【DiabetesTestingSubscrib】调取糖知家关注接口异常");
             }
+            return;
         }
 
-        try {
-            sendSubscribeState(wxMp, openId,DiabetesConstant.EVENT_SUBSCRIBE);
-        } catch (Exception e) {
-            log.error("【DiabetesTestingSubscrib】调取糖知家关注接口异常");
-        }
     }
 
     /**
