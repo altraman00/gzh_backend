@@ -1,6 +1,6 @@
-package com.ruoyi.project.weixin.service;
+package com.ruoyi.project.weixin.service.yunchan.yunchan001;
 
-import com.ruoyi.project.weixin.entity.WxMpYunchan001HelpUserStatus;
+import com.ruoyi.project.weixin.entity.yunchan.yunchan001.WxMpYunchan001HelpUserStatus;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

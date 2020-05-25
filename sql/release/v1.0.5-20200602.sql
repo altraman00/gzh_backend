@@ -33,7 +33,7 @@ CREATE TABLE `wx_mp_yunchan001_help_user_record` (
   `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `remark` varchar(100) CHARACTER SET utf8 DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='助力记录表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='孕产001-助力记录表';
 
 -- ----------------------------
 -- Table structure for wx_mp_yunchan001_help_user_status
@@ -53,7 +53,7 @@ CREATE TABLE `wx_mp_yunchan001_help_user_status` (
   `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `remark` varchar(100) CHARACTER SET utf8 DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='活动任务表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='孕产001-用户助力状态';
 
 -- ----------------------------
 -- Table structure for wx_mp_yunchan001_user_status
@@ -76,6 +76,11 @@ CREATE TABLE `wx_mp_yunchan001_user_status` (
   `create_id` varchar(32) CHARACTER SET utf8 DEFAULT NULL COMMENT '创建者',
   `update_id` varchar(32) CHARACTER SET utf8 DEFAULT NULL COMMENT '更新者',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='孕产001-用户活动状态';
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+ALTER TABLE `db_feo_ruo`.`wx_mp_yunchan001_user_status`
+ADD COLUMN `remark` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注' AFTER `update_id`,
+DROP PRIMARY KEY,
+ADD PRIMARY KEY (`id`) USING BTREE;

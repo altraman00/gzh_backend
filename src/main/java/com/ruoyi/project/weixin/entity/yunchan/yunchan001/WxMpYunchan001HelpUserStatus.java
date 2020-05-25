@@ -1,4 +1,4 @@
-package com.ruoyi.project.weixin.entity;
+package com.ruoyi.project.weixin.entity.yunchan.yunchan001;
 
 import com.ruoyi.project.common.BaseEntity;
 import lombok.Data;

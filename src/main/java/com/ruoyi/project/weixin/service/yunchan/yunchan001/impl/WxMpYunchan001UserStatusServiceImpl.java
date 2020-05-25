@@ -1,8 +1,8 @@
-package com.ruoyi.project.weixin.service.impl;
+package com.ruoyi.project.weixin.service.yunchan.yunchan001.impl;
 
-import com.ruoyi.project.weixin.entity.WxMpYunchan001UserStatus;
-import com.ruoyi.project.weixin.mapper.WxMpYunchan001UserStatusMapper;
-import com.ruoyi.project.weixin.service.IWxMpYunchan001UserStatusService;
+import com.ruoyi.project.weixin.entity.yunchan.yunchan001.WxMpYunchan001UserStatus;
+import com.ruoyi.project.weixin.mapper.yunchan.yunchan001.WxMpYunchan001UserStatusMapper;
+import com.ruoyi.project.weixin.service.yunchan.yunchan001.IWxMpYunchan001UserStatusService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
