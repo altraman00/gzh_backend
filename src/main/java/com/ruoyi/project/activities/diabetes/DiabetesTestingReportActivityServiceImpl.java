@@ -2,6 +2,7 @@ package com.ruoyi.project.activities.diabetes;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.http.HttpClient;
 import com.ruoyi.project.weixin.constant.DiabetesConstant;
 import com.ruoyi.project.weixin.entity.WxMp;
@@ -41,6 +42,12 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
     @Value("${sunlands.diabetes-testing.url}")
     private String sunlandsDiabetesUrl;
 
+    /**
+     * 用于微信带参二维码的活动标识
+     */
+    String SCENE_EVENT_KEY_DIABETES_TEST_H5 = "diabetes_test_h5";
+
+
     @Override
     public String getActivityServiceImplClassName() {
         String classFullName = this.getClass().getName();
@@ -51,6 +58,27 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
     @Async
     public void subscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplate template, String openId) {
         log.info("【DiabetesTestingSubscrib】subscrib event inMessage:[{}],wxMp:[{}],template[{}],openId[{}]", inMessage, wxMp, template, openId);
+
+        String eventKey = inMessage.getEventKey();
+
+        //如果公众号二维码中不带有场景参数，则执行默认的活动
+        if(StringUtils.isEmpty(eventKey)){
+            try {
+                sendSubscribeState(wxMp, openId,DiabetesConstant.EVENT_SUBSCRIBE);
+            } catch (Exception e) {
+                log.error("【DiabetesTestingSubscrib】调取糖知家关注接口异常");
+            }
+        }
+
+        //如果公众号二维码中带有场景参数，则执行对应的活动
+        if(SCENE_EVENT_KEY_DIABETES_TEST_H5.equals(eventKey)){
+            try {
+                sendSubscribeState(wxMp, openId,DiabetesConstant.EVENT_SUBSCRIBE);
+            } catch (Exception e) {
+                log.error("【DiabetesTestingSubscrib】调取糖知家关注接口异常");
+            }
+        }
+
         try {
             sendSubscribeState(wxMp, openId,DiabetesConstant.EVENT_SUBSCRIBE);
         } catch (Exception e) {
