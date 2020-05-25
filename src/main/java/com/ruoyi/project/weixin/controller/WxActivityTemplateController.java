@@ -96,6 +96,8 @@ public class WxActivityTemplateController extends BaseController {
             @ApiImplicitParam(name="templateId",value="活动模板id",required=true,paramType="String"),
             @ApiImplicitParam(name="appId",value="appId",required=true,paramType="String")
     })
+
+
     @GetMapping("/template/bind")
     public AjaxResult bindWxActivityTemplate(@RequestParam(value = "templateId") String templateId,@RequestParam(value = "appId") String appId){
         WxMp wxMp = wxMpService.getByAppId(appId);
@@ -132,6 +134,7 @@ public class WxActivityTemplateController extends BaseController {
             wxMpActivityTemplateMessage.setAppId(appId);
             BeanUtils.copyProperties(wxActivityTemplateMessage, wxMpActivityTemplateMessage,"id","createId","createTime","updateId","updateTime","delFlag");
             wxMpActivityTemplateMessage.setRepContent(wxMpActivityTemplateMessage.getRepContent().replace("appid=","appid="+appId).replace("state=","state="+appId));
+            wxMpActivityTemplateMessage.setActivityEnable(true);
             wxMpActivityTemplateMessageService.save(wxMpActivityTemplateMessage);
             if (wxMpActivityTemplateMessage.getRepType().equals(ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE)) {
                 needPublishSchedule.add(wxMpActivityTemplateMessage);

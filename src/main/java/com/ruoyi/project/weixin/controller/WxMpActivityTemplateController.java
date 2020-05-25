@@ -1,6 +1,7 @@
 package com.ruoyi.project.weixin.controller;
 
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
@@ -62,11 +63,18 @@ public class WxMpActivityTemplateController extends BaseController {
     @DeleteMapping("/activity/template/{id}")
     @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")
     public AjaxResult deleteMpWxActivityTemplate(@PathVariable(value = "id") String id){
+
+        WxMpActivityTemplate wxMpActivityTemplate = iWxMpActivityTemplateService.getOne(Wrappers.<WxMpActivityTemplate>lambdaQuery().eq(WxMpActivityTemplate::getId,id));
+
         log.info("deleteMpWxActivityTemplate，id:{}",id);
         iWxMpActivityTemplateService.lambdaUpdate()
                 .eq(WxMpActivityTemplate::getId,id)
                 .set(WxMpActivityTemplate::getDelFlag,"1")
                 .set(WxMpActivityTemplate::isActivityEnable,false).update();
+
+        //删除子表数据，否者根据appid和template_id查询时会出现重复数据
+        wxMpActivityTemplateMessageService.lambdaUpdate().eq(WxMpActivityTemplateMessage::getAppId,wxMpActivityTemplate.getAppId()).eq(WxMpActivityTemplateMessage::getTemplateId,wxMpActivityTemplate.getTemplateId())
+                .set(WxMpActivityTemplateMessage::getDelFlag,"1").update();
 
         return AjaxResult.success();
     }
