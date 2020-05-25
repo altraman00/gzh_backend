@@ -222,4 +222,23 @@ public class WxSendMsgServer {
     }
 
 
+    public String generatorPosterMpQrcode(String appId){
+        String qrCodePictureUrl = null;
+        try {
+            WxMpQrCodeTicket wxMpQrCodeTicket = wxMpService.switchoverTo(appId).getQrcodeService().qrCodeCreateLastTicket("helpActivity:"+ "123456789");
+            String ticket = wxMpQrCodeTicket.getTicket();
+            File qrCode = wxMpService.switchoverTo(appId).getQrcodeService().qrCodePicture(wxMpQrCodeTicket);
+            String path = qrCode.getPath();
+            log.info("【generatorPosterMpQrcode】,path:{}",path);
+            qrCodePictureUrl = wxMpService.switchoverTo(appId).getQrcodeService().qrCodePictureUrl(ticket);
+
+            log.info("【generatorPosterMpQrcode】,qrCodePictureUrl:{}",qrCodePictureUrl);
+        } catch (Exception e) {
+            log.error("生成助力活动带参二维码异常，消息模板appId:"+appId,e);
+        }
+
+        return qrCodePictureUrl;
+    }
+
+
 }

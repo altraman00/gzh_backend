@@ -1,6 +1,6 @@
 
 
-ALTER TABLE `wx_activity_template_message`
+ALTER TABLE `wx_mp`
 DROP COLUMN `template_id`;
 
 

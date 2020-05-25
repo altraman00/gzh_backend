@@ -50,6 +50,8 @@ public class WxMpOpenController extends BaseController {
 
     private final IWxActivityTemplateService wxActivityTemplateService;
 
+    private final IWxMpActivityTemplateService wxMpActivityTemplateService;
+
     private final IWxMpActivityTemplateMessageService wxMpActivityTemplateMessageService;
 
     private final WxMpService wxMpService;
@@ -98,11 +100,23 @@ public class WxMpOpenController extends BaseController {
     @GetMapping("/template")
     public List<WxMpActivityTemplateMessage> getActivityTemplate(@RequestParam(value = "appId") String appId) {
         logger.debug("【getActivityTemplate】appId:{}",appId);
-        List<WxMpActivityTemplateMessage> list = wxMpActivityTemplateMessageService.list(
-                Wrappers.<WxMpActivityTemplateMessage>lambdaQuery()
-                        .eq(WxMpActivityTemplateMessage::getAppId, appId)
-                        .eq(WxMpActivityTemplateMessage::getActivityEnable,true)
-        );
+
+        List<WxMpActivityTemplate> activityTemplates = wxMpActivityTemplateService.list(Wrappers.<WxMpActivityTemplate>lambdaQuery()
+                .eq(WxMpActivityTemplate::getAppId, appId)
+                .eq(WxMpActivityTemplate::isActivityEnable, true));
+
+        List<WxMpActivityTemplateMessage> list = Lists.newArrayList();
+        for(WxMpActivityTemplate wxMpActivityTemplate : activityTemplates){
+            String templateId = wxMpActivityTemplate.getTemplateId();
+            List<WxMpActivityTemplateMessage> templateMessages = wxMpActivityTemplateMessageService.list(
+                    Wrappers.<WxMpActivityTemplateMessage>lambdaQuery()
+                            .eq(WxMpActivityTemplateMessage::getAppId, appId)
+                            .eq(WxMpActivityTemplateMessage::getTemplateId,templateId)
+//                            .eq(WxMpActivityTemplateMessage::getActivityEnable, true)
+            );
+            list.addAll(templateMessages);
+        }
+
         return list;
     }
 
@@ -122,11 +136,23 @@ public class WxMpOpenController extends BaseController {
     @ApiOperation("发送海报消息")
     @PostMapping("/send/poster_msg")
     public void sendGzhPosterMsg(@RequestBody WxPosterMsgDTO posterMsgDTO) {
+        log.info("【sendGzhPosterMsg】,posterMsgDTO:{}",posterMsgDTO);
         WxMpActivityTemplateMessage posterMsgTemplate = posterMsgDTO.getWxMpTemplateMessage();
         String openId = posterMsgDTO.getOpenId();
         WxUser wxUser = wxUserService.getOne(Wrappers.<WxUser>lambdaQuery().eq(WxUser::getOpenId, openId).last("limit 0,1"), false);
         wxSendMsgServer.sendPosterMessage(posterMsgTemplate,wxUser);
     }
+
+
+
+    @ApiOperation("根据appId生成公众号二维码")
+    @PostMapping("/create/qr_code")
+    public String create_mp_qrcode(@RequestParam(value = "appId") String appId) {
+        String s = wxSendMsgServer.generatorPosterMpQrcode(appId);
+        return s;
+    }
+
+
 
 
     @ApiOperation("根据openId和appId创建微信用户，默认是没有关注公众号的")
