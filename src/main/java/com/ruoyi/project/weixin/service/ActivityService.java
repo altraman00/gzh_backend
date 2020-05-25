@@ -6,6 +6,16 @@ import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 
 public interface ActivityService {
 
+    /**最开始做的助理活动活动**/
+    String ACTIVITY_HELP = "help000";
+
+    /**糖知家的评测小工具活动**/
+    String ACTIVITY_DIABETIS = "diabetesTesting";
+
+    /**孕产001的助力活动**/
+    String ACTIVITY_HELP_YUNCHAN001 = "yunchan001";
+
+
     /**
      * 获取当前实现类的类名
      * @return
