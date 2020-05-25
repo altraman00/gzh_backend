@@ -59,10 +59,10 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
     public void subscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplate template, String openId) {
         log.info("【DiabetesTestingSubscrib】subscrib event inMessage:[{}],wxMp:[{}],template[{}],openId[{}]", inMessage, wxMp, template, openId);
 
-        String eventKey = inMessage.getEventKey();
-
+        String mpQrcodeScene = inMessage.getEventKey();
+        log.info("【DiabetesTestingSubscrib】subscrib event mpQrcodeScene:{}",mpQrcodeScene);
         //如果公众号二维码中不带有场景参数，则执行默认的活动
-        if(StringUtils.isEmpty(eventKey)){
+        if(StringUtils.isEmpty(mpQrcodeScene)){
             try {
                 sendSubscribeState(wxMp, openId,DiabetesConstant.EVENT_SUBSCRIBE);
             } catch (Exception e) {
@@ -71,7 +71,7 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
         }
 
         //如果公众号二维码中带有场景参数，则执行对应的活动
-        if(SCENE_EVENT_KEY_DIABETES_TEST_H5.equals(eventKey)){
+        if(mpQrcodeScene.contains(SCENE_EVENT_KEY_DIABETES_TEST_H5)){
             try {
                 sendSubscribeState(wxMp, openId,DiabetesConstant.EVENT_SUBSCRIBE);
             } catch (Exception e) {
