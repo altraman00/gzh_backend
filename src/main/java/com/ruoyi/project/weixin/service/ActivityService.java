@@ -13,7 +13,7 @@ public interface ActivityService {
     String ACTIVITY_DIABETIS = "diabetesTesting";
 
     /**孕产001的助力活动**/
-    String ACTIVITY_HELP_YUNCHAN001 = "yunchan001";
+    String ACTIVITY_YUNCHAN001_HELP = "help";
 
 
     /**
