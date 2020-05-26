@@ -36,11 +36,15 @@ public interface YunChan001Constant {
     String SCENE_ACTIVITY_POSTER = "activity_poster";
     String SCENE_SCHEDULE_INVITER = "schedule_invite";
     String SCENE_HAS_COMPLETE = "has_complete";
+    /**孕产助理老师的微信二维码的scene**/
+    String SCENE_AIDE_TEACHER_QRCODE = "aide_teacher_qrcode";
 
     Integer POSTER_SIZE = 200 * 1024;
 
     String SCENE_JP_TITLE = "jp_title";
     String SCENE_JP_URL = "jp_url";
+
+
 
     /**
      * 占位信息

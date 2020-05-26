@@ -2,6 +2,7 @@ package com.ruoyi.project.weixin.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
+import com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMp;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
@@ -41,7 +42,11 @@ public class WxMpActivityTemplateMessageServiceImpl extends ServiceImpl<WxMpActi
     private CronTaskRegistrar cronTaskRegistrar;
 
     @Autowired
-    private IWxMpActivityTemplateService IWxMpActivityTemplateService;
+    private IWxMpActivityTemplateService iWxMpActivityTemplateService;
+
+    @Autowired
+    private WxMpActivityTemplateMessageMapper wxMpActivityTemplateMessageMapper;
+
 
     @Override
     public void pushAllScheduleMessageTask() {
@@ -49,7 +54,7 @@ public class WxMpActivityTemplateMessageServiceImpl extends ServiceImpl<WxMpActi
         List<WxMpActivityTemplateMessage> needPublishSchedule = new ArrayList<>();
         for (WxMp wxMp : list) {
             String appId = wxMp.getAppId();
-            List<WxMpActivityTemplate> activityTemplatesByAppId = IWxMpActivityTemplateService.getActivityTemplatesByAppId(appId);
+            List<WxMpActivityTemplate> activityTemplatesByAppId = iWxMpActivityTemplateService.getActivityTemplatesByAppId(appId);
             if(activityTemplatesByAppId != null && activityTemplatesByAppId.size()>0){
                 for(WxMpActivityTemplate template : activityTemplatesByAppId){
                     String templateId = template.getTemplateId();
@@ -67,5 +72,33 @@ public class WxMpActivityTemplateMessageServiceImpl extends ServiceImpl<WxMpActi
             cronTaskRegistrar.addCronTask(task, wxMpActivityTemplateMessage.getScheduleCron(), wxMpActivityTemplateMessage.getId());
             log.info("成功发布定时任务:messageId:[{}]", wxMpActivityTemplateMessage.getId());
         }
+    }
+
+    @Override
+    public List<WxMpActivityTemplateMessage> getMpTemplateMessage(String appId, String activityClassName) {
+
+        //查找appid绑定的模版
+        WxMpActivityTemplate wxMpActivityTemplate = iWxMpActivityTemplateService.getOne(Wrappers.<WxMpActivityTemplate>lambdaQuery()
+                .eq(WxMpActivityTemplate::getAppId, appId)
+                .eq(WxMpActivityTemplate::getTemplateClass, activityClassName),true);
+        String templateId = wxMpActivityTemplate.getTemplateId();
+
+        //查询appid绑定的模版的所有消息
+        List<WxMpActivityTemplateMessage> templateMessages = wxMpActivityTemplateMessageMapper.selectList(Wrappers.<WxMpActivityTemplateMessage>lambdaQuery()
+                .eq(WxMpActivityTemplateMessage::getAppId, appId)
+                .eq(WxMpActivityTemplateMessage::getTemplateId, templateId)
+                .eq(WxMpActivityTemplateMessage::getActivityEnable,true)
+        );
+
+        return templateMessages;
+    }
+
+    @Override
+    public WxMpActivityTemplateMessage findMpTemplateMessage(String appId, String activityClassName, String scene) {
+        List<WxMpActivityTemplateMessage> templateMessages = getMpTemplateMessage(appId,activityClassName);
+        WxMpActivityTemplateMessage message = templateMessages.stream()
+                .filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(scene))
+                .findFirst().orElse(null);
+        return message;
     }
 }

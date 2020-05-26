@@ -68,7 +68,7 @@ CREATE TABLE `wx_mp_yunchan001_user_status` (
   `first_stage_unlock_time` datetime DEFAULT NULL COMMENT '第一阶段的解锁时间',
   `second_stage_status` varchar(8) DEFAULT NULL COMMENT '第二阶段的解锁状态',
   `second_stage_unlock_time` datetime DEFAULT NULL COMMENT '第二阶段的解锁时间',
-  `aid_teacher_qrcode` varchar(8) DEFAULT NULL,
+  `aid_teacher_qrcode` varchar(500) DEFAULT NULL COMMENT '助教老师的微信二维码',
   `del_flag` char(2) CHARACTER SET utf8 DEFAULT '0' COMMENT '逻辑删除标记（0：未删除；1：删除）',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
