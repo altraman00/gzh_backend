@@ -140,7 +140,8 @@ public class WxMpOpenController extends BaseController {
         WxMpActivityTemplateMessage posterMsgTemplate = posterMsgDTO.getWxMpTemplateMessage();
         String openId = posterMsgDTO.getOpenId();
         WxUser wxUser = wxUserService.getOne(Wrappers.<WxUser>lambdaQuery().eq(WxUser::getOpenId, openId).last("limit 0,1"), false);
-        wxSendMsgServer.sendPosterMessage(posterMsgTemplate,wxUser);
+
+        wxSendMsgServer.sendPosterMessage(posterMsgTemplate,wxUser,posterMsgDTO.getQrParams());
     }
 
 

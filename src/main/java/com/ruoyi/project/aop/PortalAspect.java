@@ -50,6 +50,19 @@ public class PortalAspect {
         if (wxMp == null) {
             throw new IllegalArgumentException(String.format("未找到对应appid=[%s]的配置，请核实！", appId));
         }
+
+
+
+        String eventKey = inMessage.getEventKey();
+        if(StringUtils.isEmpty(eventKey)){
+            //如果没有场景值，获取排序号为0的第一个活动模板作为主活动模板 执行关注事件
+
+        }else{
+            //如果有场景值，根据场景值获取对应的实现类执行关注事件
+
+        }
+
+
         //遍历当前公众号所关联的所有活动模板
         List<WxMpActivityTemplate> templateList =  IWxMpActivityTemplateService.getActivityTemplatesByAppId(wxMp.getAppId());
 
@@ -61,17 +74,9 @@ public class PortalAspect {
                 continue;
             }
 
-            String templateId = wxMpActivityTemplate.getTemplateId();
-
-            if (StringUtils.isBlank(templateId)) {
-                log.info("appId:[{}]无绑定活动模板，流程结束",appId);
-                return;
-            }
-
-
             String openId= (String) args[5];
 
-            WxMpActivityTemplate template = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndTemplateId(appId, templateId);
+            WxMpActivityTemplate template = wxMpActivityTemplate;
 
             if(null != template){
                 String templateClass = template.getTemplateClass();

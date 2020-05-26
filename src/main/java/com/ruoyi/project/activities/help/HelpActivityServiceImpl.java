@@ -120,7 +120,8 @@ public class HelpActivityServiceImpl implements ActivityService {
         executeActivityRule(messages,wxUser,templateId,appId);
         // 推送活动海报
         WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
-        wxSendMsgServer.sendPosterMessage(message,wxUser);
+
+        wxSendMsgServer.sendPosterMessage(message,wxUser,HelpActivityConstant.SCENE_EVENT_KEY+":"+wxUser.getOpenId());
     }
 
     @Override
@@ -224,9 +225,7 @@ public class HelpActivityServiceImpl implements ActivityService {
 
     public void sendInviteMessage(String appId) {
 
-        WxMp wxMp = iWxMpService.getByAppId(appId);
-
-        WxMpActivityTemplate wxMpActivityTemplate = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndClassName(appId,this.getActivityServiceImplClassName());
+        WxMpActivityTemplate wxMpActivityTemplate = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndAlias(appId,HelpActivityConstant.SCENE_EVENT_KEY);
 
         if (!wxMpActivityTemplate.isActivityEnable()) {
             log.info("appId:[{}]已暂停活动，流程结束",appId);
