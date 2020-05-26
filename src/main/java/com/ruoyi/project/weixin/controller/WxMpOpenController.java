@@ -93,6 +93,8 @@ public class WxMpOpenController extends BaseController {
      * }
      */
     public AjaxResult getAccessTokenByCode(@RequestParam(value = "appId") String appId,@RequestParam(value = "code") String code) throws WxErrorException {
+
+        logger.debug("get accesstoke by code : {}->{}",appId,code);
         WxMpOAuth2AccessToken wxMpOAuth2AccessToken = wxMpService.switchoverTo(appId).oauth2getAccessToken(code);
         logger.debug("get accesstoke by code : {}-{}->{}",appId,code,wxMpOAuth2AccessToken);
 
