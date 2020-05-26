@@ -91,6 +91,9 @@ public class HelpActivityServiceImpl implements ActivityService {
                             wxActivityTask.setAppId(appId);
                             wxActivityTaskService.save(wxActivityTask);
                         }
+
+                        log.info("help activity task-> user {} has complete {} , need num is : {}",inviterOpenId,wxActivityTask.getCompleteNum(),needNum);
+
                         if (wxActivityTask.getCompleteNum() < needNum ){
                             //查找助力记录,一个人只能助力一次
                             List<WxTaskHelpRecord> records = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery()

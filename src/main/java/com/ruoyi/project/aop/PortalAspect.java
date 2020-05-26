@@ -82,15 +82,17 @@ public class PortalAspect {
                 String templateClass = template.getTemplateClass();
                 log.info("appId:{}所绑定活动为：{}，开始执行活动流程",appId,template.getTemplateName());
                 ActivityService activityService  = (ActivityService) SpringBeanUtil.getBean(templateClass);
+                if(activityService != null){
+                    if (WxEvenConstant.EVENT_SUBSCRIBE.equals(inMessage.getEvent())) {
+                        log.info("此事件为关注事件，开始执行活动流程:{}",activityService.getActivityServiceImplClassName());
+                        activityService.subscrib(inMessage,wxMp,template,openId);
+                    }
 
-                if (WxEvenConstant.EVENT_SUBSCRIBE.equals(inMessage.getEvent())) {
-                    log.info("此事件为关注事件，开始执行活动流程");
-                    activityService.subscrib(inMessage,wxMp,template,openId);
+                    if(WxEvenConstant.EVENT_UNSUBSCRIBE.equals(inMessage.getEvent())){
+                        activityService.unsubscrib(inMessage,wxMp,template,openId);
+                    }
                 }
 
-                if(WxEvenConstant.EVENT_UNSUBSCRIBE.equals(inMessage.getEvent())){
-                    activityService.unsubscrib(inMessage,wxMp,template,openId);
-                }
 
             }
 
