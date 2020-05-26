@@ -144,20 +144,16 @@ public class WxSendMsgServer {
      * activityTemplateAlias+":"+ openId
      */
     public File getPosterFile(String openId, WxMpActivityTemplateMessage message, String appId,String wxMpQrParams) {
-        StopWatch stopWatch = new StopWatch();
         String messageId = message.getId();
         // 先获取海报图片
         String repMediaId = message.getRepMediaId();
         InputStream inputStream = null;
-        stopWatch.start("get poster img");
         try {
             inputStream = wxMpService.switchoverTo(appId).getMaterialService().materialImageOrVoiceDownload(repMediaId);
         } catch (WxErrorException e) {
             log.error("从素材库获取海报图片异常，消息模板id:{},openId:{}",messageId,openId,e);
         }
-        stopWatch.stop();
         // 获取用户头像
-        stopWatch.start("get avatar img");
         String headImgUrl = null;
         try {
             //语言
@@ -167,9 +163,7 @@ public class WxSendMsgServer {
         } catch (WxErrorException e) {
             log.error("获取用户头像信息异常，消息模板id:{},openId:{}",messageId,openId,e);
         }
-        stopWatch.stop();
         // 开始处理图片,生成海报
-        stopWatch.start("Join poster img");
         File poster = null;
         try {
             poster = File.createTempFile("temp",".jpg");
@@ -180,9 +174,7 @@ public class WxSendMsgServer {
 
             //如果指定的二维码路径为空，则使用appId自动生成二维码，否则使用指定的路径生成二维码
             if(StringUtils.isEmpty(qrCodeUrl)){
-                stopWatch.stop();
                 // 获取邀请二维码
-                stopWatch.start("get qrcode img");
                 File qrCode = null;
                 try {
                     WxMpQrCodeTicket ticket = wxMpService.switchoverTo(appId).getQrcodeService().qrCodeCreateLastTicket(wxMpQrParams);
@@ -190,7 +182,6 @@ public class WxSendMsgServer {
                 } catch (Exception e) {
                     log.error("生成助力活动带参二维码异常，消息模板id:{},openId:{}",messageId,openId,e);
                 }
-                stopWatch.stop();
 
                 qrCodeBuffer = Thumbnails.of(qrCode).size(message.getQrcodeSize(), message.getQrcodeSize()).asBufferedImage();
             }else{
@@ -208,8 +199,6 @@ public class WxSendMsgServer {
         } catch (Exception e) {
             log.error("生成海报图片异常，消息模板id:{},openId:{}",messageId,openId,e);
         }
-        stopWatch.stop();
-        log.info(stopWatch.prettyPrint());
         return poster;
     }
 
