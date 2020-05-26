@@ -59,27 +59,24 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
     public void subscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplate template, String openId) {
         log.info("【DiabetesTestingSubscrib】subscrib event inMessage:[{}],wxMp:[{}],template[{}],openId[{}]", inMessage, wxMp, template, openId);
 
-        String mpQrcodeScene = inMessage.getEventKey();
-        log.info("【DiabetesTestingSubscrib】subscrib event mpQrcodeScene:{}",mpQrcodeScene);
-        //如果公众号二维码中不带有场景参数，则执行默认的活动
-        if(StringUtils.isEmpty(mpQrcodeScene)){
-            try {
-                sendSubscribeState(wxMp, openId,DiabetesConstant.EVENT_SUBSCRIBE);
-            } catch (Exception e) {
-                log.error("【DiabetesTestingSubscrib】调取糖知家关注接口异常");
-            }
-            return;
-        }
+        String appId = wxMp.getAppId();
+        WxUser wxUser = wxUserService.getOne(Wrappers.<WxUser>lambdaQuery()
+                .eq(WxUser::getOpenId,openId).eq(WxUser::getAppId,appId));
 
-        //如果公众号二维码中带有场景参数，则执行对应的活动
-        if(mpQrcodeScene.contains(SCENE_EVENT_KEY_DIABETES_TEST_H5)){
-            try {
-                sendSubscribeState(wxMp, openId,DiabetesConstant.EVENT_SUBSCRIBE);
-            } catch (Exception e) {
-                log.error("【DiabetesTestingSubscrib】调取糖知家关注接口异常");
-            }
-            return;
-        }
+        String nickName = wxUser.getNickName();
+        Map<String,String> paramsMap = new HashMap<String,String>(){{
+            put("appId",appId);
+            put("openId",openId);
+            put("nickName",nickName);
+            put("event", DiabetesConstant.EVENT_SUBSCRIBE);
+        }};
+
+        String url = sunlandsDiabetesUrl + DiabetesConstant.DIABETES_TESTING_PORTAL_API;
+        String params = JSONUtil.toJsonStr(paramsMap);
+        log.info("【DiabetesTestingReportActivity】,url:{},params:{}",url,params);
+        String result = HttpClient.doPost(url, params);
+        log.info("【DiabetesTestingReportActivity】,result:{}",result);
+
 
     }
 
@@ -110,23 +107,7 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
      * @param event
      */
     private void sendSubscribeState(WxMp wxMp, String openId,String event) {
-        String appId = wxMp.getAppId();
-        WxUser wxUser = wxUserService.getOne(Wrappers.<WxUser>lambdaQuery()
-                .eq(WxUser::getOpenId,openId).eq(WxUser::getAppId,appId));
 
-        String nickName = wxUser.getNickName();
-        Map<String,String> paramsMap = new HashMap<String,String>(){{
-            put("appId",appId);
-            put("openId",openId);
-            put("nickName",nickName);
-            put("event", event);
-        }};
-
-        String url = sunlandsDiabetesUrl + DiabetesConstant.DIABETES_TESTING_PORTAL_API;
-        String params = JSONUtil.toJsonStr(paramsMap);
-        log.info("【DiabetesTestingReportActivity】,url:{},params:{}",url,params);
-        String result = HttpClient.doPost(url, params);
-        log.info("【DiabetesTestingReportActivity】,result:{}",result);
     }
 
 
