@@ -42,8 +42,6 @@ public class Yunchan001ActivityServiceImpl implements ActivityService {
 
     private final WxUserMapper wxUserMapper;
 
-    private final WxSendMsgServer wxSendMsgServer;
-
     private final Yunchan001ActivityHelpHandleServer yunchan001ActivityHelpHandleServer;
 
     @Override
