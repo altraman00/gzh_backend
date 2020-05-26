@@ -65,4 +65,9 @@ public class WxMpActivityTemplate extends BaseEntity {
      */
     private Integer sortNo;
 
+    /**
+     *是否为主活动模板
+     */
+    private Boolean masterTemplate;
+
 }

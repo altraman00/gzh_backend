@@ -44,6 +44,7 @@ public class PortalAspect {
         log.info("成功切向事件：{}",Arrays.toString(args));
         String requestBody = (String) args[1];
         String appId= (String) args[0];
+        String openId= (String) args[5];
         WxMpXmlMessage inMessage = WxMpXmlMessage.fromXml(requestBody);
 
         WxMp wxMp = iWxMpService.getByAppId(appId);
@@ -54,12 +55,13 @@ public class PortalAspect {
 
 
         String eventKey = inMessage.getEventKey();
+
         if(StringUtils.isEmpty(eventKey)){
             //如果没有场景值，获取排序号为0的第一个活动模板作为主活动模板 执行关注事件
 
         }else{
             //如果有场景值，根据场景值获取对应的实现类执行关注事件
-
+            log.info("【{}】用户{}关注事件场景值：{}",appId,openId,eventKey);
         }
 
 
@@ -74,7 +76,7 @@ public class PortalAspect {
                 continue;
             }
 
-            String openId= (String) args[5];
+
 
             WxMpActivityTemplate template = wxMpActivityTemplate;
 
