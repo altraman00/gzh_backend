@@ -155,7 +155,7 @@ public class WxSendMsgServer {
         } catch (WxErrorException e) {
             log.error("从素材库获取海报图片异常，消息模板id:{},openId:{}",messageId,openId,e);
         }
-
+        stopWatch.stop();
         // 获取用户头像
         stopWatch.start("get avatar img");
         String headImgUrl = null;
