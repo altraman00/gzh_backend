@@ -102,8 +102,7 @@ public class WxActivityTaskController extends BaseController {
             }
             helpInfoDTO.setCompleteNum(wxActivityTask.getCompleteNum());
             helpInfoDTO.setStatus(wxActivityTask.getTaskStatus());
-            WxActivityTemplate template = iWxActivityTemplateService.getById(templateId);
-            helpInfoDTO.setNeedNum(template.getNeedNum());
+            helpInfoDTO.setNeedNum(wxMpActivityTemplate.getNeedNum());
 
             // 被助力记录
             List<WxTaskHelpRecord> list = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery().eq(WxTaskHelpRecord::getWxUserTaskId, wxActivityTask.getId()));
