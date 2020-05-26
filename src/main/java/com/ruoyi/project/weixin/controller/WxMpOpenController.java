@@ -178,8 +178,7 @@ public class WxMpOpenController extends BaseController {
     ) {
         try {
             String s = wxSendMsgServer.generatorPosterMpQrcode(appId, wxMpQrParams);
-            return AjaxResult.success(s);
-
+            return AjaxResult.success("OK",s);
         }catch (Exception ex){
             return AjaxResult.error("failed:"+ex.getMessage());
         }
