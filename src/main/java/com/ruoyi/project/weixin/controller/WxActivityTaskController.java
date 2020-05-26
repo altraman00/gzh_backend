@@ -159,7 +159,7 @@ public class WxActivityTaskController extends BaseController {
     public AjaxResult getTaskPoster(@RequestParam(value = "openId") String openId,@RequestParam(value = "appId") String appId){
             QueryWrapper<WxMpActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
 
-        WxMpActivityTemplate wxMpActivityTemplate = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndAlias(appId,helpActivityService.getActivityServiceImplClassName());
+        WxMpActivityTemplate wxMpActivityTemplate = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndAlias(appId,HelpActivityConstant.SCENE_EVENT_KEY);
         String templateId = wxMpActivityTemplate.getTemplateId();
         queryWrapper.lambda()
                 .eq(WxMpActivityTemplateMessage::getAppId, appId)
