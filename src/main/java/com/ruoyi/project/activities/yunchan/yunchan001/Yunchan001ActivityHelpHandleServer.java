@@ -41,7 +41,7 @@ import java.util.List;
 @Service
 @Slf4j
 @AllArgsConstructor
-public class Yunchan001ActivityHelp {
+public class Yunchan001ActivityHelpHandleServer {
 
     private final IWxMpYunchan001HelpUserRecordService yunchan001HelpUserRecordService;
 
@@ -64,6 +64,9 @@ public class Yunchan001ActivityHelp {
      */
     public void activityHelp(String inviterOpenId, String openId, String appId, String templateId, List<WxMpActivityTemplateMessage> messages, WxUser wxUser, String wxUserId, Integer needNum) {
         WxUser inviter = wxUserService.getByOpenIdAndAppId(inviterOpenId,appId);
+        if(inviter == null){
+            return;
+        }
         String inviterId = inviter.getId();
         // 不是自己扫自己的码进入的
         if (!inviterId.equals(wxUserId)) {
@@ -71,28 +74,28 @@ public class Yunchan001ActivityHelp {
             String lockKey = inviterId + "-" + templateId + "-" + appId;
             try {
                 synchronized (ObjectLockUtil.lock(lockKey)){
-                    WxMpYunchan001HelpUserStatus wxActivityTask = yunchan001HelpUserStatusService.getOne(Wrappers.<WxMpYunchan001HelpUserStatus>lambdaQuery()
+                    WxMpYunchan001HelpUserStatus wxMpYunchan001HelpUserStatus = yunchan001HelpUserStatusService.getOne(Wrappers.<WxMpYunchan001HelpUserStatus>lambdaQuery()
                             .eq(WxMpYunchan001HelpUserStatus::getWxUserId, inviterId)
                             .eq(WxMpYunchan001HelpUserStatus::getTemplateId,templateId)
                             .eq(WxMpYunchan001HelpUserStatus::getAppId,appId));
-                    if (wxActivityTask == null) {
-                        wxActivityTask = new WxMpYunchan001HelpUserStatus();
-                        wxActivityTask.setCompleteNum(0);
-                        wxActivityTask.setTaskStatus(ConfigConstant.TASK_DOING);
-                        wxActivityTask.setWxUserId(inviterId);
-                        wxActivityTask.setTemplateId(templateId);
-                        wxActivityTask.setAppId(appId);
-                        yunchan001HelpUserStatusService.save(wxActivityTask);
+                    if (wxMpYunchan001HelpUserStatus == null) {
+                        wxMpYunchan001HelpUserStatus = new WxMpYunchan001HelpUserStatus();
+                        wxMpYunchan001HelpUserStatus.setCompleteNum(0);
+                        wxMpYunchan001HelpUserStatus.setTaskStatus(ConfigConstant.TASK_DOING);
+                        wxMpYunchan001HelpUserStatus.setWxUserId(inviterId);
+                        wxMpYunchan001HelpUserStatus.setTemplateId(templateId);
+                        wxMpYunchan001HelpUserStatus.setAppId(appId);
+                        yunchan001HelpUserStatusService.save(wxMpYunchan001HelpUserStatus);
                     }
-                    if (wxActivityTask.getCompleteNum() < needNum ){
+                    if (wxMpYunchan001HelpUserStatus.getCompleteNum() < needNum ){
                         //查找助力记录,一个人只能助力一次
                         List<WxMpYunchan001HelpUserRecord> records = yunchan001HelpUserRecordService.list(Wrappers.<WxMpYunchan001HelpUserRecord>lambdaQuery()
                                 .eq(WxMpYunchan001HelpUserRecord::getHelpWxUserId, wxUserId));
                         if (records.isEmpty()) {
                             // 未助力过，可以执行助力流程
-                            executeHelpSuccess(messages, wxUser, inviter, wxActivityTask,needNum);
+                            executeHelpSuccess(messages, wxUser, inviter, wxMpYunchan001HelpUserStatus,needNum);
                             // 为邀请人推送助力成功
-                            executeBeHelped(messages,wxUser,inviter, wxActivityTask,needNum);
+                            executeBeHelped(messages,wxUser,inviter, wxMpYunchan001HelpUserStatus,needNum);
                         } else {
                             // 已经助力过了
                             executeHasHelp(messages,wxUser,inviter);
@@ -123,6 +126,13 @@ public class Yunchan001ActivityHelp {
     }
 
 
+    /**
+     * 推送活动规则消息
+     * @param messages
+     * @param wxUser
+     * @param templateId
+     * @param appId
+     */
     public void executeActivityRule(List<WxMpActivityTemplateMessage> messages, WxUser wxUser, String templateId, String appId) {
         log.info("【yunchan001Subscrib】开始执行助理活动流程：{}",YunChan001Constant.SCENE_ACTIVITY_RULE);
         WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(YunChan001Constant.SCENE_ACTIVITY_RULE)).findFirst().orElse(null);
@@ -149,8 +159,15 @@ public class Yunchan001ActivityHelp {
         }
     }
 
+
+    /**
+     * 已经助力过，给被推荐者发送完成助力的消息
+     * @param messages
+     * @param wxUser
+     * @param inviter
+     */
     private void executeHasHelp(List<WxMpActivityTemplateMessage> messages, WxUser wxUser, WxUser inviter) {
-        log.info("【yunchan001Subscrib】开始执行助理活动流程：{}",YunChan001Constant.SCENE_HAS_HELP);
+        log.info("【yunchan001Subscrib】开始执行已经助力过的活动流程：{}",YunChan001Constant.SCENE_HAS_HELP);
         WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(YunChan001Constant.SCENE_HAS_HELP)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
         if (hasAvailableMessage) {
@@ -160,8 +177,17 @@ public class Yunchan001ActivityHelp {
         }
     }
 
+
+    /**
+     * 助力成功后给邀请人发送"xxx帮你助力成功"的消息
+     * @param messages
+     * @param wxUser
+     * @param inviter
+     * @param wxActivityTask
+     * @param needNum
+     */
     private void executeBeHelped(List<WxMpActivityTemplateMessage> messages, WxUser wxUser, WxUser inviter, WxMpYunchan001HelpUserStatus wxActivityTask, Integer needNum) {
-        log.info("【yunchan001Subscrib】开始执行助理活动流程：{}",YunChan001Constant.SCENE_BE_HELPED);
+        log.info("【yunchan001Subscrib】开始执行发送助力成功消息的流程：{}",YunChan001Constant.SCENE_BE_HELPED);
         if (wxActivityTask.getCompleteNum() < needNum) {
             WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(YunChan001Constant.SCENE_BE_HELPED)).findFirst().orElse(null);
             boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
@@ -180,6 +206,15 @@ public class Yunchan001ActivityHelp {
         }
     }
 
+
+    /**
+     * 第一次帮助邀请人助力
+     * @param list
+     * @param wxUser
+     * @param inviter
+     * @param wxMpYunchan001HelpUserStatus
+     * @param needNum
+     */
     private void executeHelpSuccess(List<WxMpActivityTemplateMessage> list, WxUser wxUser, WxUser inviter, WxMpYunchan001HelpUserStatus wxMpYunchan001HelpUserStatus, Integer needNum) {
         log.info("【yunchan001Subscrib】开始执行助理活动流程：{}", YunChan001Constant.SCENE_HELP_SUCCESS);
         String wxUserId = wxUser.getId();

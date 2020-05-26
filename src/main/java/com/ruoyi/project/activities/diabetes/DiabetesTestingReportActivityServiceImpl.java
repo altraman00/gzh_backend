@@ -4,7 +4,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.http.HttpClient;
-import com.ruoyi.project.weixin.constant.DiabetesConstant;
+import com.ruoyi.project.weixin.constant.diabetes.DiabetesConstant;
 import com.ruoyi.project.weixin.entity.WxMp;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxUser;
@@ -42,11 +42,11 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
     @Value("${sunlands.diabetes-testing.url}")
     private String sunlandsDiabetesUrl;
 
-    /**
-     * 用于微信带参二维码的活动标识
-     */
-    String SCENE_EVENT_KEY_DIABETES_TEST_H5 = "diabetes_test_h5";
 
+    @Override
+    public String getActivityAliasName() {
+        return DiabetesConstant.ACTIVITY_ALIAS_NAME;
+    }
 
     @Override
     public String getActivityServiceImplClassName() {
@@ -72,7 +72,7 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
         }
 
         //如果公众号二维码中带有场景参数，则执行对应的活动
-        if(mpQrcodeScene.contains(SCENE_EVENT_KEY_DIABETES_TEST_H5)){
+        if(mpQrcodeScene.contains(DiabetesConstant.SCENE_EVENT_KEY_DIABETES_TEST_H5)){
             try {
                 sendSubscribeState(wxMp, openId,DiabetesConstant.EVENT_SUBSCRIBE);
             } catch (Exception e) {

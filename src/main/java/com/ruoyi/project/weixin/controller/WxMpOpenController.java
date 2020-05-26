@@ -146,9 +146,11 @@ public class WxMpOpenController extends BaseController {
 
 
     @ApiOperation("根据appId生成公众号二维码")
-    @PostMapping("/create/qr_code")
-    public String create_mp_qrcode(@RequestParam(value = "appId") String appId) {
-        return wxSendMsgServer.generatorPosterMpQrcode(appId);
+    @GetMapping("/create/qr_code")
+    public String create_mp_qrcode(
+             @RequestParam(value = "appId") String appId
+            ,@RequestParam(value = "wxMpQrParams") String wxMpQrParams) {
+        return wxSendMsgServer.generatorPosterMpQrcode(appId,wxMpQrParams);
     }
 
 

@@ -12,6 +12,7 @@ import com.ruoyi.project.weixin.mapper.WxUserMapper;
 import com.ruoyi.project.weixin.server.WxSendMsgServer;
 import com.ruoyi.project.weixin.service.ActivityService;
 import com.ruoyi.project.weixin.service.IWxMpActivityTemplateMessageService;
+import com.ruoyi.project.weixin.utils.SpringContextUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
@@ -43,11 +44,17 @@ public class Yunchan001ActivityServiceImpl implements ActivityService {
 
     private final WxSendMsgServer wxSendMsgServer;
 
-    private final Yunchan001ActivityHelp yunchan001ActivityHelp;
+    private final Yunchan001ActivityHelpHandleServer yunchan001ActivityHelpHandleServer;
+
+    @Override
+    public String getActivityAliasName() {
+        return YunChan001Constant.ACTIVITY_ALIAS_NAME;
+    }
 
     @Override
     public String getActivityServiceImplClassName() {
-        return ActivityService.ACTIVITY_YUNCHAN001_HELP;
+        String classFullName = this.getClass().getName();
+        return SpringContextUtils.getCurrentClassName(classFullName);
     }
 
     @Override
@@ -71,25 +78,25 @@ public class Yunchan001ActivityServiceImpl implements ActivityService {
         Integer needNum = template.getNeedNum();
         log.info("【yunchan001Subscrib】event key:[{}],openId:[{}],appId[{}]",eventKey,openId,appId);
 
-        // 首先判断是不是扫活动中的公众号二维码进入的 {prefix}_class_yunchan001@help#{inviter_openid}
-        if (StringUtils.isNotBlank(eventKey) && eventKey.contains(YunChan001Constant.MP_QRCODE_SCENE_EVENT_KEY)) {
+        // 首先判断是不是扫活动中的公众号二维码进入的 {prefix}_class_yunchan001@help_{inviter_openid}
+        if (StringUtils.isNotBlank(eventKey) && eventKey.contains(YunChan001Constant.MP_QRCODE_ACTIVITY_SCENE_EVENT_KEY)) {
             String value = eventKey.substring(eventKey.lastIndexOf("@") + 1);
 
             //活动的标示
-            String activityTag = value.split("#")[0];
+            String activityTag = value.split("_")[0];
+            //邀请人的公众号
+            String inviterOpenId = value.split("_")[1];
 
             //孕产的助力活动
-            if(StringUtils.isNotEmpty(activityTag) && ActivityService.ACTIVITY_YUNCHAN001_HELP.equals(activityTag)){
+            if(StringUtils.isNotEmpty(activityTag) && YunChan001Constant.MP_QRCODE_ACTIVITY_TYPE.equals(activityTag)){
                 log.info("【yunchan001Subscrib】启动yunchan001的助力活动");
-                //邀请人的公众号
-                String inviterOpenId = value.split("#")[1];
                 //启动助力活动
-                yunchan001ActivityHelp.activityHelp(inviterOpenId,openId, appId, templateId, messages, wxUser, wxUserId, needNum);
-                // 推送活动规则消息
-                yunchan001ActivityHelp.executeActivityRule(messages,wxUser,templateId,appId);
-                // 推送活动海报
-                WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(YunChan001Constant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
-                wxSendMsgServer.sendPosterMessage(message,wxUser);
+                yunchan001ActivityHelpHandleServer.activityHelp(inviterOpenId,openId, appId, templateId, messages, wxUser, wxUserId, needNum);
+//                // 推送活动规则消息
+//                yunchan001ActivityHelpHandleServer.executeActivityRule(messages,wxUser,templateId,appId);
+//                // 推送活动海报
+//                WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(YunChan001Constant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
+//                wxSendMsgServer.sendPosterMessage(message,wxUser, YunChan001Constant.MP_QRCODE_ACTIVITY_SCENE_EVENT_KEY +":"+wxUser.getOpenId());
             }else{
                 log.info("【yunchan001Subscrib】执行默认活动");
             }
