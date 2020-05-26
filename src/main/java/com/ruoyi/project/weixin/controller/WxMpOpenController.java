@@ -74,6 +74,32 @@ public class WxMpOpenController extends BaseController {
     }
 
 
+    @ApiOperation("获取access_toke by code")
+    @ApiImplicitParam(name = "appId", value = "获取access_token", dataType = "String",required = true)
+    @GetMapping("/access_token_by_code")
+    /**
+     * 返回格式
+     * {
+     *     "msg": "操作成功",
+     *     "code": 200,
+     *     "data": {
+     *         "accessToken": "33_45mrxYfcsJ98uSBrVS4IG3S_TAqbIiouMmDsld97giV4vPeELOpkbCIckjaTr-anygxdKeRWjIRPwQ5OwwJYNwCIHdLpZ6xifGaMYPb2Lc8",
+     *         "expiresIn": 7200,
+     *         "refreshToken": "33_ZC2tsTEya2NmvrCVXSLtzIN_vCI8kFLVev6KR4YAhc7Tc9s94bWGrZCg1oqc-QRkAYI_cAC_SqVUjD0VxwZiuBJfr728Rpqspf2p0h6YsKs",
+     *         "openId": "ogjgCj4s_f8p45PuAxe-Fx36pXlU",
+     *         "scope": "snsapi_base",
+     *         "unionId": null
+     *     }
+     * }
+     */
+    public AjaxResult getAccessTokenByCode(@RequestParam(value = "appId") String appId,@RequestParam(value = "code") String code) throws WxErrorException {
+        WxMpOAuth2AccessToken wxMpOAuth2AccessToken = wxMpService.switchoverTo(appId).oauth2getAccessToken(code);
+        logger.debug("get accesstoke by code : {}-{}->{}",appId,code,wxMpOAuth2AccessToken);
+
+        return AjaxResult.success(wxMpOAuth2AccessToken);
+    }
+
+
     @ApiOperation("测试用open接口")
     @GetMapping("/hello")
     public String openHello(@RequestParam(required = false, defaultValue = "gzh") String str) {
