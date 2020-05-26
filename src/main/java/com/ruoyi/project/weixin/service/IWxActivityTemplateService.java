@@ -13,4 +13,12 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IWxActivityTemplateService extends IService<WxActivityTemplate> {
 
+
+    /**
+     * 根据别名找到对应的活动模板
+     * @param alias
+     * @return
+     */
+    WxActivityTemplate findActivityTemplateByAlias(String alias);
+
 }

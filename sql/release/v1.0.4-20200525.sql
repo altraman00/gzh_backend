@@ -54,3 +54,9 @@ MODIFY COLUMN `activity_enable` tinyint(4) NOT NULL DEFAULT 0 COMMENT '活动是
 rename table wx_mp_template_message to wx_mp_activity_template_message
 
 
+-- by tanchang 20200525
+ALTER TABLE `wx_activity_template`
+ADD COLUMN `alias` varchar(100) NULL COMMENT '活动模板别名' AFTER `reward_url`;
+
+ALTER TABLE `wx_activity_template`
+ADD UNIQUE INDEX(`alias`);

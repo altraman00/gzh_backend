@@ -3,14 +3,19 @@ package com.ruoyi.project.weixin.service.impl;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ruoyi.project.weixin.entity.WxActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMp;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
+import com.ruoyi.project.weixin.mapper.WxActivityTemplateMapper;
 import com.ruoyi.project.weixin.mapper.WxMpActivityTemplateMapper;
+import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
 import com.ruoyi.project.weixin.service.IWxMpActivityTemplateService;
 import com.ruoyi.project.weixin.service.IWxMpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -30,6 +35,9 @@ public class WxMpActivityTemplateServiceImpl extends ServiceImpl<WxMpActivityTem
     private WxMpActivityTemplateMapper wxMpActivityTemplateMapper;
 
     @Autowired
+    private IWxActivityTemplateService wxActivityTemplateService;
+
+    @Autowired
     private IWxMpService wxMpService;
 
     @Override
@@ -47,12 +55,23 @@ public class WxMpActivityTemplateServiceImpl extends ServiceImpl<WxMpActivityTem
     }
 
     @Override
-    public WxMpActivityTemplate findActivityTemplateByAppIdAndClassName(String appId, String activityClassName) {
-        WxMpActivityTemplate wxMpActivityTemplate = wxMpActivityTemplateMapper.selectOne(Wrappers.<WxMpActivityTemplate>lambdaQuery()
-                .eq(WxMpActivityTemplate::getAppId, appId)
-                .eq(WxMpActivityTemplate::getTemplateClass, activityClassName));
-        return wxMpActivityTemplate;
+    public WxMpActivityTemplate findActivityTemplateByAppIdAndAlias(String appId, String alias) {
+        //select * from activity_template  where alias = ?alias
+        WxActivityTemplate template = wxActivityTemplateService.findActivityTemplateByAlias(alias);
+        if(template != null){
+            return this.findActivityTemplateByAppIdAndTemplateId(appId,template.getId());
+        }
+
+        return null;
     }
+//
+//    @Override
+//    public WxMpActivityTemplate findActivityTemplateByAppIdAndClassName(String appId, String activityClassName) {
+//        WxMpActivityTemplate wxMpActivityTemplate = wxMpActivityTemplateMapper.selectOne(Wrappers.<WxMpActivityTemplate>lambdaQuery()
+//                .eq(WxMpActivityTemplate::getAppId, appId)
+//                .eq(WxMpActivityTemplate::getTemplateClass, activityClassName));
+//        return wxMpActivityTemplate;
+//    }
 
     @Override
     public WxMpActivityTemplate findActivityTemplateByAppIdAndTemplateId(String appId, String templateId) {
@@ -66,6 +85,12 @@ public class WxMpActivityTemplateServiceImpl extends ServiceImpl<WxMpActivityTem
     public void enableActivityTemplates(String id, boolean activityEnable) {
         WxMpActivityTemplate template = new WxMpActivityTemplate();
         template.setActivityEnable(activityEnable);
+        if(true == activityEnable){
+            template.setStartTime(LocalDateTime.now());
+        }else{
+            template.setStartTime(null);
+        }
+
         UpdateWrapper<WxMpActivityTemplate> templateUpdateWrapper = new UpdateWrapper<>();
         templateUpdateWrapper.eq("id", id);
         wxMpActivityTemplateMapper.update(template,templateUpdateWrapper);

@@ -4,6 +4,7 @@ import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.qrcode.QRCodeUtil;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.constant.HelpActivityConstant;
+import com.ruoyi.project.weixin.entity.WxActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
 import com.ruoyi.project.weixin.entity.WxMsg;
 import com.ruoyi.project.weixin.entity.WxUser;
@@ -82,14 +83,14 @@ public class WxSendMsgServer {
      * @param message
      * @param wxUser
      */
-    public void sendPosterMessage(WxMpActivityTemplateMessage message, WxUser wxUser){
+    public void sendPosterMessage(WxMpActivityTemplateMessage message, WxUser wxUser,String qrParams){
         log.info("【sendPosterMessage】,message:{},wxUser:{}",message,wxUser);
         String openId = wxUser.getOpenId();
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent()) && StringUtils.isNotBlank(message.getRepMediaId());
         if (hasAvailableMessage) {
             String qrCodeUrl = message.getRepUrl();
             //qrCodeUrl=null时，生成的是公众号的二维码，不为null时生成的qrCodeUrl里面带的链接地址的二维码
-            File poster = getPosterFile(openId, message, wxUser.getAppId(),qrCodeUrl);
+            File poster = getPosterFile(openId, message, wxUser.getAppId(),qrCodeUrl,qrParams);
             try {
                 // 将海报上传到临时素材库
                 WxMediaUploadResult uploadResult = wxMpService.switchoverTo(wxUser.getAppId()).getMaterialService().mediaUpload(ConfigConstant.MESSAGE_REP_TYPE_IMAGE, poster);
@@ -138,9 +139,12 @@ public class WxSendMsgServer {
      * @param message
      * @param appId
      * @param qrCodeUrl
+     * @param wxMpQrParams 二维码带参数 不能超过56位
      * @return
+     *
+     * activityTemplateAlias+":"+ openId
      */
-    public File getPosterFile(String openId, WxMpActivityTemplateMessage message, String appId, String qrCodeUrl) {
+    public File getPosterFile(String openId, WxMpActivityTemplateMessage message, String appId, String qrCodeUrl,String wxMpQrParams) {
         StopWatch stopWatch = new StopWatch();
         String messageId = message.getId();
         // 先获取海报图片
@@ -157,7 +161,7 @@ public class WxSendMsgServer {
         stopWatch.start("get qrcode img");
         File qrCode = null;
         try {
-            WxMpQrCodeTicket ticket = wxMpService.switchoverTo(appId).getQrcodeService().qrCodeCreateLastTicket("helpActivity:"+ openId);
+            WxMpQrCodeTicket ticket = wxMpService.switchoverTo(appId).getQrcodeService().qrCodeCreateLastTicket(wxMpQrParams);
             qrCode = wxMpService.switchoverTo(appId).getQrcodeService().qrCodePicture(ticket);
         } catch (Exception e) {
             log.error("生成助力活动带参二维码异常，消息模板id:{},openId:{}",messageId,openId,e);

@@ -32,14 +32,23 @@ public interface IWxMpActivityTemplateService extends IService<WxMpActivityTempl
      */
     List<WxMpActivityTemplate> getActivityTemplatesByAppIdentify(String appIdentify);
 
+//
+//    /**
+//     * 根据appid和活动实现类名查询活动
+//     * @param appId
+//     * @param activityClassName
+//     * @return
+//     */
+//    WxMpActivityTemplate findActivityTemplateByAppIdAndClassName(String appId, String activityClassName);
+//
 
     /**
-     * 根据appid和活动实现类名查询活动
+     * 根据别名获取活动模
      * @param appId
-     * @param activityClassName
+     * @param alias
      * @return
      */
-    WxMpActivityTemplate findActivityTemplateByAppIdAndClassName(String appId, String activityClassName);
+    WxMpActivityTemplate findActivityTemplateByAppIdAndAlias(String appId, String alias);
 
 
     /**
