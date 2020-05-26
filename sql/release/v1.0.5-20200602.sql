@@ -84,3 +84,14 @@ ALTER TABLE `db_feo_ruo`.`wx_mp_yunchan001_user_status`
 ADD COLUMN `remark` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注' AFTER `update_id`,
 DROP PRIMARY KEY,
 ADD PRIMARY KEY (`id`) USING BTREE;
+
+
+ALTER TABLE `wx_mp_yunchan001_user_status`
+MODIFY COLUMN `first_stage_status` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 0 COMMENT '第一阶段的解锁状态，0:未解锁，1:已解锁' AFTER `open_id`,
+MODIFY COLUMN `second_stage_status` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 0 COMMENT '第二阶段的解锁状态，0:未解锁，1:已解锁' AFTER `first_stage_unlock_time`;
+
+
+ALTER TABLE `wx_mp_yunchan001_user_status`
+MODIFY COLUMN `first_stage_status` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0' COMMENT '第一阶段的解锁状态，0:未解锁，1:已解锁' AFTER `open_id`,
+MODIFY COLUMN `second_stage_status` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0' COMMENT '第二阶段的解锁状态，0:未解锁，1:已解锁' AFTER `first_stage_unlock_time`;
+

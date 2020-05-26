@@ -36,7 +36,7 @@ public class WxMpYunchan001UserStatus extends BaseEntity {
     /**
      * 第一阶段的解锁状态
      */
-    private String firstStageStatus;
+    private Integer firstStageStatus;
 
     /**
      * 第一阶段的解锁时间
@@ -46,7 +46,7 @@ public class WxMpYunchan001UserStatus extends BaseEntity {
     /**
      * 第二阶段的解锁状态
      */
-    private String secondStageStatus;
+    private Integer secondStageStatus;
 
     /**
      * 第二阶段的解锁时间
