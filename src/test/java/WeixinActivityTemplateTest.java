@@ -31,5 +31,15 @@ public class WeixinActivityTemplateTest {
         String appid = "wxd3fc86ade86ec00d";
         WxMpActivityTemplate wxMpActivityTemplate = iWxMpActivityTemplateService.getMasterActivityTemplate(appid);
         Assert.assertNotNull(wxMpActivityTemplate);
+        Assert.assertTrue(wxMpActivityTemplate.getTemplateName().equals("糖尿病风险检测拉新活动"));
     }
+
+    @Test
+    public void testFindFirstTemplate(){
+        String appid = "wxd3fc86ade86ec00d";
+        WxMpActivityTemplate wxMpActivityTemplate = iWxMpActivityTemplateService.getFirstAvalibleTemplate(appid);
+        Assert.assertNotNull(wxMpActivityTemplate);
+        Assert.assertTrue(wxMpActivityTemplate.getTemplateName().equals("五人助力"));
+    }
+
 }
