@@ -219,10 +219,16 @@ public class WxSendMsgServer {
     }
 
 
-    public String generatorPosterMpQrcode(String appId){
+    /**
+     * 生成指定appid的公众号二维码
+     * @param appId
+     * @param wxMpQrParams
+     * @return
+     */
+    public String generatorPosterMpQrcode(String appId,String wxMpQrParams){
         String qrCodePictureUrl = null;
         try {
-            WxMpQrCodeTicket wxMpQrCodeTicket = wxMpService.switchoverTo(appId).getQrcodeService().qrCodeCreateLastTicket("helpActivity:"+ "123456789");
+            WxMpQrCodeTicket wxMpQrCodeTicket = wxMpService.switchoverTo(appId).getQrcodeService().qrCodeCreateLastTicket(wxMpQrParams);
             String ticket = wxMpQrCodeTicket.getTicket();
             File qrCode = wxMpService.switchoverTo(appId).getQrcodeService().qrCodePicture(wxMpQrCodeTicket);
             String path = qrCode.getPath();
