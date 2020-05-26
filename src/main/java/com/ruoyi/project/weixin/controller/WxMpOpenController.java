@@ -87,12 +87,9 @@ public class WxMpOpenController extends BaseController {
     @ApiOperation("查询用户信息")
     @GetMapping("/userinfo")
     public AjaxResult checkUserSubscribeState(
-            @RequestParam(value = "openId") String openId
-            ,@RequestParam(value = "appId") String appId) {
-        logger.debug("【getActivityTemplate】appId:{}",appId);
+            @RequestParam(value = "openId") String openId) {
         WxUser one = wxUserService.getOne(Wrappers.<WxUser>lambdaQuery()
-                .eq(WxUser::getOpenId, openId)
-                .eq(WxUser::getAppId, appId).last("limit 0,1"), false);
+                .eq(WxUser::getOpenId, openId).last("limit 0,1"), false);
         return AjaxResult.success(one);
     }
 
