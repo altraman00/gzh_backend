@@ -1,14 +1,11 @@
 package com.ruoyi.project.weixin.controller.yunchan.yunchan001;
 
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.api.R;
 import com.google.common.collect.Lists;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.activities.yunchan.yunchan001.Yunchan001ActivityServiceImpl;
-import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
 import com.ruoyi.project.weixin.entity.WxUser;
@@ -25,7 +22,10 @@ import me.chanjar.weixin.mp.bean.result.WxMpOAuth2AccessToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
@@ -124,7 +124,7 @@ public class WxMpYunchan001UserStatusController extends BaseController {
 
     public static void main(String[] args) {
         List<Integer> list = Lists.newArrayList();
-        for ( int i = 0; i < 10; i++ ) {
+        for ( int i = 0; i < 100; i++ ) {
             int random = new Random().nextInt(3);
             list.add(random);
             System.out.println(random);

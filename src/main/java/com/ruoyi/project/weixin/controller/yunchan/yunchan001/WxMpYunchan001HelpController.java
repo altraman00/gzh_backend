@@ -1,18 +1,12 @@
 package com.ruoyi.project.weixin.controller.yunchan.yunchan001;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.domain.AjaxResult;
-import com.ruoyi.project.activities.help.HelpActivityServiceImpl;
-import com.ruoyi.project.weixin.constant.HelpActivityConstant;
+import com.ruoyi.project.activities.yunchan.yunchan001.Yunchan001ActivityServiceImpl;
 import com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant;
-import com.ruoyi.project.weixin.entity.WxActivityTemplate;
-import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
 import com.ruoyi.project.weixin.server.WxSendMsgServer;
-import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
 import com.ruoyi.project.weixin.service.IWxMpActivityTemplateMessageService;
-import com.ruoyi.project.weixin.service.IWxMpActivityTemplateService;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -29,13 +23,12 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * @Project : gzh_backend
  * @Package Name : com.ruoyi.project.weixin.controller.yunchan.yunchan001
- * @Description : TODO
+ * @Description : 孕产助力活动的接口
  * @Author : xiekun
  * @Create Date : 2020年05月26日 10:32
  * @ModificationHistory Who   When     What
@@ -51,13 +44,7 @@ public class WxMpYunchan001HelpController {
     private WxSendMsgServer wxSendMsgServer;
 
     @Autowired
-    private HelpActivityServiceImpl helpActivityService;
-
-    @Autowired
-    private IWxActivityTemplateService iWxActivityTemplateService;
-
-    @Autowired
-    private IWxMpActivityTemplateService iWxMpActivityTemplateService;
+    private Yunchan001ActivityServiceImpl yunchan001ActivityService;
 
     @Autowired
     private IWxMpActivityTemplateMessageService wxMpActivityTemplateMessageService;
@@ -67,33 +54,22 @@ public class WxMpYunchan001HelpController {
             @ApiImplicitParam(name="openId",value="openId",required=true,paramType="String"),
             @ApiImplicitParam(name="appId",value="appId",required=true,paramType="String")
     })
-    @GetMapping("/help/poster")
+    @GetMapping("/poster")
     public AjaxResult getTaskPoster(@RequestParam(value = "openId") String openId, @RequestParam(value = "appId") String appId){
-        QueryWrapper<WxMpActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
 
-        //根据appid+活动别名?
-        WxActivityTemplate wxActivityTemplate = iWxActivityTemplateService.findActivityTemplateByAlias(HelpActivityConstant.SCENE_EVENT_KEY);
-        WxMpActivityTemplate wxMpActivityTemplate = iWxMpActivityTemplateService.findActivityTemplateByAppIdAndAlias(appId,helpActivityService.getActivityServiceImplClassName());
-        String templateId = wxMpActivityTemplate.getTemplateId();
-        queryWrapper.lambda()
-                .eq(WxMpActivityTemplateMessage::getAppId, appId)
-                .eq(WxMpActivityTemplateMessage::getActivityEnable,true)
-                .eq(WxMpActivityTemplateMessage::getTemplateId,templateId);
-        List<WxMpActivityTemplateMessage> messages = wxMpActivityTemplateMessageService.list(queryWrapper);
+        //查询助力海报的消息模版
+        WxMpActivityTemplateMessage message = wxMpActivityTemplateMessageService.findMpTemplateMessage(appId
+                , yunchan001ActivityService.getActivityServiceImplClassName()
+                , YunChan001Constant.SCENE_ACTIVITY_POSTER);
 
-        //从活动的众多活动消息中找到海报的素材消息，然后再按照需求生成海报
-        WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene()
-                .equals(YunChan001Constant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent()) && StringUtils.isNotBlank(message.getRepMediaId());
         String posterBase64 = null;
         if (hasAvailableMessage) {
             Map<String,Object> result = new HashMap<>(4);
             StopWatch stopWatch = new StopWatch();
             stopWatch.start("create poster");
-
-            String wxMpQrParams = "";
-
-//            File poster = wxSendMsgServer.getPosterFile(openId, message, appId,null, HelpActivityConstant.SCENE_EVENT_KEY);
+            //公众号二维码的场景参数
+            String wxMpQrParams = YunChan001Constant.MP_QRCODE_ACTIVITY_SCENE_EVENT_KEY + openId;
             //qrCodeUrl为null时，生成的是公众号的二维码
             File poster = wxSendMsgServer.getPosterFile(openId, message, appId,null, wxMpQrParams);
             stopWatch.stop();
