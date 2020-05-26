@@ -1,7 +1,7 @@
 
-
-ALTER TABLE `wx_mp`
-DROP COLUMN `template_id`;
+--
+-- ALTER TABLE `wx_mp`
+-- DROP COLUMN `template_id`;
 
 
 ALTER TABLE `wx_mp_template_message`
@@ -45,7 +45,7 @@ CREATE TABLE `wx_mp_activity_template` (
 SET FOREIGN_KEY_CHECKS = 1;
 
 
-ALTER TABLE `db_feo_ruo`.`wx_mp_activity_template`
+ALTER TABLE `wx_mp_activity_template`
 MODIFY COLUMN `activity_enable` tinyint(4) NOT NULL DEFAULT 0 COMMENT '活动是否启用' AFTER `template_class`;
 
 
@@ -60,3 +60,6 @@ ADD COLUMN `alias` varchar(100) NULL COMMENT '活动模板别名' AFTER `reward_
 
 ALTER TABLE `wx_activity_template`
 ADD UNIQUE INDEX(`alias`);
+
+ALTER TABLE `wx_mp_activity_template`
+ADD COLUMN `master_template` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否是默认的主要活动模板' AFTER `update_id`
