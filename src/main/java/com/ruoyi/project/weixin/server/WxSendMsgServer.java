@@ -194,8 +194,8 @@ public class WxSendMsgServer {
 
                 qrCodeBuffer = Thumbnails.of(qrCode).size(message.getQrcodeSize(), message.getQrcodeSize()).asBufferedImage();
             }else{
-                //将分享着的openId带到二维码中
-                qrCodeUrl = String.format(qrCodeUrl,openId);
+//                //将分享着的openId带到二维码中
+//                qrCodeUrl = String.format(qrCodeUrl,openId); 这个动作应该在调用方法的外面做 可能还需要appid等其他场景变量，不应该在平台层面做定制化动作
                 //通过Java生成二维码
                 qrCodeBuffer = QRCodeUtil.encode(qrCodeUrl,null,true,0,0,message.getQrcodeSize());
             }
