@@ -92,26 +92,6 @@ public class PortalAspect {
         return str;
     }
 
-//    public static void main(String[] args) {
-//        PortalAspect x1 = new PortalAspect(null,null);
-//
-//
-//
-//        String sample = "alias:helpActivity@help#thisisopenid";
-//        String sample2 = "helpActivit:thisisopenid";
-//        String x = x1.getActivityAlias(sample2);
-//        System.out.println(x);
-//
-//        if(StringUtils.isEmpty(x)){
-//            System.out.println("空的");
-//        }
-//
-//
-//
-//
-//
-//    }
-
     /**
      * 执行默认的活动模板  优先为主活动模板，如果没有设置主活动模板，就是用排序号考前的第一个活动模板
      * @param appId
