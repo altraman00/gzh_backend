@@ -8,6 +8,8 @@ import com.ruoyi.project.weixin.entity.WxActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
 import com.ruoyi.project.weixin.entity.WxMsg;
 import com.ruoyi.project.weixin.entity.WxUser;
+import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
+import com.ruoyi.project.weixin.service.IWxMpActivityTemplateService;
 import com.ruoyi.project.weixin.service.WxMsgService;
 import com.ruoyi.project.weixin.utils.ImgUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +23,6 @@ import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Coordinate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StopWatch;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -47,6 +48,9 @@ public class WxSendMsgServer {
 
     @Autowired
     private WxMsgService wxMsgService;
+
+    @Autowired
+    private IWxActivityTemplateService wxActivityTemplateService;
 
 
     /**
@@ -83,14 +87,14 @@ public class WxSendMsgServer {
      * @param message
      * @param wxUser
      */
-    public void sendPosterMessage(WxMpActivityTemplateMessage message, WxUser wxUser,String qrParams){
+    public void sendPosterMessage(WxMpActivityTemplateMessage message, WxUser wxUser){
         log.info("【sendPosterMessage】,message:{},wxUser:{}",message,wxUser);
         String openId = wxUser.getOpenId();
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent()) && StringUtils.isNotBlank(message.getRepMediaId());
         if (hasAvailableMessage) {
 //            String qrCodeUrl = message.getRepUrl();
             //qrCodeUrl=null时，生成的是公众号的二维码，不为null时生成的qrCodeUrl里面带的链接地址的二维码
-            File poster = getPosterFile(openId, message, wxUser.getAppId(),qrParams);
+            File poster = getPosterFile(openId, message, wxUser.getAppId());
             try {
                 // 将海报上传到临时素材库
                 WxMediaUploadResult uploadResult = wxMpService.switchoverTo(wxUser.getAppId()).getMaterialService().mediaUpload(ConfigConstant.MESSAGE_REP_TYPE_IMAGE, poster);
@@ -138,12 +142,14 @@ public class WxSendMsgServer {
      * @param openId
      * @param message
      * @param appId
-     * @param wxMpQrParams 二维码带参数 不能超过56位
      * @return
      *
-     * activityTemplateAlias+":"+ openId
+     * 二维码参数格式：alias:helpActivity@openid
      */
-    public File getPosterFile(String openId, WxMpActivityTemplateMessage message, String appId,String wxMpQrParams) {
+    public File getPosterFile(String openId, WxMpActivityTemplateMessage message, String appId) {
+        String templateId = message.getTemplateId();
+        WxActivityTemplate wxActivityTemplate = wxActivityTemplateService.getById(templateId);
+        String wxMpQrParams = "alias:"+wxActivityTemplate.getAlias()+"@"+openId;
         String messageId = message.getId();
         // 先获取海报图片
         String repMediaId = message.getRepMediaId();

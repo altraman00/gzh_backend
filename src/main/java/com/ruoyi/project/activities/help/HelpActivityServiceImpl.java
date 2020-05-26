@@ -124,7 +124,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         // 推送活动海报
         WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
 
-        wxSendMsgServer.sendPosterMessage(message,wxUser,HelpActivityConstant.SCENE_EVENT_KEY+":"+wxUser.getOpenId());
+        wxSendMsgServer.sendPosterMessage(message,wxUser);
     }
 
     @Override

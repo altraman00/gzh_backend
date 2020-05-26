@@ -161,12 +161,13 @@ public class WxMpOpenController extends BaseController {
     @ApiOperation("发送海报消息")
     @PostMapping("/send/poster_msg")
     public void sendGzhPosterMsg(@RequestBody WxPosterMsgDTO posterMsgDTO) {
+
         log.info("【sendGzhPosterMsg】,posterMsgDTO:{}",posterMsgDTO);
         WxMpActivityTemplateMessage posterMsgTemplate = posterMsgDTO.getWxMpTemplateMessage();
         String openId = posterMsgDTO.getOpenId();
         WxUser wxUser = wxUserService.getOne(Wrappers.<WxUser>lambdaQuery().eq(WxUser::getOpenId, openId).last("limit 0,1"), false);
 
-        wxSendMsgServer.sendPosterMessage(posterMsgTemplate,wxUser,posterMsgDTO.getQrParams());
+        wxSendMsgServer.sendPosterMessage(posterMsgTemplate,wxUser);
     }
 
 
