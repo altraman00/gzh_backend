@@ -59,4 +59,10 @@ public interface YunChan001Constant {
      */
     String ACTIVITY_TEMPLATE_ID = "1";
 
+    /**阶段还未解锁**/
+    Integer STAGE_STATUS_UNCOMPLETE = 0;
+    /**阶段已解锁**/
+    Integer STAGE_STATUS_COMPLETED = 1;
+
+
 }

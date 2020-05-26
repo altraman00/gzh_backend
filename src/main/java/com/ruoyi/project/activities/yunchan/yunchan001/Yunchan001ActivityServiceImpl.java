@@ -92,11 +92,6 @@ public class Yunchan001ActivityServiceImpl implements ActivityService {
                 log.info("【yunchan001Subscrib】启动yunchan001的助力活动");
                 //启动助力活动
                 yunchan001ActivityHelpHandleServer.activityHelp(inviterOpenId,openId, appId, templateId, messages, wxUser, wxUserId, needNum);
-//                // 推送活动规则消息
-//                yunchan001ActivityHelpHandleServer.executeActivityRule(messages,wxUser,templateId,appId);
-//                // 推送活动海报
-//                WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(YunChan001Constant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
-//                wxSendMsgServer.sendPosterMessage(message,wxUser, YunChan001Constant.MP_QRCODE_ACTIVITY_SCENE_EVENT_KEY +":"+wxUser.getOpenId());
             }else{
                 log.info("【yunchan001Subscrib】执行默认活动");
             }
