@@ -159,8 +159,6 @@ public class WxActivityTaskController extends BaseController {
     public AjaxResult getTaskPoster(@RequestParam(value = "openId") String openId,@RequestParam(value = "appId") String appId){
             QueryWrapper<WxMpActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
 
-        //根据appid+活动别名?
-        WxActivityTemplate wxActivityTemplate = iWxActivityTemplateService.findActivityTemplateByAlias(HelpActivityConstant.SCENE_EVENT_KEY);
         WxMpActivityTemplate wxMpActivityTemplate = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndAlias(appId,helpActivityService.getActivityServiceImplClassName());
         String templateId = wxMpActivityTemplate.getTemplateId();
         queryWrapper.lambda()
@@ -175,7 +173,7 @@ public class WxActivityTaskController extends BaseController {
             Map<String,Object> result = new HashMap<>(4);
             StopWatch stopWatch = new StopWatch();
             stopWatch.start("create poster");
-            File poster = wxSendMsgServer.getPosterFile(openId, message, appId,null,HelpActivityConstant.SCENE_EVENT_KEY);
+            File poster = wxSendMsgServer.getPosterFile(openId, message, appId,HelpActivityConstant.SCENE_EVENT_KEY);
             stopWatch.stop();
             try {
                 stopWatch.start("encode base64");
