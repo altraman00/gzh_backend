@@ -1,4 +1,4 @@
-package com.ruoyi.project.weixin.controller.yunchan.yunchan001;
+package com.ruoyi.project.activities.yunchan.yunchan001;
 
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.domain.AjaxResult;
@@ -94,6 +94,11 @@ public class WxMpYunchan001HelpController {
         } else {
             return AjaxResult.error();
         }
+    }
+
+    @GetMapping("/hello")
+    public String hello(){
+        return "hello";
     }
 
 

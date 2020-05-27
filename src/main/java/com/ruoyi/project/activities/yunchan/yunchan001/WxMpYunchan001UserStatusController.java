@@ -1,4 +1,4 @@
-package com.ruoyi.project.weixin.controller.yunchan.yunchan001;
+package com.ruoyi.project.activities.yunchan.yunchan001;
 
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;

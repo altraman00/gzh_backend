@@ -1,4 +1,4 @@
-package com.ruoyi.project.weixin.controller;
+package com.ruoyi.project.activities.help;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
