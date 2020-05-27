@@ -9,6 +9,7 @@ import com.ruoyi.project.activities.yunchan.yunchan001.vo.WenjuanVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/open/mp/yunchan001/wenjuan")
 @Api(value = "Yunchan001WenjuanController", tags = "孕产001问卷相关接口")
+@Slf4j
 public class Yunchan001WenjuanController {
 
     public static final String MONGO_COLLECTION_YUNCHAN_001_WENJUAN = "bi_yunchan_001_wenjuan";
@@ -30,7 +32,7 @@ public class Yunchan001WenjuanController {
     @ApiImplicitParam(name = "openId", value = "openId", required = true, paramType = "String")
     @PostMapping()
     public AjaxResult createWenjuan(@RequestBody WenjuanVO wenjuanVO){
-
+        log.debug("commit wenjuan :{}",wenjuanVO);
         String openid = wenjuanVO.getOpenid();
         WxMpYunchan001UserStatus userStatus = userStatusService.findUserStatusByOpenId(openid);
         //只有锁定状态的可以提交问卷，提交以后解锁第一阶段状态
