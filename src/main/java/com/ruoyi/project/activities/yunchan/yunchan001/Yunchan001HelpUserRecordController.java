@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 @ApiH5
 @RestController
 @RequestMapping("/open/mp/yunchan001/user/record")
-public class WxMpYunchan001HelpUserRecordController extends BaseController {
+public class Yunchan001HelpUserRecordController extends BaseController {
 
     @Autowired
     private WxUserService wxUserService;

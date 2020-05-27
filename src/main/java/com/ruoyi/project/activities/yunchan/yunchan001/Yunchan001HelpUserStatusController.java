@@ -21,7 +21,7 @@ import com.ruoyi.framework.web.controller.BaseController;
 @ApiH5
 @RestController
 @RequestMapping("/open/mp/yunchan001/user/status")
-public class WxMpYunchan001HelpUserStatusController extends BaseController {
+public class Yunchan001HelpUserStatusController extends BaseController {
 
     @GetMapping("/hello1")
     public String hello1(){

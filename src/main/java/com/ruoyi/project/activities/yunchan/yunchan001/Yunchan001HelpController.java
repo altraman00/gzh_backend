@@ -47,7 +47,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/open/mp/yunchan001/help")
-public class WxMpYunchan001HelpController {
+public class Yunchan001HelpController {
 
     @Autowired
     private WxSendMsgServer wxSendMsgServer;

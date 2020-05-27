@@ -3,6 +3,7 @@ package com.ruoyi.project.activities.yunchan.yunchan001;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.framework.web.controller.BaseController;
+import com.ruoyi.framework.weixin.WeixinUtil;
 import com.ruoyi.project.activities.security.annotation.ApiH5;
 import com.ruoyi.project.activities.security.annotation.ApiH5SkipToken;
 import com.ruoyi.project.activities.security.annotation.CurrentUser;
@@ -17,10 +18,7 @@ import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
 import com.ruoyi.project.weixin.entity.WxUser;
 import com.ruoyi.project.weixin.service.IWxMpActivityTemplateMessageService;
 import com.ruoyi.project.weixin.service.WxUserService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.result.WxMpOAuth2AccessToken;
@@ -30,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -44,7 +43,7 @@ import java.util.*;
 @ApiH5
 @RestController
 @RequestMapping("/open/mp/yunchan001/user")
-public class WxMpYunchan001UserStatusController extends BaseController {
+public class Yunchan001UserStatusController extends BaseController {
 
     @Autowired
     private ApiH5TokenService tokenService;
@@ -144,5 +143,22 @@ public class WxMpYunchan001UserStatusController extends BaseController {
                 .eq(WxMpYunchan001UserStatus::getOpenId, openId), false);
         return new BaseResponse<>(ResultCode.SUCCESS, one);
     }
+
+    @ApiOperation("移动端微信分享时获取签名")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "url", value = "url", dataType = "String", required = true),
+            @ApiImplicitParam(name = "appId", value = "appId", required = true, paramType = "String")
+    })
+    @GetMapping("/share/sign")
+    public BaseResponse<Map<String, String>> wxShare(
+             @ApiParam(name="appId",value="appId",required=true) String appId
+            ,@ApiParam(name="url",value="分享链接",required=true) String url
+    ) throws WxErrorException, IOException {
+        String accessToken = wxMpService.switchoverTo(appId).getAccessToken();
+        Map<String, String> ret = WeixinUtil.getShareSignByAccessToken(accessToken, url);
+        logger.info("【wxShare】signature:{}",ret);
+        return new BaseResponse<>(ResultCode.SUCCESS,ret);
+    }
+
 
 }
