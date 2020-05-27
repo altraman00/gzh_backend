@@ -3,17 +3,18 @@ package com.ruoyi.project.activities.yunchan.yunchan001;
 
 import cn.hutool.json.JSONObject;
 import com.ruoyi.framework.web.domain.AjaxResult;
+import com.ruoyi.project.activities.security.annotation.ApiH5;
 import com.ruoyi.project.activities.yunchan.yunchan001.entity.WxMpYunchan001UserStatus;
 import com.ruoyi.project.activities.yunchan.yunchan001.service.IWxMpYunchan001UserStatusService;
 import com.ruoyi.project.activities.yunchan.yunchan001.vo.WenjuanVO;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.*;
 
+@ApiH5
 @RestController
 @RequestMapping("/open/mp/yunchan001/wenjuan")
 @Api(value = "Yunchan001WenjuanController", tags = "孕产001问卷相关接口")
