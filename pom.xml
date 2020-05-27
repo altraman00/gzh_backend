@@ -219,6 +219,12 @@
 			<version>${swagger.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.github.xiaoymin</groupId>
+			<artifactId>swagger-bootstrap-ui</artifactId>
+			<version>1.9.1</version>
+		</dependency>
+
         <!-- 获取系统信息 -->
 		<dependency>
 			<groupId>com.github.oshi</groupId>
