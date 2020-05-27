@@ -10,8 +10,10 @@ import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
 import com.ruoyi.project.weixin.entity.WxUser;
 import com.ruoyi.project.weixin.mapper.WxUserMapper;
+import com.ruoyi.project.weixin.server.WxSendMsgServer;
 import com.ruoyi.project.weixin.service.ActivityService;
 import com.ruoyi.project.weixin.service.IWxMpActivityTemplateMessageService;
+import com.ruoyi.project.weixin.service.WxUserService;
 import com.ruoyi.project.weixin.utils.SpringContextUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Project : gzh_backend
@@ -49,6 +52,11 @@ public class Yunchan001ActivityServiceImpl implements ActivityService {
 
     private final WxUserMapper wxUserMapper;
 
+    private final WxSendMsgServer wxSendMsgServer;
+
+    private WxUserService wxUserService;
+
+
     private final Yunchan001ActivityHelpHandleService yunchan001ActivityHelpHandleServer;
 
     @Override
@@ -65,44 +73,48 @@ public class Yunchan001ActivityServiceImpl implements ActivityService {
     @Override
     @Async
     public void subscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplate template, String openId) {
-        log.info("【yunchan001Subscrib】subscrib event inMessage:[{}],wxMp:[{}],template[{}],openId[{}]", inMessage, wxMp, template, openId);
-        String eventKey = inMessage.getEventKey();
+//        log.info("【yunchan001Subscrib】subscrib event inMessage:[{}],wxMp:[{}],template[{}],openId[{}]", inMessage, wxMp, template, openId);
+//        String eventKey = inMessage.getEventKey();
         String appId = wxMp.getAppId();
         String templateId = template.getTemplateId();
-        QueryWrapper<WxMpActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda()
-                .eq(WxMpActivityTemplateMessage::getAppId, appId)
-                .eq(WxMpActivityTemplateMessage::getTemplateId,templateId)
-                .eq(WxMpActivityTemplateMessage::getActivityEnable,true);
+//        QueryWrapper<WxMpActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
+//        queryWrapper.lambda()
+//                .eq(WxMpActivityTemplateMessage::getAppId, appId)
+//                .eq(WxMpActivityTemplateMessage::getTemplateId,templateId)
+//                .eq(WxMpActivityTemplateMessage::getActivityEnable,true);
+//
+//        List<WxMpActivityTemplateMessage> messages = wxMpActivityTemplateMessageService.list(queryWrapper);
 
-        List<WxMpActivityTemplateMessage> messages = wxMpActivityTemplateMessageService.list(queryWrapper);
-        WxUser wxUser = wxUserMapper.selectOne(Wrappers.<WxUser>lambdaQuery()
-                .eq(WxUser::getOpenId,openId).eq(WxUser::getAppId,appId));
+//
+//        String wxUserId = wxUser.getId();
+//        Integer needNum = template.getNeedNum();
+//        log.info("【yunchan001Subscrib】event key:[{}],openId:[{}],appId[{}]",eventKey,openId,appId);
+//
+//        // 首先判断是不是扫活动中的公众号二维码进入的 {prefix}_class_yunchan001@help_{inviter_openid}
+//        if (StringUtils.isNotBlank(eventKey) && eventKey.contains(YunChan001Constant.MP_QRCODE_ACTIVITY_SCENE_EVENT_KEY)) {
+//            String value = eventKey.substring(eventKey.lastIndexOf("@") + 1);
+//
+//            //活动的标示
+//            String activityTag = value.split("_")[0];
+//            //邀请人的公众号
+//            String inviterOpenId = value.split("_")[1];
+//
+//            //孕产的助力活动
+//            if(StringUtils.isNotEmpty(activityTag) && YunChan001Constant.MP_QRCODE_ACTIVITY_TYPE.equals(activityTag)){
+//                log.info("【yunchan001Subscrib】启动yunchan001的助力活动");
+//                //启动助力活动
+//                yunchan001ActivityHelpHandleServer.activityHelp(inviterOpenId,openId, appId, templateId, messages, wxUser, wxUserId, needNum);
+//            }else{
+//                log.info("【yunchan001Subscrib】执行默认活动");
+//            }
+//
+//        }
+        Map<String,WxMpActivityTemplateMessage> messages = wxMpActivityTemplateMessageService.findActivityTemplateMessages(appId,templateId,new String[]{"help_welcome"});
+        WxUser wxUser = wxUserService.findWxUserByOpenid(openId);
 
-        String wxUserId = wxUser.getId();
-        Integer needNum = template.getNeedNum();
-        log.info("【yunchan001Subscrib】event key:[{}],openId:[{}],appId[{}]",eventKey,openId,appId);
-
-        // 首先判断是不是扫活动中的公众号二维码进入的 {prefix}_class_yunchan001@help_{inviter_openid}
-        if (StringUtils.isNotBlank(eventKey) && eventKey.contains(YunChan001Constant.MP_QRCODE_ACTIVITY_SCENE_EVENT_KEY)) {
-            String value = eventKey.substring(eventKey.lastIndexOf("@") + 1);
-
-            //活动的标示
-            String activityTag = value.split("_")[0];
-            //邀请人的公众号
-            String inviterOpenId = value.split("_")[1];
-
-            //孕产的助力活动
-            if(StringUtils.isNotEmpty(activityTag) && YunChan001Constant.MP_QRCODE_ACTIVITY_TYPE.equals(activityTag)){
-                log.info("【yunchan001Subscrib】启动yunchan001的助力活动");
-                //启动助力活动
-                yunchan001ActivityHelpHandleServer.activityHelp(inviterOpenId,openId, appId, templateId, messages, wxUser, wxUserId, needNum);
-            }else{
-                log.info("【yunchan001Subscrib】执行默认活动");
-            }
-
-        }
-
+        //发送欢迎语
+        WxMpActivityTemplateMessage welcomeTemplate = messages.get("help_welcome");
+        wxSendMsgServer.sendTextMessage(welcomeTemplate.getRepContent(),wxUser);
     }
 
 

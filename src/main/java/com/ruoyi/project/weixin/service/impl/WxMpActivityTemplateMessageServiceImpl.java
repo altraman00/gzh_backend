@@ -2,7 +2,6 @@ package com.ruoyi.project.weixin.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
-import com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMp;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
@@ -19,6 +18,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -100,5 +101,21 @@ public class WxMpActivityTemplateMessageServiceImpl extends ServiceImpl<WxMpActi
                 .filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(scene))
                 .findFirst().orElse(null);
         return message;
+    }
+
+    @Override
+    public Map<String, WxMpActivityTemplateMessage> findActivityTemplateMessages(String appId, String templateId, String ... keys) {
+        //查询appid绑定的模版的所有消息
+        List<WxMpActivityTemplateMessage> templateMessages = wxMpActivityTemplateMessageMapper.selectList(Wrappers.<WxMpActivityTemplateMessage>lambdaQuery()
+                .eq(WxMpActivityTemplateMessage::getAppId, appId)
+                .eq(WxMpActivityTemplateMessage::getTemplateId, templateId)
+                .eq(WxMpActivityTemplateMessage::getActivityEnable,true).and(wrapper->{
+                    for(String sceneKey : keys){
+                        wrapper.or().eq(WxMpActivityTemplateMessage::getScene,sceneKey);
+                    }
+                }));
+
+        Map<String, WxMpActivityTemplateMessage> result = templateMessages.stream().collect(Collectors.toMap(WxMpActivityTemplateMessage::getScene,d->d,(oldValue, newValue)->newValue));
+        return result;
     }
 }
