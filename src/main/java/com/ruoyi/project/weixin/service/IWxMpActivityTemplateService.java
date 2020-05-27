@@ -32,6 +32,19 @@ public interface IWxMpActivityTemplateService extends IService<WxMpActivityTempl
      */
     List<WxMpActivityTemplate> getActivityTemplatesByAppIdentify(String appIdentify);
 
+
+    /**
+     * 获取指定微信号绑定的主活动模板,目前该设置为手工配置
+     * @param appId
+     * @return
+     */
+    WxMpActivityTemplate getMasterActivityTemplate(String appId);
+    /**
+     * 获取指定微信号绑定的第一个有效的活动模板 sort_no最小的那个
+     * @param appId
+     * @return
+     */
+    WxMpActivityTemplate getFirstAvalibleTemplate(String appId);
 //
 //    /**
 //     * 根据appid和活动实现类名查询活动

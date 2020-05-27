@@ -23,6 +23,4 @@ public class WxPosterMsgDTO {
     @ApiModelProperty( "海报消息模版")
     WxMpActivityTemplateMessage wxMpTemplateMessage;
 
-    @ApiModelProperty( "二维码参数 不超过56位")
-    private String qrParams;
 }

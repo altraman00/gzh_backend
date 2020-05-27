@@ -73,7 +73,14 @@ public class HelpActivityServiceImpl implements ActivityService {
         log.info("【helpSubscrib】event key:[{}],openId:[{}],appId[{}]",eventKey,openId,appId);
         // 首先判断是不是扫活动码进入的
         if (StringUtils.isNotBlank(eventKey) && eventKey.contains(HelpActivityConstant.SCENE_EVENT_KEY)) {
-            String inviterOpenId = eventKey.substring(eventKey.lastIndexOf(":") + 1);
+            //新老规则兼容一下
+            String inviterOpenId = "";
+            if(eventKey.indexOf("@")>=0){
+                inviterOpenId = eventKey.substring(eventKey.lastIndexOf("@") + 1);
+            }else{
+                inviterOpenId = eventKey.substring(eventKey.lastIndexOf(":") + 1);
+            }
+
             WxUser inviter = wxUserService.getByOpenIdAndAppId(inviterOpenId,appId);
             String inviterId = inviter.getId();
             // 不是自己扫自己的码进入的
@@ -95,6 +102,9 @@ public class HelpActivityServiceImpl implements ActivityService {
                             wxActivityTask.setAppId(appId);
                             wxActivityTaskService.save(wxActivityTask);
                         }
+
+                        log.info("help activity task-> user {} has complete {} , need num is : {}",inviterOpenId,wxActivityTask.getCompleteNum(),needNum);
+
                         if (wxActivityTask.getCompleteNum() < needNum ){
                             //查找助力记录,一个人只能助力一次
                             List<WxTaskHelpRecord> records = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery()
@@ -125,7 +135,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         // 推送活动海报
         WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
 
-        wxSendMsgServer.sendPosterMessage(message,wxUser, HelpActivityConstant.SCENE_EVENT_KEY+":"+wxUser.getOpenId());
+        wxSendMsgServer.sendPosterMessage(message,wxUser);
     }
 
     @Override

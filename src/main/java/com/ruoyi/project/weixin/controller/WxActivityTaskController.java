@@ -102,8 +102,7 @@ public class WxActivityTaskController extends BaseController {
             }
             helpInfoDTO.setCompleteNum(wxActivityTask.getCompleteNum());
             helpInfoDTO.setStatus(wxActivityTask.getTaskStatus());
-            WxActivityTemplate template = iWxActivityTemplateService.getById(templateId);
-            helpInfoDTO.setNeedNum(template.getNeedNum());
+            helpInfoDTO.setNeedNum(wxMpActivityTemplate.getNeedNum());
 
             // 被助力记录
             List<WxTaskHelpRecord> list = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery().eq(WxTaskHelpRecord::getWxUserTaskId, wxActivityTask.getId()));
@@ -159,9 +158,7 @@ public class WxActivityTaskController extends BaseController {
     public AjaxResult getTaskPoster(@RequestParam(value = "openId") String openId,@RequestParam(value = "appId") String appId){
             QueryWrapper<WxMpActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
 
-        //根据appid+活动别名?
-        WxActivityTemplate wxActivityTemplate = iWxActivityTemplateService.findActivityTemplateByAlias(HelpActivityConstant.SCENE_EVENT_KEY);
-        WxMpActivityTemplate wxMpActivityTemplate = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndAlias(appId,helpActivityService.getActivityServiceImplClassName());
+        WxMpActivityTemplate wxMpActivityTemplate = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndAlias(appId,HelpActivityConstant.SCENE_EVENT_KEY);
         String templateId = wxMpActivityTemplate.getTemplateId();
         queryWrapper.lambda()
                 .eq(WxMpActivityTemplateMessage::getAppId, appId)
@@ -175,7 +172,7 @@ public class WxActivityTaskController extends BaseController {
             Map<String,Object> result = new HashMap<>(4);
             StopWatch stopWatch = new StopWatch();
             stopWatch.start("create poster");
-            File poster = wxSendMsgServer.getPosterFile(openId, message, appId,null,HelpActivityConstant.SCENE_EVENT_KEY);
+            File poster = wxSendMsgServer.getPosterFile(openId, message, appId);
             stopWatch.stop();
             try {
                 stopWatch.start("encode base64");

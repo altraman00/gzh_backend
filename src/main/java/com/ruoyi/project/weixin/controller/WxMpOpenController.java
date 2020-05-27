@@ -74,6 +74,34 @@ public class WxMpOpenController extends BaseController {
     }
 
 
+    @ApiOperation("获取access_toke by code")
+    @ApiImplicitParam(name = "appId", value = "获取access_token", dataType = "String",required = true)
+    @GetMapping("/access_token_by_code")
+    /**
+     * 返回格式
+     * {
+     *     "msg": "操作成功",
+     *     "code": 200,
+     *     "data": {
+     *         "accessToken": "33_45mrxYfcsJ98uSBrVS4IG3S_TAqbIiouMmDsld97giV4vPeELOpkbCIckjaTr-anygxdKeRWjIRPwQ5OwwJYNwCIHdLpZ6xifGaMYPb2Lc8",
+     *         "expiresIn": 7200,
+     *         "refreshToken": "33_ZC2tsTEya2NmvrCVXSLtzIN_vCI8kFLVev6KR4YAhc7Tc9s94bWGrZCg1oqc-QRkAYI_cAC_SqVUjD0VxwZiuBJfr728Rpqspf2p0h6YsKs",
+     *         "openId": "ogjgCj4s_f8p45PuAxe-Fx36pXlU",
+     *         "scope": "snsapi_base",
+     *         "unionId": null
+     *     }
+     * }
+     */
+    public AjaxResult getAccessTokenByCode(@RequestParam(value = "appId") String appId,@RequestParam(value = "code") String code) throws WxErrorException {
+
+        logger.debug("get accesstoke by code : {}->{}",appId,code);
+        WxMpOAuth2AccessToken wxMpOAuth2AccessToken = wxMpService.switchoverTo(appId).oauth2getAccessToken(code);
+        logger.debug("get accesstoke by code : {}-{}->{}",appId,code,wxMpOAuth2AccessToken);
+
+        return AjaxResult.success(wxMpOAuth2AccessToken);
+    }
+
+
     @ApiOperation("测试用open接口")
     @GetMapping("/hello")
     public String openHello(@RequestParam(required = false, defaultValue = "gzh") String str) {
@@ -87,12 +115,9 @@ public class WxMpOpenController extends BaseController {
     @ApiOperation("查询用户信息")
     @GetMapping("/userinfo")
     public AjaxResult checkUserSubscribeState(
-            @RequestParam(value = "openId") String openId
-            ,@RequestParam(value = "appId") String appId) {
-        logger.debug("【getActivityTemplate】appId:{}",appId);
+            @RequestParam(value = "openId") String openId) {
         WxUser one = wxUserService.getOne(Wrappers.<WxUser>lambdaQuery()
-                .eq(WxUser::getOpenId, openId)
-                .eq(WxUser::getAppId, appId).last("limit 0,1"), false);
+                .eq(WxUser::getOpenId, openId).last("limit 0,1"), false);
         return AjaxResult.success(one);
     }
 
@@ -136,22 +161,31 @@ public class WxMpOpenController extends BaseController {
     @ApiOperation("发送海报消息")
     @PostMapping("/send/poster_msg")
     public void sendGzhPosterMsg(@RequestBody WxPosterMsgDTO posterMsgDTO) {
+
         log.info("【sendGzhPosterMsg】,posterMsgDTO:{}",posterMsgDTO);
         WxMpActivityTemplateMessage posterMsgTemplate = posterMsgDTO.getWxMpTemplateMessage();
         String openId = posterMsgDTO.getOpenId();
         WxUser wxUser = wxUserService.getOne(Wrappers.<WxUser>lambdaQuery().eq(WxUser::getOpenId, openId).last("limit 0,1"), false);
 
-        wxSendMsgServer.sendPosterMessage(posterMsgTemplate,wxUser,posterMsgDTO.getQrParams());
+        wxSendMsgServer.sendPosterMessage(posterMsgTemplate,wxUser);
     }
+
 
 
     @ApiOperation("根据appId生成公众号二维码")
     @GetMapping("/create/qr_code")
-    public String create_mp_qrcode(
-             @RequestParam(value = "appId") String appId
-            ,@RequestParam(value = "wxMpQrParams") String wxMpQrParams) {
-        return wxSendMsgServer.generatorPosterMpQrcode(appId,wxMpQrParams);
+    public AjaxResult create_mp_qrcode(@RequestParam(value = "appId") String appId,
+                                   @RequestParam(value = "wxMpQrParams", required = false) String wxMpQrParams
+    ) {
+        try {
+            String s = wxSendMsgServer.generatorPosterMpQrcode(appId, wxMpQrParams);
+            return AjaxResult.success("OK",s);
+        }catch (Exception ex){
+            return AjaxResult.error("failed:"+ex.getMessage());
+        }
+
     }
+
 
 
 
