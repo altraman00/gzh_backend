@@ -1,7 +1,9 @@
-package com.ruoyi.framework.config;
+package com.ruoyi.framework.config.swagger;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.ruoyi.framework.config.RuoYiConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

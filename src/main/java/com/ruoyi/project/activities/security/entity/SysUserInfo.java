@@ -1,5 +1,6 @@
 package com.ruoyi.project.activities.security.entity;
 
+import com.ruoyi.framework.config.swagger.IgnoreSwaggerParameter;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,12 +22,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SysUserInfo {
 
+    @IgnoreSwaggerParameter
     private String id;
 
-    @ApiModelProperty("微信openId")
+    @IgnoreSwaggerParameter
     private String openId;
 
-    @ApiModelProperty("微信昵称")
+    @IgnoreSwaggerParameter
+    @ApiModelProperty(value = "微信昵称",hidden = true)
     private String nickName;
 
 
