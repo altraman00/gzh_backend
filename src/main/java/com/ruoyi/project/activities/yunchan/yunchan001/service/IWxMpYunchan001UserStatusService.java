@@ -13,4 +13,16 @@ import com.ruoyi.project.activities.yunchan.yunchan001.entity.WxMpYunchan001User
  */
 public interface IWxMpYunchan001UserStatusService extends IService<WxMpYunchan001UserStatus> {
 
+    /**
+     * 根据openid查到用户状态
+     * @param openid
+     * @return
+     */
+    WxMpYunchan001UserStatus findUserStatusByOpenId(String openid);
+
+    /**
+     * 解锁第一阶段
+     * @param openid
+     */
+    void unlockFirstStage(String openid);
 }
