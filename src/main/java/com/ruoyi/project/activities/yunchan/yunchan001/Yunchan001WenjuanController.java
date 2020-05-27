@@ -29,7 +29,6 @@ public class Yunchan001WenjuanController {
 
 
     @ApiOperation("提交问卷接口")
-    @ApiImplicitParam(name = "openId", value = "openId", required = true, paramType = "String")
     @PostMapping()
     public AjaxResult createWenjuan(@RequestBody WenjuanVO wenjuanVO){
         log.debug("commit wenjuan :{}",wenjuanVO);
