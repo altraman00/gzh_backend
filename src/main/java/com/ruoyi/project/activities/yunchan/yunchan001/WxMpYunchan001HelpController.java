@@ -2,6 +2,8 @@ package com.ruoyi.project.activities.yunchan.yunchan001;
 
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.domain.AjaxResult;
+import com.ruoyi.project.activities.security.annotation.ApiH5;
+import com.ruoyi.project.activities.security.annotation.ApiH5SkipToken;
 import com.ruoyi.project.activities.yunchan.yunchan001.Yunchan001ActivityServiceImpl;
 import com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
@@ -37,6 +39,7 @@ import java.util.Map;
  */
 
 @Api(value = "WxMpYunchan001HelpController", tags = "孕产001助力 相关接口")
+@ApiH5
 @Slf4j
 @RestController
 @RequestMapping("/open/mp/yunchan001/help")
@@ -50,6 +53,7 @@ public class WxMpYunchan001HelpController {
 
     @Autowired
     private IWxMpActivityTemplateMessageService wxMpActivityTemplateMessageService;
+
 
     @ApiOperation("获取助力任务海报信息")
     @ApiImplicitParams({
@@ -96,6 +100,7 @@ public class WxMpYunchan001HelpController {
         }
     }
 
+    @ApiH5SkipToken
     @GetMapping("/hello")
     public String hello(){
         return "hello";

@@ -17,11 +17,12 @@ import com.ruoyi.framework.web.controller.BaseController;
  * @author xiekun
  * @since 2020-05-25
  */
+
+@ApiH5
 @RestController
 @RequestMapping("/open/mp/yunchan001/user/status")
 public class WxMpYunchan001HelpUserStatusController extends BaseController {
 
-    @ApiH5
     @GetMapping("/hello1")
     public String hello1(){
         return "hello";

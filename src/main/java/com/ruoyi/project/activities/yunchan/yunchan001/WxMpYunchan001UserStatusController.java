@@ -4,6 +4,8 @@ package com.ruoyi.project.activities.yunchan.yunchan001;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
+import com.ruoyi.project.activities.security.annotation.ApiH5;
+import com.ruoyi.project.activities.security.annotation.ApiH5SkipToken;
 import com.ruoyi.project.activities.yunchan.yunchan001.entity.WxMpYunchan001UserStatus;
 import com.ruoyi.project.activities.yunchan.yunchan001.service.IWxMpYunchan001UserStatusService;
 import com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant;
@@ -34,6 +36,7 @@ import java.util.Random;
  * @since 2020-05-25
  */
 @Api(value = "WxMpYunchan001UserStatusController", tags = "孕产001用户关注 相关接口")
+@ApiH5
 @RestController
 @RequestMapping("/open/mp/yunchan001/user")
 public class WxMpYunchan001UserStatusController extends BaseController {
@@ -53,6 +56,7 @@ public class WxMpYunchan001UserStatusController extends BaseController {
     @Autowired
     private Yunchan001ActivityServiceImpl yunchan001ActivityService;
 
+    @ApiH5SkipToken
     @ApiOperation("孕产001移动端微信授权")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "code", value = "微信授权code", required = true, paramType = "String"),

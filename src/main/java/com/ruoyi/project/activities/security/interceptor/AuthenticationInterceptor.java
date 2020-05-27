@@ -2,13 +2,13 @@ package com.ruoyi.project.activities.security.interceptor;
 
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.ruoyi.framework.web.exception.GlobalException;
 import com.ruoyi.project.activities.security.annotation.ApiH5;
 import com.ruoyi.project.activities.security.annotation.ApiH5SkipToken;
-import com.ruoyi.project.activities.security.service.ApiH5TokenService;
 import com.ruoyi.project.activities.security.common.LoginUserContext;
 import com.ruoyi.project.activities.security.entity.SysUserInfo;
+import com.ruoyi.project.activities.security.service.ApiH5TokenService;
 import com.ruoyi.project.common.ResultCode;
-import com.ruoyi.framework.web.exception.GlobalException;
 import com.ruoyi.project.weixin.utils.JSONUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,8 +58,10 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        //检查是否有passtoken注释，有则跳过认证,其余的全部要走认证
-        if (method.isAnnotationPresent(ApiH5.class) || method.isAnnotationPresent(ApiH5SkipToken.class)) {
+        //如果controller类上有@ApiH5注解，则走下面需要token验证的过程，否则全部通过
+        Class aclazz = ((HandlerMethod) object).getMethod().getDeclaringClass();
+        boolean apiH5AnnotationPresent = aclazz.isAnnotationPresent(ApiH5.class);
+        if (apiH5AnnotationPresent) {
             if (method.isAnnotationPresent(ApiH5SkipToken.class)) {
                 ApiH5SkipToken skipToken = method.getAnnotation(ApiH5SkipToken.class);
                 if (skipToken.required()) {

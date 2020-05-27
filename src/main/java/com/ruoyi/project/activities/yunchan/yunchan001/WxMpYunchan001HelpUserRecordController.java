@@ -4,10 +4,12 @@ package com.ruoyi.project.activities.yunchan.yunchan001;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
+import com.ruoyi.project.activities.security.annotation.ApiH5;
 import com.ruoyi.project.activities.yunchan.yunchan001.entity.WxMpYunchan001HelpUserRecord;
 import com.ruoyi.project.activities.yunchan.yunchan001.service.IWxMpYunchan001HelpUserRecordService;
 import com.ruoyi.project.weixin.entity.WxUser;
 import com.ruoyi.project.weixin.service.WxUserService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,9 @@ import java.util.stream.Collectors;
  * @author xiekun
  * @since 2020-05-25
  */
+
+@Api(value = "WxMpYunchan001HelpUserRecordController", tags = "孕产001助力详情 相关接口")
+@ApiH5
 @RestController
 @RequestMapping("/open/mp/yunchan001/user/record")
 public class WxMpYunchan001HelpUserRecordController extends BaseController {
