@@ -4,7 +4,11 @@ import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.activities.security.annotation.ApiH5;
 import com.ruoyi.project.activities.security.annotation.ApiH5SkipToken;
+import com.ruoyi.project.activities.security.annotation.CurrentUser;
+import com.ruoyi.project.activities.security.entity.SysUserInfo;
 import com.ruoyi.project.activities.yunchan.yunchan001.Yunchan001ActivityServiceImpl;
+import com.ruoyi.project.common.BaseResponse;
+import com.ruoyi.project.common.ResultCode;
 import com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
 import com.ruoyi.project.weixin.server.WxSendMsgServer;
@@ -54,15 +58,15 @@ public class WxMpYunchan001HelpController {
     @Autowired
     private IWxMpActivityTemplateMessageService wxMpActivityTemplateMessageService;
 
-
     @ApiOperation("获取助力任务海报信息")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="openId",value="openId",required=true,paramType="String"),
             @ApiImplicitParam(name="appId",value="appId",required=true,paramType="String")
     })
     @GetMapping("/poster")
-    public AjaxResult getTaskPoster(@RequestParam(value = "openId") String openId, @RequestParam(value = "appId") String appId){
-
+    public BaseResponse<Map<String,Object>> getTaskPoster(
+              @CurrentUser SysUserInfo sysUserInfo
+            , @RequestParam(value = "appId") String appId){
+        String openId = sysUserInfo.getOpenId();
         //查询助力海报的消息模版
         WxMpActivityTemplateMessage message = wxMpActivityTemplateMessageService.findMpTemplateMessage(appId
                 , yunchan001ActivityService.getActivityServiceImplClassName()
@@ -94,9 +98,9 @@ public class WxMpYunchan001HelpController {
             result.put("posterBase64",posterBase64);
             String name = poster.getName();
             result.put("suffix", name.substring(name.lastIndexOf(".")+1));
-            return AjaxResult.success(result);
+            return new BaseResponse<>(ResultCode.SUCCESS, result);
         } else {
-            return AjaxResult.error();
+            return new BaseResponse<>(ResultCode.TEMPLATE_NOT_EXIST);
         }
     }
 

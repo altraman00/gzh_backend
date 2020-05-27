@@ -24,7 +24,7 @@ import java.util.Date;
  * @ModificationHistory Who   When     What
  * ------------    --------------    ---------------------------------
  */
-@Service("TokenService")
+@Service("ApiH5TokenService")
 public class ApiH5TokenService {
 
     private static final String CLAIM_KEY_USERNAME = "sub";

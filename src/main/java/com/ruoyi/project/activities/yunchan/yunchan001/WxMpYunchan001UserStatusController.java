@@ -3,11 +3,15 @@ package com.ruoyi.project.activities.yunchan.yunchan001;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.framework.web.controller.BaseController;
-import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.activities.security.annotation.ApiH5;
 import com.ruoyi.project.activities.security.annotation.ApiH5SkipToken;
+import com.ruoyi.project.activities.security.annotation.CurrentUser;
+import com.ruoyi.project.activities.security.entity.SysUserInfo;
+import com.ruoyi.project.activities.security.service.ApiH5TokenService;
 import com.ruoyi.project.activities.yunchan.yunchan001.entity.WxMpYunchan001UserStatus;
 import com.ruoyi.project.activities.yunchan.yunchan001.service.IWxMpYunchan001UserStatusService;
+import com.ruoyi.project.common.BaseResponse;
+import com.ruoyi.project.common.ResultCode;
 import com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
 import com.ruoyi.project.weixin.entity.WxUser;
@@ -21,11 +25,12 @@ import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.result.WxMpOAuth2AccessToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * <p>
@@ -35,11 +40,14 @@ import java.util.Random;
  * @author xiekun
  * @since 2020-05-25
  */
-@Api(value = "WxMpYunchan001UserStatusController", tags = "孕产001用户关注 相关接口")
+@Api(value = "WxMpYunchan001UserStatusController", tags = "孕产001用户授权，获取助教二维码等 相关接口")
 @ApiH5
 @RestController
 @RequestMapping("/open/mp/yunchan001/user")
 public class WxMpYunchan001UserStatusController extends BaseController {
+
+    @Autowired
+    private ApiH5TokenService tokenService;
 
     @Autowired
     private WxMpService wxMpService;
@@ -64,30 +72,41 @@ public class WxMpYunchan001UserStatusController extends BaseController {
             @ApiImplicitParam(name = "parentOpenid", value = "分享人的openid", required = false, paramType = "String")
     })
     @GetMapping("/oauth2")
-    public AjaxResult oauth2(
+    public BaseResponse oauth2(
             @RequestParam(value = "code") String code
             , @RequestParam(value = "appId") String appId
             , @RequestParam(value = "parentOpenid", required = false, defaultValue = "") String parentOpenid) throws WxErrorException {
 
+        logger.debug("【yunchan001-oauth2】get accesstoke by code : {}->{}",appId,code);
         //获取静默授权的access_token
         WxMpOAuth2AccessToken wxMpOAuth2AccessToken = wxMpService.switchoverTo(appId).oauth2getAccessToken(code);
         String openId = wxMpOAuth2AccessToken.getOpenId();
         //创建用户
-        wxUserService.createSimpleWxUser(appId, openId, parentOpenid);
-        return AjaxResult.success(openId);
+        WxUser simpleWxUser = wxUserService.createSimpleWxUser(appId, openId, parentOpenid);
+
+        //生成token
+        SysUserInfo userInfo = SysUserInfo.builder()
+                .id(simpleWxUser.getId())
+                .openId(simpleWxUser.getOpenId())
+                .build();
+        String token = tokenService.getToken(userInfo);
+        Map<String, String> resMap = new HashMap<String, String>() {{
+            put("token", token);
+            put("openId", openId);
+        }};
+        return new BaseResponse<>(ResultCode.SUCCESS, resMap);
     }
 
 
     @ApiOperation("获取助力老师的微信二维码")
-    @GetMapping("/{openId}/teacher")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "openId", value = "openId", required = true, paramType = "String"),
-            @ApiImplicitParam(name = "appId", value = "appId", required = true, paramType = "String")
-    })
-    public AjaxResult getUserAssistanceTeacher(
-            @PathVariable(value = "openId") String openId
-            , @RequestParam(value = "appId") String appId) {
+    @ApiImplicitParam(name = "appId", value = "appId", required = true, paramType = "String")
+    @GetMapping("/teacher")
+    public BaseResponse<Map<String,String>> getUserAssistanceTeacher(
+             @CurrentUser SysUserInfo sysUserInfo
+            ,@RequestParam(value = "appId") String appId
+    ) {
 
+        String openId = sysUserInfo.getOpenId();
         WxMpYunchan001UserStatus userStatus = wxMpYunchan001UserStatusService.getOne(Wrappers.<WxMpYunchan001UserStatus>lambdaQuery()
                 .eq(WxMpYunchan001UserStatus::getOpenId, openId), false);
 
@@ -110,18 +129,20 @@ public class WxMpYunchan001UserStatusController extends BaseController {
             userStatus.setWxuserId(simpleWxUser.getId());
             wxMpYunchan001UserStatusService.save(userStatus);
         }
+        Map<String,String> resMap = new HashMap<>();
+        resMap.put("aidTeacherQrcode",userStatus.getAidTeacherQrcode());
 
-        return AjaxResult.success(userStatus.getAidTeacherQrcode());
+        return new BaseResponse<>(ResultCode.SUCCESS, resMap);
     }
 
 
     @ApiOperation("获取用户的阶段解锁状态")
-    @ApiImplicitParam(name = "openId", value = "openId", required = true, paramType = "String")
-    @GetMapping("/{openId}/status")
-    public AjaxResult getUserStageStatus(@PathVariable(value = "openId") String openId) {
+    @GetMapping("/status")
+    public BaseResponse<WxMpYunchan001UserStatus> getUserStageStatus(@CurrentUser SysUserInfo sysUserInfo) {
+        String openId = sysUserInfo.getOpenId();
         WxMpYunchan001UserStatus one = wxMpYunchan001UserStatusService.getOne(Wrappers.<WxMpYunchan001UserStatus>lambdaQuery()
                 .eq(WxMpYunchan001UserStatus::getOpenId, openId), false);
-        return AjaxResult.success(one);
+        return new BaseResponse<>(ResultCode.SUCCESS, one);
     }
 
 }
