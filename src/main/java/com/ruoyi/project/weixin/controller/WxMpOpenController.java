@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
-import com.ruoyi.project.activities.diabetes.DiabetesTestingReportActivityServiceImpl;
+import com.ruoyi.project.activities.diabetes.testing.DiabetesTestingReportActivityServiceImpl;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.dto.WxMsgDTO;
 import com.ruoyi.project.weixin.dto.WxPosterMsgDTO;

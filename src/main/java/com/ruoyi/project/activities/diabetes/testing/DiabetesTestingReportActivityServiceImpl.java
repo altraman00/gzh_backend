@@ -1,4 +1,4 @@
-package com.ruoyi.project.activities.diabetes;
+package com.ruoyi.project.activities.diabetes.testing;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
