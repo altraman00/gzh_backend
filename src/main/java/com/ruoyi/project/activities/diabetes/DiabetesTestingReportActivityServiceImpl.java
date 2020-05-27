@@ -1,14 +1,16 @@
-package com.ruoyi.project.weixin.service.impl;
+package com.ruoyi.project.activities.diabetes;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.http.HttpClient;
 import com.ruoyi.project.weixin.constant.DiabetesConstant;
-import com.ruoyi.project.weixin.entity.WxActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMp;
+import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxUser;
 import com.ruoyi.project.weixin.service.ActivityService;
 import com.ruoyi.project.weixin.service.WxUserService;
+import com.ruoyi.project.weixin.utils.SpringContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,15 +42,42 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
     @Value("${sunlands.diabetes-testing.url}")
     private String sunlandsDiabetesUrl;
 
+    /**
+     * 用于微信带参二维码的活动标识
+     */
+    String SCENE_EVENT_KEY_DIABETES_TEST_H5 = "diabetes_test_h5";
+
+
+    @Override
+    public String getActivityServiceImplClassName() {
+        String classFullName = this.getClass().getName();
+        return SpringContextUtils.getCurrentClassName(classFullName);
+    }
+
     @Override
     @Async
-    public void subscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxActivityTemplate template, String openId) {
+    public void subscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplate template, String openId) {
         log.info("【DiabetesTestingSubscrib】subscrib event inMessage:[{}],wxMp:[{}],template[{}],openId[{}]", inMessage, wxMp, template, openId);
-        try {
-            sendSubscribeState(wxMp, openId,DiabetesConstant.EVENT_SUBSCRIBE);
-        } catch (Exception e) {
-            log.error("【DiabetesTestingSubscrib】调取糖知家关注接口异常");
-        }
+
+        String appId = wxMp.getAppId();
+        WxUser wxUser = wxUserService.getOne(Wrappers.<WxUser>lambdaQuery()
+                .eq(WxUser::getOpenId,openId).eq(WxUser::getAppId,appId));
+
+        String nickName = wxUser.getNickName();
+        Map<String,String> paramsMap = new HashMap<String,String>(){{
+            put("appId",appId);
+            put("openId",openId);
+            put("nickName",nickName);
+            put("event", DiabetesConstant.EVENT_SUBSCRIBE);
+        }};
+
+        String url = sunlandsDiabetesUrl + DiabetesConstant.DIABETES_TESTING_PORTAL_API;
+        String params = JSONUtil.toJsonStr(paramsMap);
+        log.info("【DiabetesTestingReportActivity】,url:{},params:{}",url,params);
+        String result = HttpClient.doPost(url, params);
+        log.info("【DiabetesTestingReportActivity】,result:{}",result);
+
+
     }
 
     /**
@@ -61,7 +90,7 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
      */
     @Override
     @Async
-    public void unsubscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxActivityTemplate template, String openId) {
+    public void unsubscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplate template, String openId) {
         log.info("【DiabetesTestingSubscrib】unsubscrib event inMessage:[{}],wxMp:[{}],template[{}],openId[{}]", inMessage, wxMp, template, openId);
         try {
             sendSubscribeState(wxMp, openId,DiabetesConstant.EVENT_UNSUBSCRIBE);
@@ -78,23 +107,7 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
      * @param event
      */
     private void sendSubscribeState(WxMp wxMp, String openId,String event) {
-        String appId = wxMp.getAppId();
-        WxUser wxUser = wxUserService.getOne(Wrappers.<WxUser>lambdaQuery()
-                .eq(WxUser::getOpenId,openId).eq(WxUser::getAppId,appId));
 
-        String nickName = wxUser.getNickName();
-        Map<String,String> paramsMap = new HashMap<String,String>(){{
-            put("appId",appId);
-            put("openId",openId);
-            put("nickName",nickName);
-            put("event", event);
-        }};
-
-        String url = sunlandsDiabetesUrl + DiabetesConstant.DIABETES_TESTING_PORTAL_API;
-        String params = JSONUtil.toJsonStr(paramsMap);
-        log.info("【DiabetesTestingReportActivity】,url:{},params:{}",url,params);
-        String result = HttpClient.doPost(url, params);
-        log.info("【DiabetesTestingReportActivity】,result:{}",result);
     }
 
 

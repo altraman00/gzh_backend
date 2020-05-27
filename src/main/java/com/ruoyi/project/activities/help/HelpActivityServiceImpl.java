@@ -1,4 +1,4 @@
-package com.ruoyi.project.weixin.service.impl;
+package com.ruoyi.project.activities.help;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -9,28 +9,14 @@ import com.ruoyi.project.weixin.entity.*;
 import com.ruoyi.project.weixin.mapper.WxUserMapper;
 import com.ruoyi.project.weixin.server.WxSendMsgServer;
 import com.ruoyi.project.weixin.service.*;
-import com.ruoyi.project.weixin.utils.ImgUtils;
 import com.ruoyi.project.weixin.utils.ObjectLockUtil;
+import com.ruoyi.project.weixin.utils.SpringContextUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.chanjar.weixin.common.bean.result.WxMediaUploadResult;
-import me.chanjar.weixin.common.error.WxErrorException;
-import me.chanjar.weixin.mp.api.WxMpService;
-import me.chanjar.weixin.mp.bean.kefu.WxMpKefuMessage;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
-import me.chanjar.weixin.mp.bean.result.WxMpQrCodeTicket;
-import me.chanjar.weixin.mp.bean.result.WxMpUser;
-import net.coobird.thumbnailator.Thumbnails;
-import net.coobird.thumbnailator.geometry.Coordinate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StopWatch;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.List;
 
 /**
@@ -41,7 +27,7 @@ import java.util.List;
 @AllArgsConstructor
 public class HelpActivityServiceImpl implements ActivityService {
 
-    private final IWxMpTemplateMessageService wxMpTemplateMessageService;
+    private final IWxMpActivityTemplateMessageService wxMpActivityTemplateMessageService;
 
     private final IWxTaskHelpRecordService wxTaskHelpRecordService;
 
@@ -55,15 +41,27 @@ public class HelpActivityServiceImpl implements ActivityService {
 
     private final WxSendMsgServer wxSendMsgServer;
 
+    private IWxMpActivityTemplateService IWxMpActivityTemplateService;
+
+
+    @Override
+    public String getActivityServiceImplClassName() {
+        String classFullName = this.getClass().getName();
+        return SpringContextUtils.getCurrentClassName(classFullName);
+    }
+
     @Override
     @Async
-    public void subscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxActivityTemplate template, String openId) {
+    public void subscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplate template, String openId) {
         String eventKey = inMessage.getEventKey();
         String appId = wxMp.getAppId();
-        String templateId = template.getId();
-        QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,templateId);
-        List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
+        String templateId = template.getTemplateId();
+        QueryWrapper<WxMpActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda()
+                .eq(WxMpActivityTemplateMessage::getAppId, appId)
+                .eq(WxMpActivityTemplateMessage::getTemplateId,templateId)
+                .eq(WxMpActivityTemplateMessage::getActivityEnable,true);
+        List<WxMpActivityTemplateMessage> messages = wxMpActivityTemplateMessageService.list(queryWrapper);
         WxUser wxUser = wxUserMapper.selectOne(Wrappers.<WxUser>lambdaQuery()
                 .eq(WxUser::getOpenId,openId).eq(WxUser::getAppId,appId));
         String wxUserId = wxUser.getId();
@@ -71,7 +69,14 @@ public class HelpActivityServiceImpl implements ActivityService {
         log.info("event key:[{}],openId:[{}],appId[{}]",eventKey,openId,appId);
         // 首先判断是不是扫活动码进入的
         if (StringUtils.isNotBlank(eventKey) && eventKey.contains(HelpActivityConstant.SCENE_EVENT_KEY)) {
-            String inviterOpenId = eventKey.substring(eventKey.lastIndexOf(":") + 1);
+            //新老规则兼容一下
+            String inviterOpenId = "";
+            if(eventKey.indexOf("@")>=0){
+                inviterOpenId = eventKey.substring(eventKey.lastIndexOf("@") + 1);
+            }else{
+                inviterOpenId = eventKey.substring(eventKey.lastIndexOf(":") + 1);
+            }
+
             WxUser inviter = wxUserService.getByOpenIdAndAppId(inviterOpenId,appId);
             String inviterId = inviter.getId();
             // 不是自己扫自己的码进入的
@@ -93,6 +98,9 @@ public class HelpActivityServiceImpl implements ActivityService {
                             wxActivityTask.setAppId(appId);
                             wxActivityTaskService.save(wxActivityTask);
                         }
+
+                        log.info("help activity task-> user {} has complete {} , need num is : {}",inviterOpenId,wxActivityTask.getCompleteNum(),needNum);
+
                         if (wxActivityTask.getCompleteNum() < needNum ){
                             //查找助力记录,一个人只能助力一次
                             List<WxTaskHelpRecord> records = wxTaskHelpRecordService.list(Wrappers.<WxTaskHelpRecord>lambdaQuery()
@@ -121,18 +129,19 @@ public class HelpActivityServiceImpl implements ActivityService {
         // 推送活动规则消息
         executeActivityRule(messages,wxUser,templateId,appId);
         // 推送活动海报
-        WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
+        WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_POSTER)).findFirst().orElse(null);
+
         wxSendMsgServer.sendPosterMessage(message,wxUser);
     }
 
     @Override
-    public void unsubscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxActivityTemplate template, String openId) {
+    public void unsubscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplate template, String openId) {
 
     }
 
-    private void executeHasComplete(List<WxMpTemplateMessage> messages, WxUser wxUser) {
+    private void executeHasComplete(List<WxMpActivityTemplateMessage> messages, WxUser wxUser) {
         log.info("开始执行助理活动流程：{}",HelpActivityConstant.SCENE_HAS_COMPLETE);
-        WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_HAS_COMPLETE)).findFirst().orElse(null);
+        WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_HAS_COMPLETE)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
         if (hasAvailableMessage) {
             String content = message.getRepContent();
@@ -141,9 +150,9 @@ public class HelpActivityServiceImpl implements ActivityService {
     }
 
 
-    private void executeActivityRule(List<WxMpTemplateMessage> messages, WxUser wxUser, String templateId, String appId) {
+    private void executeActivityRule(List<WxMpActivityTemplateMessage> messages, WxUser wxUser, String templateId, String appId) {
         log.info("开始执行助理活动流程：{}",HelpActivityConstant.SCENE_ACTIVITY_RULE);
-        WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_RULE)).findFirst().orElse(null);
+        WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_ACTIVITY_RULE)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
         if (hasAvailableMessage) {
             String content = message.getRepContent();
@@ -167,9 +176,9 @@ public class HelpActivityServiceImpl implements ActivityService {
         }
     }
 
-    private void executeHasHelp(List<WxMpTemplateMessage> messages, WxUser wxUser, WxUser inviter) {
+    private void executeHasHelp(List<WxMpActivityTemplateMessage> messages, WxUser wxUser, WxUser inviter) {
         log.info("开始执行助理活动流程：{}",HelpActivityConstant.SCENE_HAS_HELP);
-        WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_HAS_HELP)).findFirst().orElse(null);
+        WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_HAS_HELP)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
         if (hasAvailableMessage) {
             String content = message.getRepContent();
@@ -178,10 +187,10 @@ public class HelpActivityServiceImpl implements ActivityService {
         }
     }
 
-    private void executeBeHelped(List<WxMpTemplateMessage> messages, WxUser wxUser, WxUser inviter, WxActivityTask wxActivityTask, Integer needNum) {
+    private void executeBeHelped(List<WxMpActivityTemplateMessage> messages, WxUser wxUser, WxUser inviter, WxActivityTask wxActivityTask, Integer needNum) {
         log.info("开始执行助理活动流程：{}",HelpActivityConstant.SCENE_BE_HELPED);
         if (wxActivityTask.getCompleteNum() < needNum) {
-            WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_BE_HELPED)).findFirst().orElse(null);
+            WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_BE_HELPED)).findFirst().orElse(null);
             boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
             if (hasAvailableMessage) {
                 String content = message.getRepContent();
@@ -189,7 +198,7 @@ public class HelpActivityServiceImpl implements ActivityService {
                 wxSendMsgServer.sendTextMessage(content,inviter);
             }
         } else {
-            WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_TASK_COMPLETE)).findFirst().orElse(null);
+            WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_TASK_COMPLETE)).findFirst().orElse(null);
             boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
             if (hasAvailableMessage) {
                 String content = message.getRepContent();
@@ -198,7 +207,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         }
     }
 
-    private void executeHelpSuccess(List<WxMpTemplateMessage> list, WxUser wxUser, WxUser inviter, WxActivityTask wxActivityTask, Integer needNum) {
+    private void executeHelpSuccess(List<WxMpActivityTemplateMessage> list, WxUser wxUser, WxUser inviter, WxActivityTask wxActivityTask, Integer needNum) {
         log.info("开始执行助理活动流程：{}",HelpActivityConstant.SCENE_HELP_SUCCESS);
         String wxUserId = wxUser.getId();
         String inviterId = inviter.getId();
@@ -215,7 +224,7 @@ public class HelpActivityServiceImpl implements ActivityService {
         wxTaskHelpRecord.setWxUserTaskId(wxActivityTask.getId());
         wxTaskHelpRecordService.save(wxTaskHelpRecord);
         // 推送助力成功消息
-        WxMpTemplateMessage message = list.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_HELP_SUCCESS)).findFirst().orElse(null);
+        WxMpActivityTemplateMessage message = list.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_HELP_SUCCESS)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
         if (hasAvailableMessage) {
             String content = message.getRepContent();
@@ -225,18 +234,24 @@ public class HelpActivityServiceImpl implements ActivityService {
     }
 
     public void sendInviteMessage(String appId) {
-        WxMp wxMp = iWxMpService.getByAppId(appId);
-        if (!wxMp.isActivityEnable()) {
+
+        WxMpActivityTemplate wxMpActivityTemplate = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndAlias(appId,HelpActivityConstant.SCENE_EVENT_KEY);
+
+        if (!wxMpActivityTemplate.isActivityEnable()) {
             log.info("appId:[{}]已暂停活动，流程结束",appId);
             return;
         }
-        QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(WxMpTemplateMessage::getAppId, appId).eq(WxMpTemplateMessage::getTemplateId,wxMp.getTemplateId());
-        List<WxMpTemplateMessage> messages = wxMpTemplateMessageService.list(queryWrapper);
-        WxMpTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_SCHEDULE_INVITER)).findFirst().orElse(null);
+
+        QueryWrapper<WxMpActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda()
+                .eq(WxMpActivityTemplateMessage::getAppId, appId)
+                .eq(WxMpActivityTemplateMessage::getActivityEnable,true)
+                .eq(WxMpActivityTemplateMessage::getTemplateId, wxMpActivityTemplate.getTemplateId());
+        List<WxMpActivityTemplateMessage> messages = wxMpActivityTemplateMessageService.list(queryWrapper);
+        WxMpActivityTemplateMessage message = messages.stream().filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(HelpActivityConstant.SCENE_SCHEDULE_INVITER)).findFirst().orElse(null);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
         if (hasAvailableMessage) {
-            List<WxUser> users =  wxUserMapper.getNotCompleteUser(appId,wxMp.getTemplateId());
+            List<WxUser> users =  wxUserMapper.getNotCompleteUser(appId, wxMpActivityTemplate.getTemplateId());
             log.info("共查询到：{}个需要发送消息的用户",users.size());
             String content = message.getRepContent();
             for (WxUser wxUser : users) {

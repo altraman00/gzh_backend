@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class CronTaskRegistrar implements DisposableBean {
 
-    private final Map<String, ScheduledTask> scheduledTasks = new ConcurrentHashMap<>(16);
+    private final Map<String, ScheduledTask> scheduledTasksMap = new ConcurrentHashMap<>(16);
 
     @Autowired
     private TaskScheduler taskScheduler;
@@ -42,13 +42,13 @@ public class CronTaskRegistrar implements DisposableBean {
 
     public void addCronTask(CronTask cronTask, String key) {
         if (cronTask != null) {
-            if (this.scheduledTasks.containsKey(key)) {
+            if (this.scheduledTasksMap.containsKey(key)) {
                 removeCronTask(key);
             }
             ScheduledTask scheduledTask = scheduleCronTask(cronTask);
-            this.scheduledTasks.put(key, scheduledTask);
+            this.scheduledTasksMap.put(key, scheduledTask);
         }
-        log.info("scheduledTasks map size ：[{}]",scheduledTasks.size());
+        log.info("scheduledTasksMap map size ：[{}]", scheduledTasksMap.size());
     }
 
     /**
@@ -56,12 +56,17 @@ public class CronTaskRegistrar implements DisposableBean {
      * @param key
      */
     public void removeCronTask(String key) {
-        ScheduledTask scheduledTask = this.scheduledTasks.remove(key);
+        ScheduledTask scheduledTask = this.scheduledTasksMap.remove(key);
         if (scheduledTask != null) {
             scheduledTask.cancel();
         }
     }
 
+    /**
+     * 发布定时任务
+     * @param cronTask
+     * @return
+     */
     public ScheduledTask scheduleCronTask(CronTask cronTask) {
         ScheduledTask scheduledTask = new ScheduledTask();
         scheduledTask.future = this.taskScheduler.schedule(cronTask.getRunnable(), cronTask.getTrigger());
@@ -71,10 +76,10 @@ public class CronTaskRegistrar implements DisposableBean {
 
     @Override
     public void destroy() {
-        for (ScheduledTask task : this.scheduledTasks.values()) {
+        for (ScheduledTask task : this.scheduledTasksMap.values()) {
             task.cancel();
         }
 
-        this.scheduledTasks.clear();
+        this.scheduledTasksMap.clear();
     }
 }

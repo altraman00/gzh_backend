@@ -13,11 +13,7 @@ import com.ruoyi.project.weixin.entity.*;
 import com.ruoyi.project.weixin.schedule.SchedulingRunnable;
 import com.ruoyi.project.weixin.schedule.config.CronTaskRegistrar;
 import com.ruoyi.project.weixin.server.WxSendMsgServer;
-import com.ruoyi.project.weixin.service.IWxActivityTemplateMessageService;
-import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
-import com.ruoyi.project.weixin.service.IWxMpService;
-import com.ruoyi.project.weixin.service.IWxMpTemplateMessageService;
-import com.ruoyi.project.weixin.service.impl.HelpActivityServiceImpl;
+import com.ruoyi.project.weixin.service.*;
 import com.ruoyi.project.weixin.utils.ImgUtils;
 import com.ruoyi.project.weixin.utils.ThreadLocalUtil;
 import com.ruoyi.project.weixin.vo.EditWxTemplateVO;
@@ -34,7 +30,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.quartz.CronExpression;
 import org.springframework.beans.BeanUtils;
-import org.springframework.scheduling.config.CronTask;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,10 +52,11 @@ import java.util.Map;
  * @author zhangbin
  * @since 2020-03-11
  */
+
+@Api(value = "WxActivityTemplateController", tags = "公众号模版 相关接口")
 @RestController
 @RequestMapping("/wxactivity")
 @AllArgsConstructor
-@Api("活动模板管理")
 @Slf4j
 public class WxActivityTemplateController extends BaseController {
 
@@ -69,7 +65,7 @@ public class WxActivityTemplateController extends BaseController {
 
     private final IWxActivityTemplateMessageService wxActivityTemplateMessageService;
 
-    private final IWxMpTemplateMessageService wxMpTemplateMessageService;
+    private final IWxMpActivityTemplateMessageService wxMpActivityTemplateMessageService;
 
     private final IWxMpService wxMpService;
 
@@ -77,11 +73,12 @@ public class WxActivityTemplateController extends BaseController {
 
     private final ISysDictDataService sysDictDataService;
 
-    private final HelpActivityServiceImpl helpActivityService;
-
     private final CronTaskRegistrar cronTaskRegistrar;
 
     private final WxSendMsgServer wxSendMsgServer;
+
+    private final IWxMpActivityTemplateService IWxMpActivityTemplateService;
+
 
     @ApiOperation("查询默认活动模板")
     @GetMapping("/template/list")
@@ -99,76 +96,100 @@ public class WxActivityTemplateController extends BaseController {
             @ApiImplicitParam(name="templateId",value="活动模板id",required=true,paramType="String"),
             @ApiImplicitParam(name="appId",value="appId",required=true,paramType="String")
     })
+
+
     @GetMapping("/template/bind")
     public AjaxResult bindWxActivityTemplate(@RequestParam(value = "templateId") String templateId,@RequestParam(value = "appId") String appId){
         WxMp wxMp = wxMpService.getByAppId(appId);
-        String originalTemplateId = wxMp.getTemplateId();
-        // 未做任何改动
-        if (originalTemplateId!=null && originalTemplateId.equals(templateId) && wxMp.isActivityEnable()) {
-            return AjaxResult.success(wxMp);
-        }
-        wxMp.setTemplateId(templateId);
-        wxMp.setActivityEnable(true);
-        wxMpService.updateById(wxMp);
+
         // 判定是否已经复制过模板信息
-        List<WxMpTemplateMessage> mpTemplateMessages = wxMpTemplateMessageService.list(Wrappers.<WxMpTemplateMessage>lambdaQuery()
-                .eq(WxMpTemplateMessage::getTemplateId, templateId)
-                .eq(WxMpTemplateMessage::getAppId, appId));
-        if (!mpTemplateMessages.isEmpty()) {
+        WxMpActivityTemplate one = IWxMpActivityTemplateService.getOne(Wrappers.<WxMpActivityTemplate>lambdaQuery()
+                .eq(WxMpActivityTemplate::getAppId, appId)
+                .eq(WxMpActivityTemplate::getTemplateId, templateId), false);
+
+        if(one != null) {
             return AjaxResult.success(wxMp);
         }
+
+        WxActivityTemplate activityTemplate = wxActivityTemplateService.getOne(Wrappers.<WxActivityTemplate>lambdaQuery().eq(WxActivityTemplate::getId, templateId), false);
+        WxMpActivityTemplate wxMpActivityTemplate = new WxMpActivityTemplate();
+        wxMpActivityTemplate.setAppId(appId);
+        wxMpActivityTemplate.setAppName(wxMp.getAppName());
+        wxMpActivityTemplate.setTemplateId(activityTemplate.getId());
+        wxMpActivityTemplate.setTemplateClass(activityTemplate.getTemplateClass());
+        wxMpActivityTemplate.setTemplateName(activityTemplate.getTemplateName());
+        wxMpActivityTemplate.setNeedNum(activityTemplate.getNeedNum());
+        wxMpActivityTemplate.setRewardUrl(activityTemplate.getRewardUrl());
+        IWxMpActivityTemplateService.save(wxMpActivityTemplate);
+
         // 查询出模板详细信息
         QueryWrapper<WxActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(WxActivityTemplateMessage::getTemplateId,templateId);
         List<WxActivityTemplateMessage> list = wxActivityTemplateMessageService.list(queryWrapper);
-        List<WxMpTemplateMessage> needPublishSchedule = new ArrayList<>();
+        List<WxMpActivityTemplateMessage> needPublishSchedule = new ArrayList<>();
+
         for (WxActivityTemplateMessage wxActivityTemplateMessage : list) {
             // 复制到公众号模板信息表
-            WxMpTemplateMessage wxMpTemplateMessage = new WxMpTemplateMessage();
-            wxMpTemplateMessage.setAppId(appId);
-            BeanUtils.copyProperties(wxActivityTemplateMessage,wxMpTemplateMessage,"id","createId","createTime","updateId","updateTime","delFlag");
-            wxMpTemplateMessage.setRepContent(wxMpTemplateMessage.getRepContent().replace("appid=","appid="+appId).replace("state=","state="+appId));
-            wxMpTemplateMessageService.save(wxMpTemplateMessage);
-            if (wxMpTemplateMessage.getRepType().equals(ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE)) {
-                needPublishSchedule.add(wxMpTemplateMessage);
+            WxMpActivityTemplateMessage wxMpActivityTemplateMessage = new WxMpActivityTemplateMessage();
+            wxMpActivityTemplateMessage.setAppId(appId);
+            BeanUtils.copyProperties(wxActivityTemplateMessage, wxMpActivityTemplateMessage,"id","createId","createTime","updateId","updateTime","delFlag");
+            wxMpActivityTemplateMessage.setRepContent(wxMpActivityTemplateMessage.getRepContent().replace("appid=","appid="+appId).replace("state=","state="+appId));
+            wxMpActivityTemplateMessage.setActivityEnable(true);
+            wxMpActivityTemplateMessageService.save(wxMpActivityTemplateMessage);
+            if (wxMpActivityTemplateMessage.getRepType().equals(ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE)) {
+                needPublishSchedule.add(wxMpActivityTemplateMessage);
             }
         }
         // 发布定时任务
         // 先移除原绑定任务
-        List<WxMpTemplateMessage> originalScheduleMessages = wxMpTemplateMessageService.list(Wrappers.<WxMpTemplateMessage>lambdaQuery()
-                .eq(WxMpTemplateMessage::getTemplateId, originalTemplateId)
-                .eq(WxMpTemplateMessage::getAppId, appId)
-                .eq(WxMpTemplateMessage::getRepType, ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE));
-        for (WxMpTemplateMessage originalScheduleMessage : originalScheduleMessages) {
+        List<WxMpActivityTemplateMessage> originalScheduleMessages = wxMpActivityTemplateMessageService.list(Wrappers.<WxMpActivityTemplateMessage>lambdaQuery()
+                .eq(WxMpActivityTemplateMessage::getTemplateId, templateId)
+                .eq(WxMpActivityTemplateMessage::getAppId, appId)
+                .eq(WxMpActivityTemplateMessage::getRepType, ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE));
+        for (WxMpActivityTemplateMessage originalScheduleMessage : originalScheduleMessages) {
             cronTaskRegistrar.removeCronTask(originalScheduleMessage.getId());
         }
         // 再发布新的定时任务
-        for (WxMpTemplateMessage wxMpTemplateMessage : needPublishSchedule) {
-            SchedulingRunnable task = new SchedulingRunnable(wxMpTemplateMessage.getScheduleClass(), wxMpTemplateMessage.getScheduleMethod(), appId);
-            cronTaskRegistrar.addCronTask(task,wxMpTemplateMessage.getScheduleCron(), wxMpTemplateMessage.getId());
-            log.info("成功发布定时任务:messageId:[{}]",wxMpTemplateMessage.getId());
+        for (WxMpActivityTemplateMessage wxMpActivityTemplateMessage : needPublishSchedule) {
+            SchedulingRunnable task = new SchedulingRunnable(wxMpActivityTemplateMessage.getScheduleClass(), wxMpActivityTemplateMessage.getScheduleMethod(), appId);
+            cronTaskRegistrar.addCronTask(task, wxMpActivityTemplateMessage.getScheduleCron(), wxMpActivityTemplateMessage.getId());
+            log.info("成功发布定时任务:messageId:[{}]", wxMpActivityTemplateMessage.getId());
         }
+
         return AjaxResult.success(wxMp);
     }
 
-    @ApiOperation("查询公众号绑定的活动消息详情")
+    @ApiOperation("查询公众号绑定的某一个活动的活动详情")
     @ApiImplicitParams({
             @ApiImplicitParam(name="appId",value="appId",required=true,paramType="String")
+            ,@ApiImplicitParam(name="id",value="公众号下绑定的具体某个活动的id",required=true,paramType="String")
     })
     @GetMapping("/template/message/list")
     @PreAuthorize("@ss.hasPermi('wxmp:wxsetting:index')")
-    public AjaxResult getMpTemplateMessage(@RequestParam(value = "appId") String appId) {
+    public AjaxResult getMpTemplateMessage(
+             @RequestParam(value = "appId") String appId
+            ,@RequestParam(value = "id") String id) {
+        WxMpActivityTemplate wxMpActivityTemplate =
+                IWxMpActivityTemplateService.getOne(Wrappers.<WxMpActivityTemplate>lambdaQuery()
+                        .eq(WxMpActivityTemplate::getAppId,appId)
+                        .eq(WxMpActivityTemplate::getId,id)
+                        .eq(WxMpActivityTemplate::getDelFlag,"0")
+                );
+        if(wxMpActivityTemplate == null){
+            return AjaxResult.success("活动不存在");
+        }
         // 查询出公众号绑定的活动消息
-        WxMp wxMp = wxMpService.getByAppId(appId);
-        String templateId = wxMp.getTemplateId();
+        String templateId = wxMpActivityTemplate.getTemplateId();
+        String templateName = wxMpActivityTemplate.getTemplateName();
         if (StringUtils.isBlank(templateId)) {
             return AjaxResult.success();
         }
-        QueryWrapper<WxMpTemplateMessage> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<WxMpActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda()
-                .eq(WxMpTemplateMessage::getAppId,appId)
-                .eq(WxMpTemplateMessage::getTemplateId,templateId).orderByAsc(WxMpTemplateMessage::getSortNo);
-        List<WxMpTemplateMessage> list = wxMpTemplateMessageService.list(queryWrapper);
+                .eq(WxMpActivityTemplateMessage::getAppId,wxMpActivityTemplate.getAppId())
+                .eq(WxMpActivityTemplateMessage::getTemplateId,templateId)
+                .orderByAsc(WxMpActivityTemplateMessage::getSortNo);
+        List<WxMpActivityTemplateMessage> list = wxMpActivityTemplateMessageService.list(queryWrapper);
         return AjaxResult.success(list);
     }
 
@@ -176,7 +197,7 @@ public class WxActivityTemplateController extends BaseController {
     @PatchMapping("/template/message/{messageId}")
     public AjaxResult updateMpTemplateMessage(@PathVariable("messageId") String id,@RequestBody EditWxTemplateVO editWxTemplateVO){
         String cron = editWxTemplateVO.getScheduleCron();
-        WxMpTemplateMessage query = wxMpTemplateMessageService.getById(id);
+        WxMpActivityTemplateMessage query = wxMpActivityTemplateMessageService.getById(id);
         if (query.getRepType().equals(ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE)) {
             boolean validExpression = CronExpression.isValidExpression(cron);
             if (!validExpression) {
@@ -185,7 +206,7 @@ public class WxActivityTemplateController extends BaseController {
         }
         String originalCron = query.getScheduleCron();
         BeanUtils.copyProperties(editWxTemplateVO,query);
-        wxMpTemplateMessageService.updateById(query);
+        wxMpActivityTemplateMessageService.updateById(query);
         if (query.getRepType().equals(ConfigConstant.MESSAGE_REP_TYPE_SCHEDULE) && !originalCron.equals(cron)) {
             // 重新发布定时任务
             SchedulingRunnable task = new SchedulingRunnable(query.getScheduleClass(), query.getScheduleMethod(), query.getAppId());
@@ -195,19 +216,19 @@ public class WxActivityTemplateController extends BaseController {
         return AjaxResult.success(query);
     }
 
-    @ApiOperation("活动启动/活动暂停")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="appId",value="appId",required=true,paramType="String")
-    })
-    @PatchMapping("/status/{appId}")
-    public AjaxResult editActivityStatus(@PathVariable("appId") String appId,@RequestBody EditWxTemplateVO editWxTemplateVO) {
-        // 查询出公众号绑定的活动消息
-        Boolean activityEnable = editWxTemplateVO.getActivityEnable();
-        WxMp wxMp = wxMpService.getByAppId(appId);
-        wxMp.setActivityEnable(activityEnable);
-        wxMpService.updateById(wxMp);
-        return AjaxResult.success();
-    }
+//    @ApiOperation("活动启动/活动暂停")
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name="appId",value="appId",required=true,paramType="String")
+//    })
+//    @PatchMapping("/status/{appId}")
+//    public AjaxResult editActivityStatus(@PathVariable("appId") String appId,@RequestBody EditWxTemplateVO editWxTemplateVO) {
+//        // 查询出公众号绑定的活动消息
+//        Boolean activityEnable = editWxTemplateVO.getActivityEnable();
+//        WxMp wxMp = wxMpService.getByAppId(appId);
+//        wxMp.setActivityEnable(activityEnable);
+//        wxMpService.updateById(wxMp);
+//        return AjaxResult.success();
+//    }
 
     @ApiOperation("预览海报")
     @ApiImplicitParams({
@@ -215,7 +236,7 @@ public class WxActivityTemplateController extends BaseController {
     })
     @GetMapping("/template/{messageId}/poster/preview")
     public AjaxResult previewPoster(@PathVariable("messageId") String messageId) {
-        WxMpTemplateMessage message = wxMpTemplateMessageService.getById(messageId);
+        WxMpActivityTemplateMessage message = wxMpActivityTemplateMessageService.getById(messageId);
         String mediaId = message.getRepMediaId();
         String appId = ThreadLocalUtil.getAppId();
         logger.debug("previewPoster 当前操作的APPID:{}", appId);

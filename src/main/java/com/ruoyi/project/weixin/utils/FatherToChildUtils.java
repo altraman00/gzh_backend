@@ -1,6 +1,7 @@
 package com.ruoyi.project.weixin.utils;
 
 import com.ruoyi.project.weixin.dto.WxMpXmlMessageDTO;
+import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 
 import java.lang.reflect.Field;
@@ -13,6 +14,7 @@ import java.lang.reflect.Method;
  * @Date 2020-04-20 10:49
  * @Created by pjz
  */
+@Slf4j
 public class FatherToChildUtils {
     /*
      * 将父类所有的属性COPY到子类中。
@@ -26,27 +28,15 @@ public class FatherToChildUtils {
         Class fatherClass= father.getClass();
         Field declaredFields[]= fatherClass.getDeclaredFields();
         for(int i=0;i<declaredFields.length;i++){
+
             Field field=declaredFields[i];
             try {
                 Method method=fatherClass.getDeclaredMethod("get"+upperHeadChar(field.getName()));
                 Object obj = method.invoke(father);
                 field.setAccessible(true);
                 field.set(child,obj);
-            } catch (SecurityException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IllegalArgumentException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (NoSuchMethodException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            } catch (Exception e) {
+                log.warn("属性复制出现异常:"+field+":"+e.getMessage());
             }
         }
     }

@@ -1,4 +1,4 @@
-package com.ruoyi.project.weixin.service.impl;
+package com.ruoyi.project.activities.help;
 
 import com.ruoyi.project.weixin.entity.WxTaskHelpRecord;
 import com.ruoyi.project.weixin.mapper.WxTaskHelpRecordMapper;

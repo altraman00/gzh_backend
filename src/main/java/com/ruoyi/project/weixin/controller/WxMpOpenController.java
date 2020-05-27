@@ -2,21 +2,17 @@ package com.ruoyi.project.weixin.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.google.common.collect.Lists;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
+import com.ruoyi.project.activities.diabetes.DiabetesTestingReportActivityServiceImpl;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.dto.WxMsgDTO;
 import com.ruoyi.project.weixin.dto.WxPosterMsgDTO;
-import com.ruoyi.project.weixin.entity.WxActivityTemplate;
-import com.ruoyi.project.weixin.entity.WxMp;
-import com.ruoyi.project.weixin.entity.WxMpTemplateMessage;
-import com.ruoyi.project.weixin.entity.WxUser;
+import com.ruoyi.project.weixin.entity.*;
 import com.ruoyi.project.weixin.server.WxSendMsgServer;
-import com.ruoyi.project.weixin.service.IWxActivityTemplateService;
-import com.ruoyi.project.weixin.service.IWxMpService;
-import com.ruoyi.project.weixin.service.IWxMpTemplateMessageService;
-import com.ruoyi.project.weixin.service.WxUserService;
+import com.ruoyi.project.weixin.service.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -54,12 +50,19 @@ public class WxMpOpenController extends BaseController {
 
     private final IWxActivityTemplateService wxActivityTemplateService;
 
-    private final IWxMpTemplateMessageService wxMpTemplateMessageService;
+    private final IWxMpActivityTemplateService wxMpActivityTemplateService;
+
+    private final IWxMpActivityTemplateMessageService wxMpActivityTemplateMessageService;
 
     private final WxMpService wxMpService;
 
+    private final IWxMpActivityTemplateService IWxMpActivityTemplateService;
+
     @Autowired
     private WxUserService wxUserService;
+
+    @Autowired
+    private DiabetesTestingReportActivityServiceImpl activityService;
 
 
     @ApiOperation("获取access_token")
@@ -71,34 +74,74 @@ public class WxMpOpenController extends BaseController {
     }
 
 
+    @ApiOperation("获取access_toke by code")
+    @ApiImplicitParam(name = "appId", value = "获取access_token", dataType = "String",required = true)
+    @GetMapping("/access_token_by_code")
+    /**
+     * 返回格式
+     * {
+     *     "msg": "操作成功",
+     *     "code": 200,
+     *     "data": {
+     *         "accessToken": "33_45mrxYfcsJ98uSBrVS4IG3S_TAqbIiouMmDsld97giV4vPeELOpkbCIckjaTr-anygxdKeRWjIRPwQ5OwwJYNwCIHdLpZ6xifGaMYPb2Lc8",
+     *         "expiresIn": 7200,
+     *         "refreshToken": "33_ZC2tsTEya2NmvrCVXSLtzIN_vCI8kFLVev6KR4YAhc7Tc9s94bWGrZCg1oqc-QRkAYI_cAC_SqVUjD0VxwZiuBJfr728Rpqspf2p0h6YsKs",
+     *         "openId": "ogjgCj4s_f8p45PuAxe-Fx36pXlU",
+     *         "scope": "snsapi_base",
+     *         "unionId": null
+     *     }
+     * }
+     */
+    public AjaxResult getAccessTokenByCode(@RequestParam(value = "appId") String appId,@RequestParam(value = "code") String code) throws WxErrorException {
+
+        logger.debug("get accesstoke by code : {}->{}",appId,code);
+        WxMpOAuth2AccessToken wxMpOAuth2AccessToken = wxMpService.switchoverTo(appId).oauth2getAccessToken(code);
+        logger.debug("get accesstoke by code : {}-{}->{}",appId,code,wxMpOAuth2AccessToken);
+
+        return AjaxResult.success(wxMpOAuth2AccessToken);
+    }
+
+
     @ApiOperation("测试用open接口")
     @GetMapping("/hello")
     public String openHello(@RequestParam(required = false, defaultValue = "gzh") String str) {
         String result = "hello_env_" + str;
         logger.debug("hello,env:{},str:{}", str);
-        return result;
+        String actityServiceImplClassName = activityService.getActivityServiceImplClassName();
+        return result + "_" + actityServiceImplClassName;
     }
 
 
     @ApiOperation("查询用户信息")
     @GetMapping("/userinfo")
     public AjaxResult checkUserSubscribeState(
-            @RequestParam(value = "openId") String openId
-            ,@RequestParam(value = "appId") String appId) {
-        logger.debug("【getActivityTemplate】appId:{}",appId);
+            @RequestParam(value = "openId") String openId) {
         WxUser one = wxUserService.getOne(Wrappers.<WxUser>lambdaQuery()
-                .eq(WxUser::getOpenId, openId)
-                .eq(WxUser::getAppId, appId).last("limit 0,1"), false);
+                .eq(WxUser::getOpenId, openId).last("limit 0,1"), false);
         return AjaxResult.success(one);
     }
 
     @ApiOperation("获取活动模版")
     @GetMapping("/template")
-    public List<WxMpTemplateMessage> getActivityTemplate(@RequestParam(value = "appId") String appId) {
+    public List<WxMpActivityTemplateMessage> getActivityTemplate(@RequestParam(value = "appId") String appId) {
         logger.debug("【getActivityTemplate】appId:{}",appId);
-        List<WxMpTemplateMessage> list = wxMpTemplateMessageService.list(
-                Wrappers.<WxMpTemplateMessage>lambdaQuery()
-                        .eq(WxMpTemplateMessage::getAppId, appId));
+
+        List<WxMpActivityTemplate> activityTemplates = wxMpActivityTemplateService.list(Wrappers.<WxMpActivityTemplate>lambdaQuery()
+                .eq(WxMpActivityTemplate::getAppId, appId)
+                .eq(WxMpActivityTemplate::isActivityEnable, true));
+
+        List<WxMpActivityTemplateMessage> list = Lists.newArrayList();
+        for(WxMpActivityTemplate wxMpActivityTemplate : activityTemplates){
+            String templateId = wxMpActivityTemplate.getTemplateId();
+            List<WxMpActivityTemplateMessage> templateMessages = wxMpActivityTemplateMessageService.list(
+                    Wrappers.<WxMpActivityTemplateMessage>lambdaQuery()
+                            .eq(WxMpActivityTemplateMessage::getAppId, appId)
+                            .eq(WxMpActivityTemplateMessage::getTemplateId,templateId)
+//                            .eq(WxMpActivityTemplateMessage::getActivityEnable, true)
+            );
+            list.addAll(templateMessages);
+        }
+
         return list;
     }
 
@@ -118,11 +161,32 @@ public class WxMpOpenController extends BaseController {
     @ApiOperation("发送海报消息")
     @PostMapping("/send/poster_msg")
     public void sendGzhPosterMsg(@RequestBody WxPosterMsgDTO posterMsgDTO) {
-        WxMpTemplateMessage posterMsgTemplate = posterMsgDTO.getWxMpTemplateMessage();
+
+        log.info("【sendGzhPosterMsg】,posterMsgDTO:{}",posterMsgDTO);
+        WxMpActivityTemplateMessage posterMsgTemplate = posterMsgDTO.getWxMpTemplateMessage();
         String openId = posterMsgDTO.getOpenId();
         WxUser wxUser = wxUserService.getOne(Wrappers.<WxUser>lambdaQuery().eq(WxUser::getOpenId, openId).last("limit 0,1"), false);
+
         wxSendMsgServer.sendPosterMessage(posterMsgTemplate,wxUser);
     }
+
+
+
+    @ApiOperation("根据appId生成公众号二维码")
+    @GetMapping("/create/qr_code")
+    public AjaxResult create_mp_qrcode(@RequestParam(value = "appId") String appId,
+                                   @RequestParam(value = "wxMpQrParams", required = false) String wxMpQrParams
+    ) {
+        try {
+            String s = wxSendMsgServer.generatorPosterMpQrcode(appId, wxMpQrParams);
+            return AjaxResult.success("OK",s);
+        }catch (Exception ex){
+            return AjaxResult.error("failed:"+ex.getMessage());
+        }
+
+    }
+
+
 
 
     @ApiOperation("根据openId和appId创建微信用户，默认是没有关注公众号的")
@@ -162,13 +226,19 @@ public class WxMpOpenController extends BaseController {
         queryWrapper.eq("app_identify",appIdentify);
         WxMp wxMp = myWxMpService.getOne(queryWrapper);
         map.put("wxMp", wxMp);
-        // 查询当前公众号配置的活动模板
-        WxActivityTemplate wxActivityTemplate = null;
-        if (StringUtils.isNotEmpty(wxMp.getTemplateId())) {
-            wxActivityTemplate = wxActivityTemplateService.getById(wxMp.getTemplateId());
+        List<WxMpActivityTemplate> activityTemplates = IWxMpActivityTemplateService.getActivityTemplatesByAppIdentify(appIdentify);
+        List<WxActivityTemplate> templates = Lists.newArrayList();
+        for(WxMpActivityTemplate template : activityTemplates){
+            String templateId = template.getTemplateId();
+            // 查询当前公众号配置的活动模板
+            WxActivityTemplate wxActivityTemplate;
+            if (StringUtils.isNotEmpty(templateId)) {
+                wxActivityTemplate = wxActivityTemplateService.getById(templateId);
+                templates.add(wxActivityTemplate);
+            }
         }
-        map.put("template",wxActivityTemplate);
-        return AjaxResult.success(map);
+        map.put("template",templates);
+        return AjaxResult.success(activityTemplates);
     }
 
     @ApiOperation("移动端微信授权")
@@ -184,9 +254,6 @@ public class WxMpOpenController extends BaseController {
                 WxMpOAuth2AccessToken wxMpOAuth2AccessToken = wxMpService.switchoverTo(appId).oauth2getAccessToken(code);
                 WxMpUser wxMpUser = wxMpService.switchoverTo(appId).oauth2getUserInfo(wxMpOAuth2AccessToken, null);
                 //根据openId获取对应的APPID
-//            QueryWrapper<WxUser> queryWrapper = new QueryWrapper<>();
-//            queryWrapper.lambda().eq(WxUser::getOpenId,wxMpUser.getOpenId());
-//            WxUser wxUser = wxUserService.getOne(queryWrapper);
                 map.put("accessToken",wxMpOAuth2AccessToken);
                 map.put("wxMpUser",wxMpUser);
                 map.put("wxMp",wxMp);

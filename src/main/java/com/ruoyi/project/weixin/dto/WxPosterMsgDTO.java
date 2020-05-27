@@ -1,6 +1,6 @@
 package com.ruoyi.project.weixin.dto;
 
-import com.ruoyi.project.weixin.entity.WxMpTemplateMessage;
+import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -21,6 +21,6 @@ public class WxPosterMsgDTO {
     private String openId;
 
     @ApiModelProperty( "海报消息模版")
-    WxMpTemplateMessage wxMpTemplateMessage;
+    WxMpActivityTemplateMessage wxMpTemplateMessage;
 
 }

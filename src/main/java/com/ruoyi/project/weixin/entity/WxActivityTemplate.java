@@ -48,4 +48,9 @@ public class WxActivityTemplate extends BaseEntity {
      * 多场景支持时 用逗号","分隔  eg: 1,2,3
      */
     private String supportScene;
+
+    /**
+     * 模板别名
+     */
+    private String alias;
 }

@@ -32,6 +32,6 @@ public class WxMsgDTO {
     private String type;
 
     @ApiModelProperty( "消息id")
-    private String wxMpTempleteMsgId;
+    private String wxMpTemplateMsgId;
 
 }
