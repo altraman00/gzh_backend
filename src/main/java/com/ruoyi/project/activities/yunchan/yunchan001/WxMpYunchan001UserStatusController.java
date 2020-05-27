@@ -70,7 +70,7 @@ public class WxMpYunchan001UserStatusController extends BaseController {
         String openId = wxMpOAuth2AccessToken.getOpenId();
         //创建用户
         wxUserService.createSimpleWxUser(appId, openId, parentOpenid);
-        return AjaxResult.success();
+        return AjaxResult.success(openId);
     }
 
 

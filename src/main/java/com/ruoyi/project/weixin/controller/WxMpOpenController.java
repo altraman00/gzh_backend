@@ -15,6 +15,7 @@ import com.ruoyi.project.weixin.server.WxSendMsgServer;
 import com.ruoyi.project.weixin.service.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -173,6 +174,10 @@ public class WxMpOpenController extends BaseController {
 
 
     @ApiOperation("根据appId生成公众号二维码")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="openId",value="openId",required=true,paramType="String"),
+            @ApiImplicitParam(name="wxMpQrParams",value="公众号场景值，采用如下公式 alias:{活动别名}@{openid} 如：alias:diabetesActivity@xxxxx",required=true,paramType="String")
+    })
     @GetMapping("/create/qr_code")
     public AjaxResult create_mp_qrcode(@RequestParam(value = "appId") String appId,
                                    @RequestParam(value = "wxMpQrParams", required = false) String wxMpQrParams
@@ -183,7 +188,6 @@ public class WxMpOpenController extends BaseController {
         }catch (Exception ex){
             return AjaxResult.error("failed:"+ex.getMessage());
         }
-
     }
 
 
@@ -266,5 +270,10 @@ public class WxMpOpenController extends BaseController {
         }
         return AjaxResult.success(map);
     }
+
+
+
+
+
 
 }
