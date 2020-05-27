@@ -1,7 +1,7 @@
-package com.ruoyi.project.weixin.service.yunchan.yunchan001;
+package com.ruoyi.project.activities.yunchan.yunchan001.service;
 
-import com.ruoyi.project.weixin.entity.yunchan.yunchan001.WxMpYunchan001HelpUserRecord;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ruoyi.project.activities.yunchan.yunchan001.entity.WxMpYunchan001HelpUserRecord;
 
 /**
  * <p>

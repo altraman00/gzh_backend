@@ -1,7 +1,7 @@
-package com.ruoyi.project.weixin.mapper.yunchan.yunchan001;
+package com.ruoyi.project.activities.yunchan.yunchan001.mapper;
 
-import com.ruoyi.project.weixin.entity.yunchan.yunchan001.WxMpYunchan001HelpUserStatus;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.ruoyi.project.activities.yunchan.yunchan001.entity.WxMpYunchan001HelpUserStatus;
 
 /**
  * <p>

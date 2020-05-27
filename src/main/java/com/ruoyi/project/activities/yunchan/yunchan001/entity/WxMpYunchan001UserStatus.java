@@ -1,10 +1,11 @@
-package com.ruoyi.project.weixin.entity.yunchan.yunchan001;
+package com.ruoyi.project.activities.yunchan.yunchan001.entity;
 
 import com.ruoyi.project.common.BaseEntity;
-import java.time.LocalDateTime;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+
+import java.time.LocalDateTime;
 
 /**
  * <p>

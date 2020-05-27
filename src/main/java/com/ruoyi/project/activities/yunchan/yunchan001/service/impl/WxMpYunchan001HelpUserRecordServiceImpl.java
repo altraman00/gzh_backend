@@ -1,9 +1,9 @@
-package com.ruoyi.project.weixin.service.yunchan.yunchan001.impl;
+package com.ruoyi.project.activities.yunchan.yunchan001.service.impl;
 
-import com.ruoyi.project.weixin.entity.yunchan.yunchan001.WxMpYunchan001HelpUserRecord;
-import com.ruoyi.project.weixin.mapper.yunchan.yunchan001.WxMpYunchan001HelpUserRecordMapper;
-import com.ruoyi.project.weixin.service.yunchan.yunchan001.IWxMpYunchan001HelpUserRecordService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ruoyi.project.activities.yunchan.yunchan001.entity.WxMpYunchan001HelpUserRecord;
+import com.ruoyi.project.activities.yunchan.yunchan001.mapper.WxMpYunchan001HelpUserRecordMapper;
+import com.ruoyi.project.activities.yunchan.yunchan001.service.IWxMpYunchan001HelpUserRecordService;
 import org.springframework.stereotype.Service;
 
 /**
