@@ -73,7 +73,7 @@ public class WxMpYunchan001HelpController {
             //公众号二维码的场景参数
             String wxMpQrParams = YunChan001Constant.MP_QRCODE_ACTIVITY_SCENE_EVENT_KEY + openId;
             //qrCodeUrl为null时，生成的是公众号的二维码
-            File poster = wxSendMsgServer.getPosterFile(openId, message, appId,null, wxMpQrParams);
+            File poster = wxSendMsgServer.getPosterFile(openId, message, appId);
             stopWatch.stop();
             try {
                 stopWatch.start("encode base64");
