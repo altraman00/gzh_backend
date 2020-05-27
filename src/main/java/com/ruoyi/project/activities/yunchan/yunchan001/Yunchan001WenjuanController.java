@@ -4,10 +4,12 @@ package com.ruoyi.project.activities.yunchan.yunchan001;
 import cn.hutool.json.JSONObject;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.activities.security.annotation.ApiH5;
+import com.ruoyi.project.activities.security.annotation.CurrentUser;
+import com.ruoyi.project.activities.security.entity.SysUserInfo;
 import com.ruoyi.project.activities.yunchan.yunchan001.entity.WxMpYunchan001UserStatus;
 import com.ruoyi.project.activities.yunchan.yunchan001.service.IWxMpYunchan001UserStatusService;
-import com.ruoyi.project.activities.yunchan.yunchan001.vo.WenjuanVO;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,18 +31,19 @@ public class Yunchan001WenjuanController {
     private IWxMpYunchan001UserStatusService userStatusService;
 
 
+    @ApiImplicitParam(name="answer",value="{\"城市\":\"湖北武汉\",\"年龄\":20,\"孕妈还是宝爸\":\"孕妈\",\"孕妈目前状态\":\"备孕期\",\"学习期望\":[\"医学生理\",\"孕期饮食\"],......}",required=true,paramType="String")
     @ApiOperation("提交问卷接口")
     @PostMapping()
-    public AjaxResult createWenjuan(@RequestBody WenjuanVO wenjuanVO){
-        log.debug("commit wenjuan :{}",wenjuanVO);
-        String openid = wenjuanVO.getOpenid();
+    public AjaxResult createWenjuan(
+             @CurrentUser SysUserInfo sysUserInfo
+            ,@RequestBody JSONObject answer){
+        log.debug("commit wenjuan :{}",answer);
+        String openid = sysUserInfo.getOpenId();
         WxMpYunchan001UserStatus userStatus = userStatusService.findUserStatusByOpenId(openid);
         //只有锁定状态的可以提交问卷，提交以后解锁第一阶段状态
         if(userStatus.getFirstStageStatus().equals(WxMpYunchan001UserStatus.LOCK_STATUS_LOCKED)){
-
-            JSONObject jsonObject = wenjuanVO.getAnswer();
-            jsonObject.put("openid",wenjuanVO.getOpenid());
-            mongoTemplate.insert(jsonObject, MONGO_COLLECTION_YUNCHAN_001_WENJUAN);
+            answer.put("openid",openid);
+            mongoTemplate.insert(answer, MONGO_COLLECTION_YUNCHAN_001_WENJUAN);
             //解锁第一阶段
             userStatusService.unlockFirstStage(openid);
             return AjaxResult.success();
