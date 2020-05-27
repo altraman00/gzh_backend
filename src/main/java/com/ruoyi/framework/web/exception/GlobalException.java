@@ -1,4 +1,4 @@
-package com.ruoyi.project.exception;
+package com.ruoyi.framework.web.exception;
 
 import com.ruoyi.project.common.ResultCode;
 import lombok.Data;

@@ -8,7 +8,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.ruoyi.project.activities.security.entity.SysUserInfo;
 import com.ruoyi.project.common.ResultCode;
-import com.ruoyi.project.exception.GlobalException;
+import com.ruoyi.framework.web.exception.GlobalException;
 import com.ruoyi.project.weixin.utils.JSONUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

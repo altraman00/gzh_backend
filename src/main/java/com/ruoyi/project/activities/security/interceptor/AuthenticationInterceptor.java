@@ -8,7 +8,7 @@ import com.ruoyi.project.activities.security.service.ApiH5TokenService;
 import com.ruoyi.project.activities.security.common.LoginUserContext;
 import com.ruoyi.project.activities.security.entity.SysUserInfo;
 import com.ruoyi.project.common.ResultCode;
-import com.ruoyi.project.exception.GlobalException;
+import com.ruoyi.framework.web.exception.GlobalException;
 import com.ruoyi.project.weixin.utils.JSONUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
