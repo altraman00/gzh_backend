@@ -43,9 +43,12 @@ public class Yunchan001WenjuanController {
             mongoTemplate.insert(jsonObject, MONGO_COLLECTION_YUNCHAN_001_WENJUAN);
             //解锁第一阶段
             userStatusService.unlockFirstStage(openid);
+            return AjaxResult.success();
+        }else{
+            return AjaxResult.error("100001","已经提交过问卷");
         }
 
-        return AjaxResult.success("OK");
+
     }
 
 
