@@ -2,9 +2,11 @@ import com.ruoyi.RuoYiApplication;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.entity.WxActivityTask;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
+import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
 import com.ruoyi.project.weixin.schedule.SchedulingRunnable;
 import com.ruoyi.project.weixin.schedule.config.CronTaskRegistrar;
 import com.ruoyi.project.weixin.service.IWxActivityTaskService;
+import com.ruoyi.project.weixin.service.IWxMpActivityTemplateMessageService;
 import com.ruoyi.project.weixin.service.IWxMpActivityTemplateService;
 import org.junit.Assert;
 import org.junit.Test;
@@ -12,6 +14,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import java.util.Map;
 
 /**
  * @program: simple-demo
@@ -25,6 +29,8 @@ public class WeixinActivityTemplateTest {
     @Autowired
     private IWxMpActivityTemplateService iWxMpActivityTemplateService;
 
+    @Autowired
+    private IWxMpActivityTemplateMessageService wxMpActivityTemplateMessageService;
 
     @Test
     public void testFindMasterTemplate(){
@@ -40,6 +46,17 @@ public class WeixinActivityTemplateTest {
         WxMpActivityTemplate wxMpActivityTemplate = iWxMpActivityTemplateService.getFirstAvalibleTemplate(appid);
         Assert.assertNotNull(wxMpActivityTemplate);
         Assert.assertTrue(wxMpActivityTemplate.getTemplateName().equals("五人助力"));
+    }
+
+
+    @Test
+    public void testFindActivityTemplateMessage(){
+        Map<String, WxMpActivityTemplateMessage> result = wxMpActivityTemplateMessageService.findActivityTemplateMessages("wxd3fc86ade86ec00d","4",new String[]{"activity_rule","has_complete","activity_poster"});
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result.size() == 3);
+        WxMpActivityTemplateMessage templateMessage = result.get("has_complete");
+        Assert.assertNotNull(templateMessage);
+
     }
 
 }

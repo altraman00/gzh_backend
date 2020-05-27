@@ -35,6 +35,8 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
 
 	private final WxMpService wxService;
 
+	private final WxUserMapper wxUserMapper;
+
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public boolean updateRemark(WxUser entity) throws WxErrorException {
@@ -118,6 +120,12 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
 			this.save(byOpenIdAndAppId);
 		}
 		return byOpenIdAndAppId;
+	}
+
+	@Override
+	public WxUser findWxUserByOpenid(String openId) {
+		return wxUserMapper.selectOne(Wrappers.<WxUser>lambdaQuery()
+				.eq(WxUser::getOpenId,openId));
 	}
 
 

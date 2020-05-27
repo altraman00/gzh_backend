@@ -4,6 +4,7 @@ import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -40,4 +41,12 @@ public interface IWxMpActivityTemplateMessageService extends IService<WxMpActivi
     WxMpActivityTemplateMessage findMpTemplateMessage(String appId,String activityClassName,String scene);
 
 
+    /**
+     * 根据appid 
+     * @param appId
+     * @param templateId
+     * @param strings
+     * @return
+     */
+    Map<String, WxMpActivityTemplateMessage> findActivityTemplateMessages(String appId, String templateId, String[] strings);
 }
