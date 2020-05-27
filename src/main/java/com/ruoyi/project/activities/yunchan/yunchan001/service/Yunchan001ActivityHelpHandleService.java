@@ -1,4 +1,4 @@
-package com.ruoyi.project.activities.yunchan.yunchan001;
+package com.ruoyi.project.activities.yunchan.yunchan001.service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.common.utils.StringUtils;
@@ -37,7 +37,7 @@ import java.util.List;
 @Service
 @Slf4j
 @AllArgsConstructor
-public class Yunchan001ActivityHelpHandleServer {
+public class Yunchan001ActivityHelpHandleService {
 
     private final IWxMpYunchan001HelpUserRecordService yunchan001HelpUserRecordService;
 
