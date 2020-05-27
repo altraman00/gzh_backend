@@ -37,13 +37,13 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationInterceptor.class);
 
     @Autowired
-    private ApiH5TokenService tokenService;
+    private ApiH5TokenService apiH5TokenService;
 
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object object) {
 
         // 从 http 请求头中取出 token
-        String token = httpServletRequest.getHeader("Authorization");
+        String token = httpServletRequest.getHeader("token");
 
         // 如果不是映射到方法直接通过
         if (!(object instanceof HandlerMethod)) {
@@ -70,7 +70,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             } else {
                 // 解密token并获取token中的信息
                 try {
-                    DecodedJWT decode = tokenService.unSignToken(token);
+                    DecodedJWT decode = apiH5TokenService.unSignToken(token);
                     String userInfo = decode.getClaim("sub").asString();
                     Date expiresAt = decode.getExpiresAt();
                     long currTimestamp = System.currentTimeMillis();

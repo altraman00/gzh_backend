@@ -9,6 +9,7 @@ public enum ResultCode {
 	,NO_TOKEN(401,"无token，请重新登录")
 	,ERROR_TOKEN(402,"token异常，请重新登陆")
 	,CRON_NOT_CORRECT(10000,"定时规则输入不正确")
+	,TEMPLATE_NOT_EXIST(10001,"消息模版不存在")
 	;
 
     private Integer code;

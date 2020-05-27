@@ -48,12 +48,12 @@ public class CurrentUserMethodArgumentResolver implements HandlerMethodArgumentR
 
         if(loginUser == null){
             //拦截器为空时，尝试从请求头中获取token并解析token的值
-            String token = request.getHeader("Authorization");
+            String token = request.getHeader("token");
             loginUser = tokenService.unSignToken(token, SysUserInfo.class);
         }
 
         if(loginUser == null){
-            throw new MissingServletRequestPartException("Authorization");
+            throw new MissingServletRequestPartException("token");
         }
 
         return loginUser;
