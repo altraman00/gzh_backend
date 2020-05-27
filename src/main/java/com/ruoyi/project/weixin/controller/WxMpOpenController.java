@@ -273,6 +273,24 @@ public class WxMpOpenController extends BaseController {
 
 
 
+    @ApiOperation("根据场景值获取指定appid的对应活动的配置项")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "sceneKeys", value = "配置场景值,可从控制台查看获取，支持逗号分隔多个一次获取", dataType = "String",required = true),
+            @ApiImplicitParam(name = "templateAlias", value = "每个活动模板会固定一个别名,可找后端开发老师获取", required = true, paramType = "String"),
+            @ApiImplicitParam(name = "appid", value = "当前应用的appid", required = false, paramType = "String")
+    })
+    @GetMapping("/activity/template/msg/custom")
+    public AjaxResult getMpActivityMessageByCustom(String sceneKeys,String templateAlias,String appid){
+        log.debug("get activity template message by custom : {},{},{}",appid,templateAlias,sceneKeys);
+        WxActivityTemplate template = wxActivityTemplateService.findActivityTemplateByAlias(templateAlias);
+        if(template != null){
+            log.debug("found template : {} with alias : {}",template.getTemplateName(),templateAlias);
+            String[] keys = sceneKeys.split(",");
+            Map<String,WxMpActivityTemplateMessage> result = wxMpActivityTemplateMessageService.findActivityTemplateMessages(appid,template.getId(),keys);
+            return AjaxResult.success("OK",result);
+        }
+        return AjaxResult.success();
+    }
 
 
 
