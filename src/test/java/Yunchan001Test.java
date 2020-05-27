@@ -1,6 +1,8 @@
 import com.ruoyi.RuoYiApplication;
 import com.ruoyi.project.activities.yunchan.yunchan001.entity.WxMpYunchan001HelpUserStatus;
+import com.ruoyi.project.activities.yunchan.yunchan001.entity.WxMpYunchan001UserStatus;
 import com.ruoyi.project.activities.yunchan.yunchan001.service.IWxMpYunchan001HelpUserStatusService;
+import com.ruoyi.project.activities.yunchan.yunchan001.service.IWxMpYunchan001UserStatusService;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.entity.WxActivityTask;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
@@ -29,12 +31,35 @@ public class Yunchan001Test {
     @Autowired
     private IWxMpYunchan001HelpUserStatusService wxMpYunchan001HelpUserStatusService;
 
+    @Autowired
+    private IWxMpYunchan001UserStatusService userStatusService;
+
     @Test
     public void testFind(){
         List<WxMpYunchan001HelpUserStatus> result = wxMpYunchan001HelpUserStatusService.list();
 
         Assert.assertNotNull(result);
         Assert.assertTrue(result.size()>0);
+    }
+
+    @Test
+    public void testFindFirstStage(){
+        WxMpYunchan001UserStatus result = userStatusService.findUserStatusByOpenId("123456");
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result.getWxuserId().equals("11112222"));
+    }
+
+    @Test
+    public void testUnlockFirstStage(){
+        WxMpYunchan001UserStatus result = userStatusService.findUserStatusByOpenId("123456");
+
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result.getFirstStageStatus().equals(WxMpYunchan001UserStatus.LOCK_STATUS_LOCKED));
+        userStatusService.unlockFirstStage("123456");
+        WxMpYunchan001UserStatus result02 = userStatusService.findUserStatusByOpenId("123456");
+        Assert.assertNotNull(result02);
+        Assert.assertTrue(result02.getFirstStageStatus().equals(WxMpYunchan001UserStatus.LOCK_STATUS_UNLOCK));
+
     }
 
 }

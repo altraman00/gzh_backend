@@ -20,6 +20,10 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 public class WxMpYunchan001UserStatus extends BaseEntity {
 
+    public static final Integer LOCK_STATUS_LOCKED = 1;
+
+    public static final Integer LOCK_STATUS_UNLOCK = 0;
+
     private static final long serialVersionUID = 1L;
 
     private String appId;
@@ -35,7 +39,7 @@ public class WxMpYunchan001UserStatus extends BaseEntity {
     private String openId;
 
     /**
-     * 第一阶段的解锁状态
+     * 第一阶段的解锁状态，0:未解锁，1:已解锁
      */
     private Integer firstStageStatus;
 
@@ -45,7 +49,7 @@ public class WxMpYunchan001UserStatus extends BaseEntity {
     private LocalDateTime firstStageUnlockTime;
 
     /**
-     * 第二阶段的解锁状态
+     * 第二阶段的解锁状态，0:未解锁，1:已解锁
      */
     private Integer secondStageStatus;
 

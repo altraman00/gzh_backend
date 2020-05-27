@@ -55,6 +55,12 @@ spring:
                 wall:
                     config:
                         multi-statement-allow: true
+
+#MONGODB
+    data:
+        mongodb:
+            uri: mongodb://gzh_user:123456@111.230.70.125:27017/db_feo_gzh
+
 # 公众号配置
 # zhangbin
 wx:
