@@ -130,3 +130,10 @@ gen:
   autoRemovePre: false
   # 表前缀（生成类名不会包含表前缀，多个用逗号分隔）
   tablePrefix: sys_
+
+
+# h5相关的小活动的jwt配置
+h5:
+  jwt:
+    secret: gzh_activities
+    expiration: 21600000

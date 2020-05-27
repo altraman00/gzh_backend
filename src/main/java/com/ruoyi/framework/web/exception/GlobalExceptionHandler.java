@@ -1,5 +1,8 @@
 package com.ruoyi.framework.web.exception;
 
+import com.ruoyi.project.common.BaseResponse;
+import com.ruoyi.project.common.ResultCode;
+import com.ruoyi.project.weixin.utils.JSONUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -17,9 +20,11 @@ import com.ruoyi.common.exception.DemoModeException;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.domain.AjaxResult;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * 全局异常处理器
- * 
+ *
  * @author ruoyi
  */
 @RestControllerAdvice
@@ -114,4 +119,21 @@ public class GlobalExceptionHandler
     {
         return AjaxResult.error("演示模式，不允许操作");
     }
+
+
+    /**
+     * 自定义全局异常消息提示
+     * @param request
+     * @param exception
+     * @return
+     */
+    @ExceptionHandler(GlobalException.class)
+    public BaseResponse<?> handleGlobalException(HttpServletRequest request, GlobalException exception) {
+        log.error(String.format("【handleGlobalException】: Message: %s, InternalMessage:%s, Data:%s"
+                , exception.getMessage(), exception.getMsg(), JSONUtils.objectToJson(exception.getData())), exception);
+        Integer code = exception.getCode();
+        ResultCode byCode = ResultCode.getByCode(code);
+        return new BaseResponse<>(byCode.getCode(),byCode.getMsg());
+    }
+
 }
