@@ -3,13 +3,13 @@ package com.ruoyi.project.activities.yunchan.yunchan001;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.project.activities.yunchan.yunchan001.service.Yunchan001ActivityHelpHandleService;
 import com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant;
 import com.ruoyi.project.weixin.entity.WxMp;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
 import com.ruoyi.project.weixin.entity.WxUser;
 import com.ruoyi.project.weixin.mapper.WxUserMapper;
-import com.ruoyi.project.weixin.server.WxSendMsgServer;
 import com.ruoyi.project.weixin.service.ActivityService;
 import com.ruoyi.project.weixin.service.IWxMpActivityTemplateMessageService;
 import com.ruoyi.project.weixin.utils.SpringContextUtils;
@@ -30,6 +30,13 @@ import java.util.List;
  * @Create Date : 2020年05月25日 16:17
  * @ModificationHistory Who   When     What
  * ------------    --------------    ---------------------------------
+ * 活动流程：
+ * 1.关注事件：
+ * -> 欢迎关注公众号，一站式孕产课程免费看点击XXX去参加活动吧！ <活动首页>
+ * -> 如果有助力动作，则推送助力消息：您帮助您的好友？获取免费课程出了一份力，您也可以分享海报参加活动，免费学习孕产知识哟！！，点击《》参加活动
+ *
+ *
+ *
  */
 
 @Component
@@ -42,7 +49,7 @@ public class Yunchan001ActivityServiceImpl implements ActivityService {
 
     private final WxUserMapper wxUserMapper;
 
-    private final Yunchan001ActivityHelpHandleServer yunchan001ActivityHelpHandleServer;
+    private final Yunchan001ActivityHelpHandleService yunchan001ActivityHelpHandleServer;
 
     @Override
     public String getActivityAliasName() {

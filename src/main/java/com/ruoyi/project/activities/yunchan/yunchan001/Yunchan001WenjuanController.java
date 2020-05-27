@@ -7,7 +7,6 @@ import com.ruoyi.project.activities.yunchan.yunchan001.entity.WxMpYunchan001User
 import com.ruoyi.project.activities.yunchan.yunchan001.service.IWxMpYunchan001UserStatusService;
 import com.ruoyi.project.activities.yunchan.yunchan001.vo.WenjuanVO;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
