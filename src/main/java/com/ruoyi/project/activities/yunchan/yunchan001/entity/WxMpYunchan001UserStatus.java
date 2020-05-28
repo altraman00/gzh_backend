@@ -20,9 +20,9 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 public class WxMpYunchan001UserStatus extends BaseEntity {
 
-    public static final Integer LOCK_STATUS_LOCKED = 1;
+    public static final Integer LOCK_STATUS_LOCKED = 0; //未解锁
 
-    public static final Integer LOCK_STATUS_UNLOCK = 0;
+    public static final Integer LOCK_STATUS_UNLOCK = 1; //已解锁
 
     private static final long serialVersionUID = 1L;
 
