@@ -1,15 +1,11 @@
 package com.ruoyi.project.activities.yunchan.yunchan001;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.project.activities.yunchan.yunchan001.service.Yunchan001ActivityHelpHandleService;
 import com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant;
 import com.ruoyi.project.weixin.entity.WxMp;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
 import com.ruoyi.project.weixin.entity.WxUser;
-import com.ruoyi.project.weixin.mapper.WxUserMapper;
 import com.ruoyi.project.weixin.server.WxSendMsgServer;
 import com.ruoyi.project.weixin.service.ActivityService;
 import com.ruoyi.project.weixin.service.IWxMpActivityTemplateMessageService;
@@ -22,7 +18,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Map;
 
 import static com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant.SCENE_HELP_WELCOME;
