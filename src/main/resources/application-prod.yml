@@ -55,6 +55,10 @@ spring:
                 wall:
                     config:
                         multi-statement-allow: true
+    #MONGODB
+    data:
+        mongodb:
+            uri: mongodb://gzh_user:123456@192.168.0.3:27017/db_feo_gzh
 # 公众号配置
 # 尚学堂
 wx:
