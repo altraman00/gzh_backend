@@ -142,7 +142,7 @@ CREATE TABLE `wx_mp_user_activity_behavior` (
   `id` char(32) NOT NULL,
   `open_id` varchar(64) DEFAULT NULL,
   `page_url` varchar(255) DEFAULT NULL,
-  `scene` varchar(500) DEFAULT NULL COMMENT '场景：进入活动页:entry_index；分享助力海报:share_poster；开始问卷:wenjuan_start；提交问卷:wenjuan_commit；查看好友助力状态:check_help_status；关注公众号:subcribe_vipcn；关注助教:subcribe_teacher',
+  `scene` varchar(500) DEFAULT NULL COMMENT '场景：进入活动页:entry_index；分享助力海报:share_poster；开始问卷:wenjuan_start；提交问卷:wenjuan_commit；助力跟踪页:help_status；关注公众号:subcribe_vipcn；关注助教:subcribe_teacher',
   `activity_name` varchar(255) DEFAULT NULL COMMENT '活动名称',
   `app_id` varchar(64) DEFAULT NULL,
   `del_flag` char(2) CHARACTER SET utf8 DEFAULT '0' COMMENT '逻辑删除标记（0：未删除；1：删除）',
