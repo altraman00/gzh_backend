@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
+import static com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant.SCENE_HELP_WELCOME;
+
 /**
  * @Project : gzh_backend
  * @Package Name : com.ruoyi.project.activities.yunchan
@@ -50,8 +52,6 @@ public class Yunchan001ActivityServiceImpl implements ActivityService {
 
     private final IWxMpActivityTemplateMessageService wxMpActivityTemplateMessageService;
 
-    private final WxUserMapper wxUserMapper;
-
     private final WxSendMsgServer wxSendMsgServer;
 
     private WxUserService wxUserService;
@@ -75,8 +75,7 @@ public class Yunchan001ActivityServiceImpl implements ActivityService {
     public void subscrib(WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplate template, String openId) {
 //        log.info("【yunchan001Subscrib】subscrib event inMessage:[{}],wxMp:[{}],template[{}],openId[{}]", inMessage, wxMp, template, openId);
 //        String eventKey = inMessage.getEventKey();
-        String appId = wxMp.getAppId();
-        String templateId = template.getTemplateId();
+
 //        QueryWrapper<WxMpActivityTemplateMessage> queryWrapper = new QueryWrapper<>();
 //        queryWrapper.lambda()
 //                .eq(WxMpActivityTemplateMessage::getAppId, appId)
@@ -109,12 +108,21 @@ public class Yunchan001ActivityServiceImpl implements ActivityService {
 //            }
 //
 //        }
-        Map<String,WxMpActivityTemplateMessage> messages = wxMpActivityTemplateMessageService.findActivityTemplateMessages(appId,templateId,new String[]{"help_welcome"});
+
+        String appId = wxMp.getAppId();
+        String templateId = template.getTemplateId();
+
         WxUser wxUser = wxUserService.findWxUserByOpenid(openId);
 
+        //获取助力活动的所有配置项
+        Map<String,WxMpActivityTemplateMessage> messages = wxMpActivityTemplateMessageService.findActivityTemplateMessages(appId,templateId);
+
         //发送欢迎语
-        WxMpActivityTemplateMessage welcomeTemplate = messages.get("help_welcome");
+        WxMpActivityTemplateMessage welcomeTemplate = messages.get(SCENE_HELP_WELCOME);
         wxSendMsgServer.sendTextMessage(welcomeTemplate.getRepContent(),wxUser);
+
+        //执行助力活动相关逻辑
+        yunchan001ActivityHelpHandleServer.activityHelp(inMessage,openId,appId,templateId,messages);
     }
 
 
