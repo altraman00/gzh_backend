@@ -42,8 +42,9 @@ public class Yunchan001WenjuanController {
         WxMpYunchan001UserStatus userStatus = userStatusService.findUserStatusByOpenId(openid);
         //只有锁定状态的可以提交问卷，提交以后解锁第一阶段状态
         if(userStatus.getFirstStageStatus().equals(WxMpYunchan001UserStatus.LOCK_STATUS_LOCKED)){
-            answer.put("openid",openid);
-            mongoTemplate.insert(answer, MONGO_COLLECTION_YUNCHAN_001_WENJUAN);
+            JSONObject root = (JSONObject) answer.get("answer");
+            root.put("openid",openid);
+            mongoTemplate.insert(root, MONGO_COLLECTION_YUNCHAN_001_WENJUAN);
             //解锁第一阶段
             userStatusService.unlockFirstStage(openid);
             return AjaxResult.success();
