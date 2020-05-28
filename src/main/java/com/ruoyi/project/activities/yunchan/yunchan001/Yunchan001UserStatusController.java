@@ -101,19 +101,14 @@ public class Yunchan001UserStatusController extends BaseController {
 
 
     @ApiOperation("获取助力老师的微信二维码")
-    @ApiImplicitParam(name = "appId", value = "appId", required = true, paramType = "String")
     @GetMapping("/teacher")
     public BaseResponse<Map<String,String>> getUserAssistanceTeacher(
              @CurrentUser SysUserInfo sysUserInfo
-            ,@RequestParam(value = "appId") String appId
     ) {
-
         String openId = sysUserInfo.getOpenId();
         WxMpYunchan001UserStatus userStatus =wxMpYunchan001UserStatusService.findUserStatusByOpenId(openId);
-
         Map<String,String> resMap = new HashMap<>();
         resMap.put("aidTeacherQrcode",userStatus.getAidTeacherQrcode());
-
         return new BaseResponse<>(ResultCode.SUCCESS, resMap);
     }
 
