@@ -71,7 +71,6 @@ public class Yunchan001HelpController {
               @CurrentUser SysUserInfo sysUserInfo
             , @RequestParam(value = "appId") String appId){
 
-        WxUser wxUser = wxUserService.getByOpenIdAndAppId(sysUserInfo.getOpenId());
         String openId = sysUserInfo.getOpenId();
         //查询助力海报的消息模版
         WxMpActivityTemplateMessage message = wxMpActivityTemplateMessageService.findMpTemplateMessage(appId
@@ -82,18 +81,10 @@ public class Yunchan001HelpController {
         String posterBase64 = null;
         if (hasAvailableMessage) {
             Map<String,Object> result = new HashMap<>(4);
-            StopWatch stopWatch = new StopWatch();
-            stopWatch.start("create poster");
             //公众号二维码的场景参数
-            String wxMpQrParams = YunChan001Constant.MP_QRCODE_ACTIVITY_SCENE_EVENT_KEY + openId;
-            //qrCodeUrl为null时，生成的是公众号的二维码
             File poster = wxSendMsgServer.getPosterFile(openId, message, appId);
-            stopWatch.stop();
             try {
-                stopWatch.start("encode base64");
                 posterBase64 = Base64.encodeBase64String(FileUtils.readFileToByteArray(poster));
-                stopWatch.stop();
-                log.info(stopWatch.prettyPrint());
             } catch (IOException e) {
                 log.error("将海报文件编码成base64异常",e);
             } finally {
