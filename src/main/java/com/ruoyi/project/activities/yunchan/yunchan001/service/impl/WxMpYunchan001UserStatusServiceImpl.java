@@ -57,7 +57,7 @@ private IWxMpActivityTemplateMessageService wxMpActivityTemplateMessageService;
             //判断用户是否存在，不存在则创建用户
 
             //查询老师二维码的的list
-            Map<String,WxMpActivityTemplateMessage> mpTemplateMessageMap = wxMpActivityTemplateMessageService.findActivityTemplateMessages(wxUser.getAppId(),YunChan001Constant.ACTIVITY_ALIAS_NAME,new String[]{SCENE_AIDE_TEACHER_QRCODE});
+            Map<String,WxMpActivityTemplateMessage> mpTemplateMessageMap = wxMpActivityTemplateMessageService.findActivityTemplateMessagesByTemplateAlias(wxUser.getAppId(),YunChan001Constant.ACTIVITY_ALIAS_NAME,new String[]{SCENE_AIDE_TEACHER_QRCODE});
             WxMpActivityTemplateMessage mpTemplateMessage = mpTemplateMessageMap.get(YunChan001Constant.ACTIVITY_ALIAS_NAME);
 
             List<String> strings = Arrays.asList(mpTemplateMessage.getRepContent().split(","));
