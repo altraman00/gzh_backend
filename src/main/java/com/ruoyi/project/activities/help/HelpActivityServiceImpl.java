@@ -43,11 +43,6 @@ public class HelpActivityServiceImpl implements ActivityService {
 
 
     @Override
-    public String getActivityAliasName() {
-        return HelpActivityConstant.SCENE_EVENT_KEY;
-    }
-
-    @Override
     public String getActivityServiceImplClassName() {
         String classFullName = this.getClass().getName();
         return SpringContextUtils.getCurrentClassName(classFullName);

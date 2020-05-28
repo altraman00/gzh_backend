@@ -41,15 +41,6 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
 
     @Value("${sunlands.diabetes-testing.url}")
     private String sunlandsDiabetesUrl;
-    @Override
-    public String getActivityAliasName() {
-        return DiabetesConstant.ACTIVITY_ALIAS_NAME;
-    }
-    /**
-     * 用于微信带参二维码的活动标识
-     */
-    String SCENE_EVENT_KEY_DIABETES_TEST_H5 = "diabetes_test_h5";
-
 
     @Override
     public String getActivityServiceImplClassName() {

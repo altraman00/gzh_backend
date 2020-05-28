@@ -84,14 +84,6 @@ public class WxMpActivityTemplateServiceImpl extends ServiceImpl<WxMpActivityTem
 
         return null;
     }
-//
-//    @Override
-//    public WxMpActivityTemplate findActivityTemplateByAppIdAndClassName(String appId, String activityClassName) {
-//        WxMpActivityTemplate wxMpActivityTemplate = wxMpActivityTemplateMapper.selectOne(Wrappers.<WxMpActivityTemplate>lambdaQuery()
-//                .eq(WxMpActivityTemplate::getAppId, appId)
-//                .eq(WxMpActivityTemplate::getTemplateClass, activityClassName));
-//        return wxMpActivityTemplate;
-//    }
 
     @Override
     public WxMpActivityTemplate findActivityTemplateByAppIdAndTemplateId(String appId, String templateId) {

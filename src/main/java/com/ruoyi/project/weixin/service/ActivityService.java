@@ -7,12 +7,6 @@ import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 public interface ActivityService {
 
     /**
-     * 获取当前活动的别名，用于在公众号二维码中带场景值
-     * @return
-     */
-    String getActivityAliasName();
-
-    /**
      * 获取当前实现类的类名
      * @return
      */

@@ -54,11 +54,6 @@ public class Yunchan001HelpController {
     @Autowired
     private WxSendMsgServer wxSendMsgServer;
 
-    private WxUserService wxUserService;
-
-    @Autowired
-    private Yunchan001ActivityServiceImpl yunchan001ActivityService;
-
     @Autowired
     private IWxMpActivityTemplateMessageService wxMpActivityTemplateMessageService;
 
@@ -73,9 +68,7 @@ public class Yunchan001HelpController {
 
         String openId = sysUserInfo.getOpenId();
         //查询助力海报的消息模版
-        WxMpActivityTemplateMessage message = wxMpActivityTemplateMessageService.findMpTemplateMessage(appId
-                , yunchan001ActivityService.getActivityServiceImplClassName()
-                , YunChan001Constant.SCENE_ACTIVITY_POSTER);
+        WxMpActivityTemplateMessage message = wxMpActivityTemplateMessageService.findOneActivityTemplateMessageByTemplateAlias(appId,YunChan001Constant.ACTIVITY_ALIAS_NAME,YunChan001Constant.SCENE_ACTIVITY_POSTER);
 
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent()) && StringUtils.isNotBlank(message.getRepMediaId());
         String posterBase64 = null;

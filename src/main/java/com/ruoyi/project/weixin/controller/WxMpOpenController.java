@@ -286,7 +286,7 @@ public class WxMpOpenController extends BaseController {
         if(template != null){
             log.debug("found template : {} with alias : {}",template.getTemplateName(),templateAlias);
             String[] keys = sceneKeys.split(",");
-            Map<String,WxMpActivityTemplateMessage> result = wxMpActivityTemplateMessageService.findActivityTemplateMessages(appid,template.getId(),keys);
+            Map<String,WxMpActivityTemplateMessage> result = wxMpActivityTemplateMessageService.findEnabledActivityTemplateMessages(appid,template.getId(),keys);
             return AjaxResult.success("OK",result);
         }
         return AjaxResult.success();

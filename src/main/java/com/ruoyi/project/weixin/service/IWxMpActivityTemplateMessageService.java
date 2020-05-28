@@ -23,32 +23,13 @@ public interface IWxMpActivityTemplateMessageService extends IService<WxMpActivi
 
 
     /**
-     * 根据appid，活动实现类查找模版中的全部消息
-     * @param appId
-     * @param activityClassName
-     * @return
-     */
-    List<WxMpActivityTemplateMessage> getMpTemplateMessage(String appId,String activityClassName);
-
-
-    /**
-     * 根据appid，活动实现类，和场景值查找活动消息
-     * @param appId
-     * @param activityClassName
-     * @param scene
-     * @return
-     */
-    WxMpActivityTemplateMessage findMpTemplateMessage(String appId,String activityClassName,String scene);
-
-
-    /**
      * 根据appid
      * @param appId
      * @param templateId
      * @param strings
      * @return
      */
-    Map<String, WxMpActivityTemplateMessage> findActivityTemplateMessages(String appId, String templateId, String[] strings);
+    Map<String, WxMpActivityTemplateMessage> findEnabledActivityTemplateMessages(String appId, String templateId, String[] strings);
 
 
     /**
@@ -57,7 +38,7 @@ public interface IWxMpActivityTemplateMessageService extends IService<WxMpActivi
      * @param templateId
      * @return
      */
-    Map<String, WxMpActivityTemplateMessage> findActivityTemplateMessages(String appId, String templateId);
+    Map<String, WxMpActivityTemplateMessage> findEnabledActivityTemplateMessages(String appId, String templateId);
 
 
     /**
@@ -70,4 +51,12 @@ public interface IWxMpActivityTemplateMessageService extends IService<WxMpActivi
     Map<String, WxMpActivityTemplateMessage> findActivityTemplateMessagesByTemplateAlias(String appId, String templateAlias, String[] strings);
 
 
+    /**
+     * 根据模板别名和配置项的场景值获取对应的配置项
+     * @param appId
+     * @param activityAliasName
+     * @param sceneKey
+     * @return
+     */
+    WxMpActivityTemplateMessage findOneActivityTemplateMessageByTemplateAlias(String appId, String activityAliasName, String sceneKey);
 }

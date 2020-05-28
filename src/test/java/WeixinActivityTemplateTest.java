@@ -1,11 +1,6 @@
 import com.ruoyi.RuoYiApplication;
-import com.ruoyi.project.weixin.constant.ConfigConstant;
-import com.ruoyi.project.weixin.entity.WxActivityTask;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
-import com.ruoyi.project.weixin.schedule.SchedulingRunnable;
-import com.ruoyi.project.weixin.schedule.config.CronTaskRegistrar;
-import com.ruoyi.project.weixin.service.IWxActivityTaskService;
 import com.ruoyi.project.weixin.service.IWxMpActivityTemplateMessageService;
 import com.ruoyi.project.weixin.service.IWxMpActivityTemplateService;
 import org.junit.Assert;
@@ -51,7 +46,7 @@ public class WeixinActivityTemplateTest {
 
     @Test
     public void testFindActivityTemplateMessage(){
-        Map<String, WxMpActivityTemplateMessage> result = wxMpActivityTemplateMessageService.findActivityTemplateMessages("wxd3fc86ade86ec00d","4",new String[]{"activity_rule","has_complete","activity_poster"});
+        Map<String, WxMpActivityTemplateMessage> result = wxMpActivityTemplateMessageService.findEnabledActivityTemplateMessages("wxd3fc86ade86ec00d","4",new String[]{"activity_rule","has_complete","activity_poster"});
         Assert.assertNotNull(result);
         Assert.assertTrue(result.size() == 3);
         WxMpActivityTemplateMessage templateMessage = result.get("has_complete");

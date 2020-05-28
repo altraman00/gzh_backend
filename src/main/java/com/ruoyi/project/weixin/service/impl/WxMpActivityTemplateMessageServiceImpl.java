@@ -75,36 +75,36 @@ public class WxMpActivityTemplateMessageServiceImpl extends ServiceImpl<WxMpActi
         }
     }
 
+//    @Override
+//    public List<WxMpActivityTemplateMessage> getMpTemplateMessage(String appId, String activityClassName) {
+//
+//        //查找appid绑定的模版
+//        WxMpActivityTemplate wxMpActivityTemplate = iWxMpActivityTemplateService.getOne(Wrappers.<WxMpActivityTemplate>lambdaQuery()
+//                .eq(WxMpActivityTemplate::getAppId, appId)
+//                .eq(WxMpActivityTemplate::getTemplateClass, activityClassName),true);
+//        String templateId = wxMpActivityTemplate.getTemplateId();
+//
+//        //查询appid绑定的模版的所有消息
+//        List<WxMpActivityTemplateMessage> templateMessages = wxMpActivityTemplateMessageMapper.selectList(Wrappers.<WxMpActivityTemplateMessage>lambdaQuery()
+//                .eq(WxMpActivityTemplateMessage::getAppId, appId)
+//                .eq(WxMpActivityTemplateMessage::getTemplateId, templateId)
+//                .eq(WxMpActivityTemplateMessage::getActivityEnable,true)
+//        );
+//
+//        return templateMessages;
+//    }
+////
+//    @Override
+//    public WxMpActivityTemplateMessage findMpTemplateMessage(String appId, String activityClassName, String scene) {
+//        List<WxMpActivityTemplateMessage> templateMessages = getMpTemplateMessage(appId,activityClassName);
+//        WxMpActivityTemplateMessage message = templateMessages.stream()
+//                .filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(scene))
+//                .findFirst().orElse(null);
+//        return message;
+//    }
+
     @Override
-    public List<WxMpActivityTemplateMessage> getMpTemplateMessage(String appId, String activityClassName) {
-
-        //查找appid绑定的模版
-        WxMpActivityTemplate wxMpActivityTemplate = iWxMpActivityTemplateService.getOne(Wrappers.<WxMpActivityTemplate>lambdaQuery()
-                .eq(WxMpActivityTemplate::getAppId, appId)
-                .eq(WxMpActivityTemplate::getTemplateClass, activityClassName),true);
-        String templateId = wxMpActivityTemplate.getTemplateId();
-
-        //查询appid绑定的模版的所有消息
-        List<WxMpActivityTemplateMessage> templateMessages = wxMpActivityTemplateMessageMapper.selectList(Wrappers.<WxMpActivityTemplateMessage>lambdaQuery()
-                .eq(WxMpActivityTemplateMessage::getAppId, appId)
-                .eq(WxMpActivityTemplateMessage::getTemplateId, templateId)
-                .eq(WxMpActivityTemplateMessage::getActivityEnable,true)
-        );
-
-        return templateMessages;
-    }
-
-    @Override
-    public WxMpActivityTemplateMessage findMpTemplateMessage(String appId, String activityClassName, String scene) {
-        List<WxMpActivityTemplateMessage> templateMessages = getMpTemplateMessage(appId,activityClassName);
-        WxMpActivityTemplateMessage message = templateMessages.stream()
-                .filter(wxMpTemplateMessage -> wxMpTemplateMessage.getScene().equals(scene))
-                .findFirst().orElse(null);
-        return message;
-    }
-
-    @Override
-    public Map<String, WxMpActivityTemplateMessage> findActivityTemplateMessages(String appId, String templateId, String ... keys) {
+    public Map<String, WxMpActivityTemplateMessage> findEnabledActivityTemplateMessages(String appId, String templateId, String ... keys) {
         //查询appid绑定的模版的所有消息
         List<WxMpActivityTemplateMessage> templateMessages = wxMpActivityTemplateMessageMapper.selectList(Wrappers.<WxMpActivityTemplateMessage>lambdaQuery()
                 .eq(WxMpActivityTemplateMessage::getAppId, appId)
@@ -120,7 +120,7 @@ public class WxMpActivityTemplateMessageServiceImpl extends ServiceImpl<WxMpActi
     }
 
     @Override
-    public Map<String, WxMpActivityTemplateMessage> findActivityTemplateMessages(String appId, String templateId) {
+    public Map<String, WxMpActivityTemplateMessage> findEnabledActivityTemplateMessages(String appId, String templateId) {
         //查询appid绑定的模版的所有消息
         List<WxMpActivityTemplateMessage> templateMessages = wxMpActivityTemplateMessageMapper.selectList(Wrappers.<WxMpActivityTemplateMessage>lambdaQuery()
                         .eq(WxMpActivityTemplateMessage::getAppId, appId)
@@ -136,10 +136,20 @@ public class WxMpActivityTemplateMessageServiceImpl extends ServiceImpl<WxMpActi
 
         WxMpActivityTemplate wxMpActivityTemplate = iWxMpActivityTemplateService.findActivityTemplateByAppIdAndAlias(appId,templateAlias);
         if(wxMpActivityTemplate != null){
-            return this.findActivityTemplateMessages(appId,wxMpActivityTemplate.getTemplateId(),keys);
+            return this.findEnabledActivityTemplateMessages(appId,wxMpActivityTemplate.getTemplateId(),keys);
 
         }
 
         return null;
+    }
+
+    @Override
+    public WxMpActivityTemplateMessage findOneActivityTemplateMessageByTemplateAlias(String appId, String activityAliasName, String sceneKey) {
+        WxMpActivityTemplate wxMpActivityTemplate = iWxMpActivityTemplateService.findActivityTemplateByAppIdAndAlias(appId,activityAliasName);
+        return wxMpActivityTemplateMessageMapper.selectOne(Wrappers.<WxMpActivityTemplateMessage>lambdaQuery()
+                .eq(WxMpActivityTemplateMessage::getAppId, appId)
+                .eq(WxMpActivityTemplateMessage::getActivityEnable, true)
+                .eq(WxMpActivityTemplateMessage::getScene,sceneKey)
+                .eq(WxMpActivityTemplateMessage::getTemplateId, wxMpActivityTemplate.getTemplateId()));
     }
 }

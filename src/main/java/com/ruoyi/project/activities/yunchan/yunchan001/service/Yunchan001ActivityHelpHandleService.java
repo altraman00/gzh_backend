@@ -55,7 +55,6 @@ public class Yunchan001ActivityHelpHandleService {
 
     private final WxSendMsgServer wxSendMsgServer;
 
-    private final IWxMpActivityTemplateMessageService wxMpActivityTemplateMessageService;
     private final IWxMpActivityTemplateService wxMpActivityTemplateService;
 
 
@@ -75,7 +74,6 @@ public class Yunchan001ActivityHelpHandleService {
             return;
         }
         log.debug("found inviter user : {}-{}",inviterUser.getOpenId(),inviterUser.getNickName());
-
 
         // 不是自己扫自己的码进入的
         if (!inviterUser.equals(currentUser.getId())) {
