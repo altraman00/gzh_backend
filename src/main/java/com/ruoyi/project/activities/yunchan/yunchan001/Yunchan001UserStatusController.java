@@ -83,6 +83,10 @@ public class Yunchan001UserStatusController extends BaseController {
         //创建用户
         WxUser simpleWxUser = wxUserService.createSimpleWxUser(appId, openId, parentOpenid);
 
+        //第一次登录时初始化用户状态
+        WxMpYunchan001UserStatus userStatus = wxMpYunchan001UserStatusService.initUserStatus(openId);
+
+
         //生成token
         SysUserInfo userInfo = SysUserInfo.builder()
                 .id(simpleWxUser.getId())
@@ -106,28 +110,8 @@ public class Yunchan001UserStatusController extends BaseController {
     ) {
 
         String openId = sysUserInfo.getOpenId();
-        WxMpYunchan001UserStatus userStatus = wxMpYunchan001UserStatusService.getOne(Wrappers.<WxMpYunchan001UserStatus>lambdaQuery()
-                .eq(WxMpYunchan001UserStatus::getOpenId, openId), false);
+        WxMpYunchan001UserStatus userStatus =wxMpYunchan001UserStatusService.findUserStatusByOpenId(openId);
 
-        if (userStatus == null) {
-            //判断用户是否存在，不存在则创建用户
-            WxUser simpleWxUser = wxUserService.createSimpleWxUser(appId, openId, "");
-
-            //查询老师二维码的的list
-            WxMpActivityTemplateMessage mpTemplateMessage = wxMpActivityTemplateMessageService.findMpTemplateMessage(appId
-                    , yunchan001ActivityService.getActivityServiceImplClassName()
-                    , YunChan001Constant.SCENE_AIDE_TEACHER_QRCODE);
-
-            List<String> strings = Arrays.asList(mpTemplateMessage.getRepContent().split(","));
-            int random = new Random().nextInt(strings.size());
-            String aideTeacherQrcode = strings.get(random);
-            userStatus = new WxMpYunchan001UserStatus();
-            userStatus.setAidTeacherQrcode(aideTeacherQrcode);
-            userStatus.setAppId(appId);
-            userStatus.setOpenId(openId);
-            userStatus.setWxuserId(simpleWxUser.getId());
-            wxMpYunchan001UserStatusService.save(userStatus);
-        }
         Map<String,String> resMap = new HashMap<>();
         resMap.put("aidTeacherQrcode",userStatus.getAidTeacherQrcode());
 

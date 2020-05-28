@@ -292,6 +292,4 @@ public class WxMpOpenController extends BaseController {
         return AjaxResult.success();
     }
 
-
-
 }

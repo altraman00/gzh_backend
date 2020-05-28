@@ -25,4 +25,6 @@ public interface IWxMpYunchan001UserStatusService extends IService<WxMpYunchan00
      * @param openid
      */
     void unlockFirstStage(String openid);
+
+    WxMpYunchan001UserStatus initUserStatus(String openId);
 }
