@@ -42,11 +42,22 @@ public interface IWxMpActivityTemplateMessageService extends IService<WxMpActivi
 
 
     /**
-     * 根据appid 
+     * 根据appid
      * @param appId
      * @param templateId
      * @param strings
      * @return
      */
     Map<String, WxMpActivityTemplateMessage> findActivityTemplateMessages(String appId, String templateId, String[] strings);
+
+    /**
+     * 根据appid
+     * @param appId
+     * @param templateAlias
+     * @param strings
+     * @return
+     */
+    Map<String, WxMpActivityTemplateMessage> findActivityTemplateMessagesByTemplateAlias(String appId, String templateAlias, String[] strings);
+
+
 }
