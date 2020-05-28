@@ -69,6 +69,7 @@ public class WxMpActivityTemplateServiceImpl extends ServiceImpl<WxMpActivityTem
     public WxMpActivityTemplate getFirstAvalibleTemplate(String appId) {
         WxMpActivityTemplate x = this.getOne(Wrappers.<WxMpActivityTemplate>lambdaQuery()
                 .eq(WxMpActivityTemplate::getAppId,appId)
+                .eq(WxMpActivityTemplate::isActivityEnable,true)
                 .orderByAsc(WxMpActivityTemplate::getSortNo).last("limit 0,1"),false);
         return x;
     }
