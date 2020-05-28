@@ -2,8 +2,8 @@ package com.ruoyi.project.activities.yunchan.yunchan001;
 
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.google.common.collect.Lists;
 import com.ruoyi.framework.web.controller.BaseController;
-import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.activities.security.annotation.ApiH5;
 import com.ruoyi.project.activities.security.annotation.CurrentUser;
 import com.ruoyi.project.activities.security.entity.SysUserInfo;
@@ -14,12 +14,10 @@ import com.ruoyi.project.common.ResultCode;
 import com.ruoyi.project.weixin.entity.WxUser;
 import com.ruoyi.project.weixin.service.WxUserService;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -56,7 +54,10 @@ public class Yunchan001HelpUserRecordController extends BaseController {
                 .orderByAsc(WxMpYunchan001HelpUserRecord::getCreateTime)
                 .last("limit 0,3"));
         List<String> collect = list.stream().map(t -> t.getHelpWxUserId()).collect(Collectors.toList());
-        List<WxUser> helpUsers = wxUserService.lambdaQuery().in(true,WxUser::getId, collect).list();
+        List<WxUser> helpUsers = Lists.newArrayList();
+        if(collect.size()>0){
+            helpUsers = wxUserService.lambdaQuery().in(true,WxUser::getId, collect).list();
+        }
         return new BaseResponse<>(ResultCode.SUCCESS, helpUsers);
     }
 

@@ -234,7 +234,8 @@ public class WxSendMsgServer {
     public String generatorPosterMpQrcode(String appId,String wxMpQrParams){
         String qrCodePictureUrl = null;
         try {
-            WxMpQrCodeTicket wxMpQrCodeTicket = wxMpService.switchoverTo(appId).getQrcodeService().qrCodeCreateLastTicket(wxMpQrParams);
+            //2592000秒=30天
+            WxMpQrCodeTicket wxMpQrCodeTicket = wxMpService.switchoverTo(appId).getQrcodeService().qrCodeCreateTmpTicket(wxMpQrParams,2592000);
             String ticket = wxMpQrCodeTicket.getTicket();
             File qrCode = wxMpService.switchoverTo(appId).getQrcodeService().qrCodePicture(wxMpQrCodeTicket);
             String path = qrCode.getPath();
