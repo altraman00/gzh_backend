@@ -123,7 +123,8 @@ public class WxMpActivityTemplateMessageServiceImpl extends ServiceImpl<WxMpActi
     public Map<String, WxMpActivityTemplateMessage> findActivityTemplateMessages(String appId, String templateId) {
         //查询appid绑定的模版的所有消息
         List<WxMpActivityTemplateMessage> templateMessages = wxMpActivityTemplateMessageMapper.selectList(Wrappers.<WxMpActivityTemplateMessage>lambdaQuery()
-                .eq(WxMpActivityTemplateMessage::getAppId, appId)
+                        .eq(WxMpActivityTemplateMessage::getAppId, appId)
+                        .eq(WxMpActivityTemplateMessage::getActivityEnable, true)
                 .eq(WxMpActivityTemplateMessage::getTemplateId, templateId)
                 );
         Map<String, WxMpActivityTemplateMessage> result = templateMessages.stream().collect(Collectors.toMap(WxMpActivityTemplateMessage::getScene,d->d,(oldValue, newValue)->newValue));
