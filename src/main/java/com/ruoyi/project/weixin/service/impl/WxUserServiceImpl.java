@@ -126,6 +126,8 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
 	public WxUser createWxUser(WxMpUser wxMpUser) {
 		WxUser wxUser = this.getByOpenId(wxMpUser.getOpenId());
 		if(wxUser == null){
+			wxUser = new WxUser();
+			SubscribeHandler.setWxUserValue(wxUser,wxMpUser);
 			this.save(wxUser);
 		}
 		return wxUser;
