@@ -33,7 +33,7 @@ public interface WxUserService extends IService<WxUser> {
 	 */
 	void tagging(String taggingType, Long tagId, String[] openIds, String appId) throws WxErrorException;
 
-	WxUser getByOpenIdAndAppId(String openId, String appId);
+	WxUser getByOpenIdAndAppId(String openId);
 
 	/**
 	 * 简单的创建一个只有openId的微信用户

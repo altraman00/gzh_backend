@@ -50,6 +50,16 @@ public interface IWxMpActivityTemplateMessageService extends IService<WxMpActivi
      */
     Map<String, WxMpActivityTemplateMessage> findActivityTemplateMessages(String appId, String templateId, String[] strings);
 
+
+    /**
+     * 获取指定app下的指定活动的所有配置
+     * @param appId
+     * @param templateId
+     * @return
+     */
+    Map<String, WxMpActivityTemplateMessage> findActivityTemplateMessages(String appId, String templateId);
+
+
     /**
      * 根据appid
      * @param appId

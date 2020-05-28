@@ -203,7 +203,7 @@ public class WxMpOpenController extends BaseController {
         if(wxUser == null || StringUtils.isEmpty(appId) || StringUtils.isEmpty(openId)){
             return AjaxResult.error("wxUser缺少openId或者appId");
         }
-        WxUser byOpenIdAndAppId = wxUserService.getByOpenIdAndAppId(openId, appId);
+        WxUser byOpenIdAndAppId = wxUserService.getByOpenIdAndAppId(openId);
         if(byOpenIdAndAppId == null){
             byOpenIdAndAppId = new WxUser();
             byOpenIdAndAppId.setAppId(appId);

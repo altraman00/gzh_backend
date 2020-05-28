@@ -73,7 +73,7 @@ public class Yunchan001HelpUserRecordController extends BaseController {
         String openId = sysUserInfo.getOpenId();
         WxMp wxMp = iWxMpService.getByAppId(appId);
         if(wxMp != null){
-            WxUser wxuser = wxUserService.getByOpenIdAndAppId(openId, appId);
+            WxUser wxuser = wxUserService.getByOpenIdAndAppId(openId);
 
             //根据别名找模版
             WxMpActivityTemplate wxMpActivityTemplate = iWxMpActivityTemplateService.findActivityTemplateByAppIdAndAlias(appId, YunChan001Constant.ACTIVITY_ALIAS_NAME);

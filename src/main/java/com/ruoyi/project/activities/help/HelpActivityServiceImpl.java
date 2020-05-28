@@ -81,7 +81,7 @@ public class HelpActivityServiceImpl implements ActivityService {
                 inviterOpenId = eventKey.substring(eventKey.lastIndexOf(":") + 1);
             }
 
-            WxUser inviter = wxUserService.getByOpenIdAndAppId(inviterOpenId,appId);
+            WxUser inviter = wxUserService.getByOpenIdAndAppId(inviterOpenId);
             String inviterId = inviter.getId();
             // 不是自己扫自己的码进入的
             if (!inviterId.equals(wxUserId)) {
