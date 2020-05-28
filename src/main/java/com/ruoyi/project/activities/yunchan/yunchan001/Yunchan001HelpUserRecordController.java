@@ -13,8 +13,6 @@ import com.ruoyi.project.activities.yunchan.yunchan001.entity.WxMpYunchan001Help
 import com.ruoyi.project.activities.yunchan.yunchan001.entity.WxMpYunchan001HelpUserStatus;
 import com.ruoyi.project.activities.yunchan.yunchan001.service.IWxMpYunchan001HelpUserRecordService;
 import com.ruoyi.project.activities.yunchan.yunchan001.service.IWxMpYunchan001HelpUserStatusService;
-import com.ruoyi.project.common.BaseResponse;
-import com.ruoyi.project.common.ResultCode;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant;
 import com.ruoyi.project.weixin.dto.HelpInfoDTO;
@@ -73,7 +71,7 @@ public class Yunchan001HelpUserRecordController extends BaseController {
         String openId = sysUserInfo.getOpenId();
         WxMp wxMp = iWxMpService.getByAppId(appId);
         if(wxMp != null){
-            WxUser wxuser = wxUserService.getByOpenIdAndAppId(openId);
+            WxUser wxuser = wxUserService.getByOpenId(openId);
 
             //根据别名找模版
             WxMpActivityTemplate wxMpActivityTemplate = iWxMpActivityTemplateService.findActivityTemplateByAppIdAndAlias(appId, YunChan001Constant.ACTIVITY_ALIAS_NAME);
