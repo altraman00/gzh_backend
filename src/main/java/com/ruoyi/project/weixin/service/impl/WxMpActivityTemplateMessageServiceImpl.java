@@ -118,4 +118,16 @@ public class WxMpActivityTemplateMessageServiceImpl extends ServiceImpl<WxMpActi
         Map<String, WxMpActivityTemplateMessage> result = templateMessages.stream().collect(Collectors.toMap(WxMpActivityTemplateMessage::getScene,d->d,(oldValue, newValue)->newValue));
         return result;
     }
+
+    @Override
+    public Map<String, WxMpActivityTemplateMessage> findActivityTemplateMessagesByTemplateAlias(String appId, String templateAlias, String[] keys) {
+
+        WxMpActivityTemplate wxMpActivityTemplate = iWxMpActivityTemplateService.findActivityTemplateByAppIdAndAlias(appId,templateAlias);
+        if(wxMpActivityTemplate != null){
+            return this.findActivityTemplateMessages(appId,wxMpActivityTemplate.getTemplateId(),keys);
+
+        }
+
+        return null;
+    }
 }

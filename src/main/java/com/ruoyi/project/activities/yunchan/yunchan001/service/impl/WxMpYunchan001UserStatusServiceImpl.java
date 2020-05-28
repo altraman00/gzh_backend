@@ -16,7 +16,10 @@ import java.sql.Wrapper;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+
+import static com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant.SCENE_AIDE_TEACHER_QRCODE;
 
 /**
  * <p>
@@ -54,17 +57,18 @@ private IWxMpActivityTemplateMessageService wxMpActivityTemplateMessageService;
             //判断用户是否存在，不存在则创建用户
 
             //查询老师二维码的的list
-            WxMpActivityTemplateMessage mpTemplateMessage = wxMpActivityTemplateMessageService.findActivityTemplateMessages()
+            Map<String,WxMpActivityTemplateMessage> mpTemplateMessageMap = wxMpActivityTemplateMessageService.findActivityTemplateMessages(wxUser.getAppId(),YunChan001Constant.ACTIVITY_ALIAS_NAME,new String[]{SCENE_AIDE_TEACHER_QRCODE});
+            WxMpActivityTemplateMessage mpTemplateMessage = mpTemplateMessageMap.get(YunChan001Constant.ACTIVITY_ALIAS_NAME);
 
             List<String> strings = Arrays.asList(mpTemplateMessage.getRepContent().split(","));
             int random = new Random().nextInt(strings.size());
             String aideTeacherQrcode = strings.get(random);
             userStatus = new WxMpYunchan001UserStatus();
             userStatus.setAidTeacherQrcode(aideTeacherQrcode);
-            userStatus.setAppId(appId);
-            userStatus.setOpenId(openId);
-            userStatus.setWxuserId(simpleWxUser.getId());
-            wxMpYunchan001UserStatusService.save(userStatus);
+            userStatus.setAppId(wxUser.getAppId());
+            userStatus.setOpenId(wxUser.getOpenId());
+            userStatus.setWxuserId(wxUser.getId());
+            save(userStatus);
         }
         return null;
     }

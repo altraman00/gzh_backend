@@ -2,6 +2,7 @@ package com.ruoyi.project.activities.yunchan.yunchan001.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.project.activities.yunchan.yunchan001.entity.WxMpYunchan001UserStatus;
+import com.ruoyi.project.weixin.entity.WxUser;
 
 /**
  * <p>
@@ -26,5 +27,5 @@ public interface IWxMpYunchan001UserStatusService extends IService<WxMpYunchan00
      */
     void unlockFirstStage(String openid);
 
-    WxMpYunchan001UserStatus initUserStatus(String openId);
+    WxMpYunchan001UserStatus initUserStatus(WxUser wxUser);
 }

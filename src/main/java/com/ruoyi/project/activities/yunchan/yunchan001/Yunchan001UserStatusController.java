@@ -84,8 +84,7 @@ public class Yunchan001UserStatusController extends BaseController {
         WxUser simpleWxUser = wxUserService.createSimpleWxUser(appId, openId, parentOpenid);
 
         //第一次登录时初始化用户状态
-        WxMpYunchan001UserStatus userStatus = wxMpYunchan001UserStatusService.initUserStatus(openId);
-
+        wxMpYunchan001UserStatusService.initUserStatus(simpleWxUser);
 
         //生成token
         SysUserInfo userInfo = SysUserInfo.builder()
