@@ -93,7 +93,7 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
 	}
 
 	@Override
-	public WxUser getByOpenIdAndAppId(String openId) {
+	public WxUser getByOpenId(String openId) {
 		return this.getOne(Wrappers.<WxUser>lambdaQuery()
 				.eq(WxUser::getOpenId,openId),false);
 	}
@@ -107,7 +107,7 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
 	 */
 	@Override
 	public WxUser createSimpleWxUser(String appId, String openId, String parentOpenid) {
-		WxUser byOpenIdAndAppId = this.getByOpenIdAndAppId(openId);
+		WxUser byOpenIdAndAppId = this.getByOpenId(openId);
 		if(byOpenIdAndAppId == null){
 			byOpenIdAndAppId = new WxUser();
 			byOpenIdAndAppId.setAppId(appId);
@@ -120,6 +120,17 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
 			this.save(byOpenIdAndAppId);
 		}
 		return byOpenIdAndAppId;
+	}
+
+	@Override
+	public WxUser createWxUser(WxMpUser wxMpUser) {
+		WxUser wxUser = this.getByOpenId(wxMpUser.getOpenId());
+		if(wxUser == null){
+			wxUser = new WxUser();
+			SubscribeHandler.setWxUserValue(wxUser,wxMpUser);
+			this.save(wxUser);
+		}
+		return wxUser;
 	}
 
 	@Override

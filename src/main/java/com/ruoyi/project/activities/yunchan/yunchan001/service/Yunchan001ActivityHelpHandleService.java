@@ -1,18 +1,13 @@
 package com.ruoyi.project.activities.yunchan.yunchan001.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.project.activities.yunchan.yunchan001.entity.WxMpYunchan001HelpUserRecord;
 import com.ruoyi.project.activities.yunchan.yunchan001.entity.WxMpYunchan001HelpUserStatus;
 import com.ruoyi.project.activities.yunchan.yunchan001.entity.WxMpYunchan001UserStatus;
-import com.ruoyi.project.activities.yunchan.yunchan001.service.IWxMpYunchan001HelpUserRecordService;
-import com.ruoyi.project.activities.yunchan.yunchan001.service.IWxMpYunchan001HelpUserStatusService;
-import com.ruoyi.project.activities.yunchan.yunchan001.service.IWxMpYunchan001UserStatusService;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.constant.HelpActivityConstant;
 import com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant;
-import com.ruoyi.project.weixin.entity.WxMp;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
 import com.ruoyi.project.weixin.entity.WxUser;
@@ -155,7 +150,7 @@ public class Yunchan001ActivityHelpHandleService {
 
         if(StringUtils.isNotEmpty(eventKey) && eventKey.indexOf("@")>=0){
             String inviterOpenId =  eventKey.substring(eventKey.indexOf("@")+1);
-            inviter = wxUserService.getByOpenIdAndAppId(inviterOpenId);
+            inviter = wxUserService.getByOpenId(inviterOpenId);
         }
         return inviter;
     }

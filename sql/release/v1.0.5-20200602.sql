@@ -113,3 +113,48 @@ INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `up
 INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_id`, `rep_type`, `rep_content`, `rep_media_id`, `rep_url`, `title`, `scene`, `avatar_coordinate`, `qrcode_coordinate`, `avatar_size`, `qrcode_size`, `schedule_cron`, `schedule_class`, `schedule_method`, `sort_no`) VALUES ('47', NULL, '2020-03-12 09:09:52', NULL, '2020-04-24 13:33:13', '当关注者的助力活动未完成时，定时提醒', '0', '4', 'schedule', '只差一点点，您的助力活动就可以完成啦。赶紧去邀请好友助力吧。<a href = \"https://open.weixin.qq.com/connect/oauth2/authorize?appid=&redirect_uri=http://gzh.supplus.cn&response_type=code&scope=snsapi_userinfo&state=#wechat_redirect\">查看任务详情</a>', NULL, '', '定时消息1——给关注人推送消息	', 'schedule_invite', NULL, NULL, NULL, NULL, '0 0 21 * * ? ', 'helpActivityTask', 'sendInviteMessage', 8);
 INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_id`, `rep_type`, `rep_content`, `rep_media_id`, `rep_url`, `title`, `scene`, `avatar_coordinate`, `qrcode_coordinate`, `avatar_size`, `qrcode_size`, `schedule_cron`, `schedule_class`, `schedule_method`, `sort_no`) VALUES ('48', NULL, '2020-03-12 09:09:52', NULL, '2020-03-24 10:57:12', '此条信息发放给被推荐者', '0', '4', 'text', '助力人数已满，无法助力。', NULL, '', '关注消息1——给关注者推送任务完成消息', 'has_complete', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3);
 INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_id`, `rep_type`, `rep_content`, `rep_media_id`, `rep_url`, `title`, `scene`, `avatar_coordinate`, `qrcode_coordinate`, `avatar_size`, `qrcode_size`, `schedule_cron`, `schedule_class`, `schedule_method`, `sort_no`) VALUES ('49', NULL, '2020-03-12 09:09:52', NULL, '2020-04-17 14:57:56', '奖励资料标题', '0', '4', 'text', '2020考研必过宝典', NULL, '', '奖励资料标题', 'jp_title', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 9);
+
+
+/*
+ Navicat Premium Data Transfer
+
+ Source Server         : test_db
+ Source Server Type    : MySQL
+ Source Server Version : 50635
+ Source Host           : 111.230.70.125:3389
+ Source Schema         : db_feo_ruo
+
+ Target Server Type    : MySQL
+ Target Server Version : 50635
+ File Encoding         : 65001
+
+ Date: 28/05/2020 16:38:45
+*/
+
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for wx_mp_user_activity_behavior
+-- ----------------------------
+DROP TABLE IF EXISTS `wx_mp_user_activity_behavior`;
+CREATE TABLE `wx_mp_user_activity_behavior` (
+  `id` char(32) NOT NULL,
+  `open_id` varchar(64) DEFAULT NULL,
+  `page_url` varchar(255) DEFAULT NULL,
+  `scene` varchar(500) DEFAULT NULL COMMENT '场景：进入活动页:entry_index；分享助力海报:share_poster；开始问卷:wenjuan_start；提交问卷:wenjuan_commit；助力跟踪页:help_status；关注公众号:subcribe_vipcn；关注助教:subcribe_teacher',
+  `activity_name` varchar(255) DEFAULT NULL COMMENT '活动名称',
+  `app_id` varchar(64) DEFAULT NULL,
+  `del_flag` char(2) CHARACTER SET utf8 DEFAULT '0' COMMENT '逻辑删除标记（0：未删除；1：删除）',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `sort_no` int(2) DEFAULT NULL COMMENT '排序号',
+  `create_id` varchar(32) CHARACTER SET utf8 DEFAULT NULL COMMENT '创建者',
+  `update_id` varchar(32) CHARACTER SET utf8 DEFAULT NULL COMMENT '更新者',
+  `remark` varchar(100) CHARACTER SET utf8 DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+

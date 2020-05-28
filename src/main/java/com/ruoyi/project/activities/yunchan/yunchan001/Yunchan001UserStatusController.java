@@ -18,10 +18,12 @@ import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
 import com.ruoyi.project.weixin.entity.WxUser;
 import com.ruoyi.project.weixin.service.IWxMpActivityTemplateMessageService;
 import com.ruoyi.project.weixin.service.WxUserService;
+import com.ruoyi.project.weixin.utils.JSONUtils;
 import io.swagger.annotations.*;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.result.WxMpOAuth2AccessToken;
+import me.chanjar.weixin.mp.bean.result.WxMpUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -79,9 +81,13 @@ public class Yunchan001UserStatusController extends BaseController {
         logger.debug("【yunchan001-oauth2】get accesstoke by code : {}->{}",appId,code);
         //获取静默授权的access_token
         WxMpOAuth2AccessToken wxMpOAuth2AccessToken = wxMpService.switchoverTo(appId).oauth2getAccessToken(code);
+        logger.info("【oauth2】wxMpOAuth2AccessToken:{}", JSONUtils.toJson(wxMpOAuth2AccessToken));
+        WxMpUser wxMpUser = wxMpService.switchoverTo(appId).oauth2getUserInfo(wxMpOAuth2AccessToken, null);
+        logger.info("【oauth2】wxMpUser:{}", JSONUtils.toJson(wxMpUser));
         String openId = wxMpOAuth2AccessToken.getOpenId();
+
         //创建用户
-        WxUser simpleWxUser = wxUserService.createSimpleWxUser(appId, openId, parentOpenid);
+        WxUser simpleWxUser = wxUserService.createWxUser(wxMpUser);
 
         //第一次登录时初始化用户状态
         wxMpYunchan001UserStatusService.initUserStatus(simpleWxUser);
