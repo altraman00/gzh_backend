@@ -17,7 +17,7 @@ import lombok.Data;
 public class ActivityBehaviorEventVO {
 
     @ApiModelProperty("场景：进入活动页:entry_index；分享助力海报:share_poster；开始问卷:wenjuan_start；" +
-            "提交问卷:wenjuan_commit；查看好友助力状态:check_help_status；关注公众号:subcribe_vipcn；" +
+            "提交问卷:wenjuan_commit；助力跟踪页:help_status；关注公众号:subcribe_vipcn；" +
             "关注助教:subcribe_teacher")
     private String scene;
 
