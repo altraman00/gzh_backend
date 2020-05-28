@@ -10,6 +10,7 @@ import com.ruoyi.project.activities.yunchan.yunchan001.service.IWxMpYunchan001He
 import com.ruoyi.project.activities.yunchan.yunchan001.service.IWxMpYunchan001HelpUserStatusService;
 import com.ruoyi.project.activities.yunchan.yunchan001.service.IWxMpYunchan001UserStatusService;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
+import com.ruoyi.project.weixin.constant.HelpActivityConstant;
 import com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant;
 import com.ruoyi.project.weixin.entity.WxMp;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
@@ -29,6 +30,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+
+import static com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant.SCENE_ACTIVITY_POSTER;
+import static com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant.SCENE_ACTIVITY_RULE;
 
 /**
  * @Project : gzh_backend
@@ -177,23 +181,17 @@ public class Yunchan001ActivityHelpHandleService {
     /**
      * 推送活动规则消息
      *
-     * @param messages
+     * @param message
      * @param wxUser
-     * @param templateId
-     * @param appId
      */
-    public void executeActivityRule(Map<String,WxMpActivityTemplateMessage> messages, WxUser wxUser, String templateId, String appId) {
-        log.info("【yunchan001Subscrib】开始执行助理活动流程：{}", YunChan001Constant.SCENE_ACTIVITY_RULE);
-        WxMpActivityTemplateMessage message = messages.get(YunChan001Constant.SCENE_ACTIVITY_RULE);
+    public void executeActivityRule(WxMpActivityTemplateMessage message, WxUser wxUser) {
+        log.info("【yunchan001Subscrib】开始执行助理活动流程：{}", SCENE_ACTIVITY_RULE);
         boolean hasAvailableMessage = message != null && StringUtils.isNotBlank(message.getRepContent());
         if (hasAvailableMessage) {
             String content = message.getRepContent();
             content = content.replace(YunChan001Constant.PLACEHOLDER_SUBSCRIBE_NICKNAME, wxUser.getNickName());
             wxSendMsgServer.sendTextMessage(content, wxUser);
         }
-        // 生成助力任务信息
-        String wxUserId = wxUser.getId();
-        WxMpYunchan001HelpUserStatus wxMpYunchan001HelpUserStatus = getWxMpYunchan001HelpUserStatus(appId, templateId, wxUserId);
     }
 
 
@@ -275,6 +273,7 @@ public class Yunchan001ActivityHelpHandleService {
                     .update();
 
         }
+
         yunchan001HelpUserStatusService.updateById(wxMpYunchan001HelpUserStatus);
         // 存储助力记录
         WxMpYunchan001HelpUserRecord wxMpYunchan001HelpUserRecord = new WxMpYunchan001HelpUserRecord();
@@ -290,6 +289,13 @@ public class Yunchan001ActivityHelpHandleService {
             content = content.replace(YunChan001Constant.PLACEHOLDER_INVITER_NICKNAME, inviter.getNickName());
             wxSendMsgServer.sendTextMessage(content, wxUser);
         }
+
+        //帮助别人助力以后，给自己推活动规则消息:孕妈奶爸火爆推出免费一站式孕产知识免费公开课，推荐3人即可解锁该课程
+        // 推送活动规则消息
+        executeActivityRule(msgMap.get(SCENE_ACTIVITY_RULE),wxUser);
+
+        // 推送活动海报
+        wxSendMsgServer.sendPosterMessage(msgMap.get(SCENE_ACTIVITY_POSTER),wxUser);
     }
 
 }

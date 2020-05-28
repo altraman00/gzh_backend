@@ -11,8 +11,10 @@ import com.ruoyi.project.common.BaseResponse;
 import com.ruoyi.project.common.ResultCode;
 import com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
+import com.ruoyi.project.weixin.entity.WxUser;
 import com.ruoyi.project.weixin.server.WxSendMsgServer;
 import com.ruoyi.project.weixin.service.IWxMpActivityTemplateMessageService;
+import com.ruoyi.project.weixin.service.WxUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -52,6 +54,8 @@ public class Yunchan001HelpController {
     @Autowired
     private WxSendMsgServer wxSendMsgServer;
 
+    private WxUserService wxUserService;
+
     @Autowired
     private Yunchan001ActivityServiceImpl yunchan001ActivityService;
 
@@ -66,6 +70,8 @@ public class Yunchan001HelpController {
     public BaseResponse<Map<String,Object>> getTaskPoster(
               @CurrentUser SysUserInfo sysUserInfo
             , @RequestParam(value = "appId") String appId){
+
+        WxUser wxUser = wxUserService.getByOpenIdAndAppId(sysUserInfo.getOpenId());
         String openId = sysUserInfo.getOpenId();
         //查询助力海报的消息模版
         WxMpActivityTemplateMessage message = wxMpActivityTemplateMessageService.findMpTemplateMessage(appId
@@ -98,6 +104,7 @@ public class Yunchan001HelpController {
             result.put("posterBase64",posterBase64);
             String name = poster.getName();
             result.put("suffix", name.substring(name.lastIndexOf(".")+1));
+
             return new BaseResponse<>(ResultCode.SUCCESS, result);
         } else {
             return new BaseResponse<>(ResultCode.TEMPLATE_NOT_EXIST);

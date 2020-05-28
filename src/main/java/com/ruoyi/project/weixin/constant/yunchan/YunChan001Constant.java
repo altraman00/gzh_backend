@@ -30,7 +30,7 @@ public interface YunChan001Constant {
      */
     String SCENE_HELP_SUCCESS = "help_success";
     String SCENE_HAS_HELP = "has_help";
-    String SCENE_ACTIVITY_RULE = "activity_rule";
+    String SCENE_ACTIVITY_RULE = "help_activity_rule";
     String SCENE_BE_HELPED = "be_helped";
     String SCENE_TASK_COMPLETE = "task_complete";
     String SCENE_ACTIVITY_POSTER = "activity_poster";
