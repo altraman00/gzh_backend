@@ -108,9 +108,4 @@ public class WxMpActivityTemplateMessage extends BaseEntity {
     private Boolean activityEnable;
 
 
-
-    private WxMpActivityTemplate wxMpActivityTemplate;
-
-
-
 }
