@@ -37,6 +37,7 @@ public interface YunChan001Constant {
     String SCENE_SCHEDULE_INVITER = "schedule_invite";
     String SCENE_HAS_COMPLETE = "has_complete";
     String SCENE_HELP_WELCOME = "help_welcome";
+    String SCENE_SUBSCRIB_POSTER = "be_helped";
 
     /**孕产助理老师的微信二维码的scene**/
     String SCENE_AIDE_TEACHER_QRCODE = "aide_teacher_qrcode";

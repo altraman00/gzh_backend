@@ -6,13 +6,11 @@ import com.ruoyi.project.activities.yunchan.yunchan001.entity.WxMpYunchan001Help
 import com.ruoyi.project.activities.yunchan.yunchan001.entity.WxMpYunchan001HelpUserStatus;
 import com.ruoyi.project.activities.yunchan.yunchan001.entity.WxMpYunchan001UserStatus;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
-import com.ruoyi.project.weixin.constant.HelpActivityConstant;
 import com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplateMessage;
 import com.ruoyi.project.weixin.entity.WxUser;
 import com.ruoyi.project.weixin.server.WxSendMsgServer;
-import com.ruoyi.project.weixin.service.IWxMpActivityTemplateMessageService;
 import com.ruoyi.project.weixin.service.IWxMpActivityTemplateService;
 import com.ruoyi.project.weixin.service.WxUserService;
 import com.ruoyi.project.weixin.utils.ObjectLockUtil;

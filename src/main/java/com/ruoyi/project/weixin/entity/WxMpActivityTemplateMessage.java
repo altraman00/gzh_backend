@@ -1,5 +1,6 @@
 package com.ruoyi.project.weixin.entity;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.ruoyi.project.common.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,6 +17,7 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
+@TableName
 public class WxMpActivityTemplateMessage extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
@@ -104,6 +106,10 @@ public class WxMpActivityTemplateMessage extends BaseEntity {
      * 活动是否启用
      */
     private Boolean activityEnable;
+
+
+
+    private WxMpActivityTemplate wxMpActivityTemplate;
 
 
 
