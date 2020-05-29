@@ -80,7 +80,7 @@ public class Yunchan001ActivityServiceImpl implements ActivityService {
         wxSendMsgServer.sendTextMessage(welcomeTemplate.getRepContent(),wxUser);
 
         //发送欢迎海报
-        wxSendMsgServer.sendPosterMessage(messages.get(YunChan001Constant.SCENE_HELP_WELCOME),wxUser);
+        wxSendMsgServer.sendPosterMessage(messages.get(YunChan001Constant.SCENE_SUBSCRIB_POSTER),wxUser);
 
         //执行助力活动相关逻辑
         yunchan001ActivityHelpHandleServer.activityHelp(inMessage,openId,appId,templateId,messages);
