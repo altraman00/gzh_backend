@@ -96,12 +96,6 @@ MODIFY COLUMN `first_stage_status` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8
 MODIFY COLUMN `second_stage_status` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0' COMMENT '第二阶段的解锁状态，0:未解锁，1:已解锁' AFTER `first_stage_unlock_time`;
 
 
-ALTER TABLE `wx_mp_yunchan001_user_status`
-MODIFY COLUMN `first_stage_status` tinyint(4) NOT NULL DEFAULT 1 COMMENT '第一阶段的解锁状态，0:未解锁，1:已解锁' AFTER `open_id`,
-MODIFY COLUMN `second_stage_status` tinyint(4) NOT NULL DEFAULT 1 COMMENT '第二阶段的解锁状态，0:未解锁，1:已解锁' AFTER `first_stage_unlock_time`
-
-
-
 INSERT INTO `wx_activity_template`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_name`, `support_scene`, `template_class`, `need_num`, `reward_url`, `alias`) VALUES ('4', NULL, '2020-05-13 19:50:09', NULL, '2020-05-26 09:50:29', NULL, '0', '孕产训练营拉新活动', '2', 'yunchan001ActivityServiceImpl', NULL, NULL, 'yunchan001')
 INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_id`, `rep_type`, `rep_content`, `rep_media_id`, `rep_url`, `title`, `scene`, `avatar_coordinate`, `qrcode_coordinate`, `avatar_size`, `qrcode_size`, `schedule_cron`, `schedule_class`, `schedule_method`, `sort_no`) VALUES ('41', NULL, '2020-03-12 09:09:52', NULL, '2020-03-24 10:46:29', '${上级好友微信昵称}——为分享者微信昵称； 此条信息发放给被推荐者', '0', '4', 'text', '【任务完成】\r\n\r\n您已帮好友${上级好友微信昵称}，助力成功。', NULL, '', '关注消息1——给关注者推送任务完成消息', 'help_success', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
 INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_id`, `rep_type`, `rep_content`, `rep_media_id`, `rep_url`, `title`, `scene`, `avatar_coordinate`, `qrcode_coordinate`, `avatar_size`, `qrcode_size`, `schedule_cron`, `schedule_class`, `schedule_method`, `sort_no`) VALUES ('40', NULL, '2020-03-12 09:09:52', NULL, '2020-04-17 16:19:29', '奖品领取页面地址', '0', '4', 'text', 'http://qr61.cn/oKHkte/q08pvhH', NULL, '', '奖品领取页面地址', 'jp_url', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 10);
