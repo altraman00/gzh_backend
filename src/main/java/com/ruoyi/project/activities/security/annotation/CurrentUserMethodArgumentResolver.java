@@ -1,8 +1,14 @@
 package com.ruoyi.project.activities.security.annotation;
 
+import com.ruoyi.framework.web.exception.GlobalException;
 import com.ruoyi.project.activities.security.entity.SysUserInfo;
 import com.ruoyi.project.activities.security.service.ApiH5TokenService;
+import com.ruoyi.project.common.ResultCode;
+import com.ruoyi.project.weixin.entity.WxUser;
+import com.ruoyi.project.weixin.service.WxUserService;
 import com.ruoyi.project.weixin.utils.JSONUtils;
+import lombok.extern.slf4j.Slf4j;
+import me.chanjar.weixin.mp.bean.result.WxMpUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -24,10 +30,14 @@ import javax.servlet.http.HttpServletRequest;
  * @ModificationHistory Who   When     What
  * ------------    --------------    ---------------------------------
  */
+@Slf4j
 public class CurrentUserMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Autowired
     private ApiH5TokenService tokenService;
+
+    @Autowired
+    private WxUserService userService;
 
     @Override
     public boolean supportsParameter(MethodParameter methodParameter) {
@@ -52,8 +62,17 @@ public class CurrentUserMethodArgumentResolver implements HandlerMethodArgumentR
             loginUser = tokenService.unSignToken(token, SysUserInfo.class);
         }
 
+
+
         if(loginUser == null){
             throw new MissingServletRequestPartException("token");
+        }else{
+            String openid = loginUser.getOpenId();
+            WxUser user = userService.findWxUserByOpenid(openid);
+            if(user == null){
+                log.debug("user openid is not exist : {}",loginUser.getOpenId());
+                throw new GlobalException(ResultCode.FORBIDDEN);
+            }
         }
 
         return loginUser;
