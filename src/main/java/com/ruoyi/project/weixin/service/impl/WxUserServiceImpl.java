@@ -123,11 +123,12 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
 	}
 
 	@Override
-	public WxUser createWxUser(WxMpUser wxMpUser) {
+	public WxUser createWxUser(WxMpUser wxMpUser, String appId) {
 		WxUser wxUser = this.getByOpenId(wxMpUser.getOpenId());
 		if(wxUser == null){
 			wxUser = new WxUser();
 			SubscribeHandler.setWxUserValue(wxUser,wxMpUser);
+			wxUser.setAppId(appId);
 			this.save(wxUser);
 		}
 		return wxUser;

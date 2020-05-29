@@ -87,7 +87,7 @@ public class Yunchan001UserStatusController extends BaseController {
         String openId = wxMpOAuth2AccessToken.getOpenId();
 
         //创建用户
-        WxUser simpleWxUser = wxUserService.createWxUser(wxMpUser);
+        WxUser simpleWxUser = wxUserService.createWxUser(wxMpUser,appId);
 
         //第一次登录时初始化用户状态
         wxMpYunchan001UserStatusService.initUserStatus(simpleWxUser);

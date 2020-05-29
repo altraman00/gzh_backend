@@ -46,7 +46,7 @@ public interface WxUserService extends IService<WxUser> {
 	WxUser createSimpleWxUser(String appId,String openId,String parentOpenid);
 
 
-	WxUser createWxUser(WxMpUser wxMpUser);
+	WxUser createWxUser(WxMpUser wxMpUser, String appId);
 
 
 	WxUser findWxUserByOpenid(String openId);

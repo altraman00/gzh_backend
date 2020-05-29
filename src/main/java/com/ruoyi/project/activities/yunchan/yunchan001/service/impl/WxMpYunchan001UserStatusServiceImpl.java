@@ -12,7 +12,6 @@ import com.ruoyi.project.weixin.service.IWxMpActivityTemplateMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Wrapper;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
