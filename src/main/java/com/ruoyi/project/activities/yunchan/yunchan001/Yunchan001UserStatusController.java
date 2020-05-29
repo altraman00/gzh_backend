@@ -88,6 +88,8 @@ public class Yunchan001UserStatusController extends BaseController {
 
         //创建用户
         WxUser simpleWxUser = wxUserService.createWxUser(wxMpUser,appId);
+        logger.debug("【oauth2】wxuser is : {}",simpleWxUser);
+
 
         //第一次登录时初始化用户状态
         wxMpYunchan001UserStatusService.initUserStatus(simpleWxUser);

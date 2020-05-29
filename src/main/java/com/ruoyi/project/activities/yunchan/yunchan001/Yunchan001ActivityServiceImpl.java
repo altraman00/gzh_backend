@@ -1,5 +1,6 @@
 package com.ruoyi.project.activities.yunchan.yunchan001;
 
+import com.ruoyi.project.activities.yunchan.yunchan001.service.IWxMpYunchan001UserStatusService;
 import com.ruoyi.project.activities.yunchan.yunchan001.service.Yunchan001ActivityHelpHandleService;
 import com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant;
 import com.ruoyi.project.weixin.entity.WxMp;
@@ -55,6 +56,9 @@ public class Yunchan001ActivityServiceImpl implements ActivityService {
     private final Yunchan001ActivityHelpHandleService yunchan001ActivityHelpHandleServer;
 
 
+    private IWxMpYunchan001UserStatusService userStatusService;
+
+
     @Override
     public String getActivityServiceImplClassName() {
         String classFullName = this.getClass().getName();
@@ -70,7 +74,7 @@ public class Yunchan001ActivityServiceImpl implements ActivityService {
 
         WxUser wxUser = wxUserService.findWxUserByOpenid(openId);
 
-
+        userStatusService.initUserStatus(wxUser);
         //获取助力活动的所有配置项
         Map<String,WxMpActivityTemplateMessage> messages = wxMpActivityTemplateMessageService.findEnabledActivityTemplateMessages(appId,templateId);
 
