@@ -94,4 +94,5 @@ public class WxMpActivityTemplateController extends BaseController {
         return AjaxResult.success(update);
     }
 
+
 }

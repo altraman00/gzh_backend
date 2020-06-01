@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
-import com.ruoyi.project.activities.diabetes.DiabetesTestingReportActivityServiceImpl;
+import com.ruoyi.project.activities.diabetes.testing.DiabetesTestingReportActivityServiceImpl;
 import com.ruoyi.project.weixin.constant.ConfigConstant;
 import com.ruoyi.project.weixin.dto.WxMsgDTO;
 import com.ruoyi.project.weixin.dto.WxPosterMsgDTO;
@@ -15,6 +15,7 @@ import com.ruoyi.project.weixin.server.WxSendMsgServer;
 import com.ruoyi.project.weixin.service.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -173,6 +174,10 @@ public class WxMpOpenController extends BaseController {
 
 
     @ApiOperation("根据appId生成公众号二维码")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="openId",value="openId",required=true,paramType="String"),
+            @ApiImplicitParam(name="wxMpQrParams",value="公众号场景值，采用如下公式 alias:{活动别名}@{openid} 如：alias:diabetesActivity@xxxxx",required=true,paramType="String")
+    })
     @GetMapping("/create/qr_code")
     public AjaxResult create_mp_qrcode(@RequestParam(value = "appId") String appId,
                                    @RequestParam(value = "wxMpQrParams", required = false) String wxMpQrParams
@@ -183,7 +188,6 @@ public class WxMpOpenController extends BaseController {
         }catch (Exception ex){
             return AjaxResult.error("failed:"+ex.getMessage());
         }
-
     }
 
 
@@ -199,7 +203,7 @@ public class WxMpOpenController extends BaseController {
         if(wxUser == null || StringUtils.isEmpty(appId) || StringUtils.isEmpty(openId)){
             return AjaxResult.error("wxUser缺少openId或者appId");
         }
-        WxUser byOpenIdAndAppId = wxUserService.getByOpenIdAndAppId(openId, appId);
+        WxUser byOpenIdAndAppId = wxUserService.getByOpenId(openId);
         if(byOpenIdAndAppId == null){
             byOpenIdAndAppId = new WxUser();
             byOpenIdAndAppId.setAppId(appId);
@@ -265,6 +269,27 @@ public class WxMpOpenController extends BaseController {
             log.error("调用微信授权异常",e);
         }
         return AjaxResult.success(map);
+    }
+
+
+
+    @ApiOperation("根据场景值获取指定appid的对应活动的配置项")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "sceneKeys", value = "配置场景值,可从控制台查看获取，支持逗号分隔多个一次获取", dataType = "String",required = true),
+            @ApiImplicitParam(name = "templateAlias", value = "每个活动模板会固定一个别名,可找后端开发老师获取", required = true, paramType = "String"),
+            @ApiImplicitParam(name = "appid", value = "当前应用的appid", required = false, paramType = "String")
+    })
+    @GetMapping("/activity/template/msg/custom")
+    public AjaxResult getMpActivityMessageByCustom(String sceneKeys,String templateAlias,String appid){
+        log.debug("get activity template message by custom : {},{},{}",appid,templateAlias,sceneKeys);
+        WxActivityTemplate template = wxActivityTemplateService.findActivityTemplateByAlias(templateAlias);
+        if(template != null){
+            log.debug("found template : {} with alias : {}",template.getTemplateName(),templateAlias);
+            String[] keys = sceneKeys.split(",");
+            Map<String,WxMpActivityTemplateMessage> result = wxMpActivityTemplateMessageService.findEnabledActivityTemplateMessages(appid,template.getId(),keys);
+            return AjaxResult.success("OK",result);
+        }
+        return AjaxResult.success();
     }
 
 }

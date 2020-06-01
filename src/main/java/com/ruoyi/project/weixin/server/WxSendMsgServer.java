@@ -220,7 +220,7 @@ public class WxSendMsgServer {
         builder.watermark(new Coordinate(Integer.parseInt(qrcodeCoordinate[0]),Integer.parseInt(qrcodeCoordinate[1])), qrCodeBuffer,1.0f);
         builder.toFile(poster);
         if (poster.length() > HelpActivityConstant.POSTER_SIZE ) {
-            Thumbnails.of(poster).scale(1.0).outputQuality((float)HelpActivityConstant.POSTER_SIZE / poster.length()).outputFormat("jpg").toFile(poster);
+            Thumbnails.of(poster).scale(1.0).outputQuality((float) HelpActivityConstant.POSTER_SIZE / poster.length()).outputFormat("jpg").toFile(poster);
         }
     }
 
@@ -234,7 +234,8 @@ public class WxSendMsgServer {
     public String generatorPosterMpQrcode(String appId,String wxMpQrParams){
         String qrCodePictureUrl = null;
         try {
-            WxMpQrCodeTicket wxMpQrCodeTicket = wxMpService.switchoverTo(appId).getQrcodeService().qrCodeCreateLastTicket(wxMpQrParams);
+            //2592000秒=30天
+            WxMpQrCodeTicket wxMpQrCodeTicket = wxMpService.switchoverTo(appId).getQrcodeService().qrCodeCreateTmpTicket(wxMpQrParams,2592000);
             String ticket = wxMpQrCodeTicket.getTicket();
             File qrCode = wxMpService.switchoverTo(appId).getQrcodeService().qrCodePicture(wxMpQrCodeTicket);
             String path = qrCode.getPath();

@@ -69,6 +69,7 @@ public class WxMpActivityTemplateServiceImpl extends ServiceImpl<WxMpActivityTem
     public WxMpActivityTemplate getFirstAvalibleTemplate(String appId) {
         WxMpActivityTemplate x = this.getOne(Wrappers.<WxMpActivityTemplate>lambdaQuery()
                 .eq(WxMpActivityTemplate::getAppId,appId)
+                .eq(WxMpActivityTemplate::isActivityEnable,true)
                 .orderByAsc(WxMpActivityTemplate::getSortNo).last("limit 0,1"),false);
         return x;
     }
@@ -83,14 +84,6 @@ public class WxMpActivityTemplateServiceImpl extends ServiceImpl<WxMpActivityTem
 
         return null;
     }
-//
-//    @Override
-//    public WxMpActivityTemplate findActivityTemplateByAppIdAndClassName(String appId, String activityClassName) {
-//        WxMpActivityTemplate wxMpActivityTemplate = wxMpActivityTemplateMapper.selectOne(Wrappers.<WxMpActivityTemplate>lambdaQuery()
-//                .eq(WxMpActivityTemplate::getAppId, appId)
-//                .eq(WxMpActivityTemplate::getTemplateClass, activityClassName));
-//        return wxMpActivityTemplate;
-//    }
 
     @Override
     public WxMpActivityTemplate findActivityTemplateByAppIdAndTemplateId(String appId, String templateId) {

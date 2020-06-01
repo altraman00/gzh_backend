@@ -3,6 +3,7 @@ package com.ruoyi.project.weixin.service.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
+import com.ruoyi.project.weixin.constant.yunchan.YunChan001Constant;
 import com.ruoyi.project.weixin.handler.SubscribeHandler;
 import com.ruoyi.project.weixin.mapper.WxUserMapper;
 import com.ruoyi.project.weixin.service.WxUserService;
@@ -33,6 +34,8 @@ import java.util.*;
 public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> implements WxUserService {
 
 	private final WxMpService wxService;
+
+	private final WxUserMapper wxUserMapper;
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -90,10 +93,53 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
 	}
 
 	@Override
-	public WxUser getByOpenIdAndAppId(String openId, String appId) {
-		return this.getOne(Wrappers.<WxUser>lambdaQuery().eq(WxUser::getAppId, appId)
+	public WxUser getByOpenId(String openId) {
+		return this.getOne(Wrappers.<WxUser>lambdaQuery()
+				.eq(WxUser::getOpenId,openId),false);
+	}
+
+	/**
+	 * 简单的创建一个只有openId的微信用户
+	 * @param appId
+	 * @param openId
+	 * @param parentOpenid
+	 * @return
+	 */
+	@Override
+	public WxUser createSimpleWxUser(String appId, String openId, String parentOpenid) {
+		WxUser byOpenIdAndAppId = this.getByOpenId(openId);
+		if(byOpenIdAndAppId == null){
+			byOpenIdAndAppId = new WxUser();
+			byOpenIdAndAppId.setAppId(appId);
+			byOpenIdAndAppId.setOpenId(openId);
+			byOpenIdAndAppId.setAppType(ConfigConstant.SUBSCRIBE_TYPE_WEBLICENS);
+			byOpenIdAndAppId.setSubscribe(ConfigConstant.SUBSCRIBE_TYPE_NO);
+			byOpenIdAndAppId.setSubscribeScene("ADD_SCENE_OTHERS");
+			byOpenIdAndAppId.setUserSource(YunChan001Constant.ACTIVITY_ALIAS_NAME);
+			byOpenIdAndAppId.setParentOpenid(parentOpenid);
+			this.save(byOpenIdAndAppId);
+		}
+		return byOpenIdAndAppId;
+	}
+
+	@Override
+	public WxUser createWxUser(WxMpUser wxMpUser, String appId) {
+		WxUser wxUser = this.getByOpenId(wxMpUser.getOpenId());
+		if(wxUser == null){
+			wxUser = new WxUser();
+			SubscribeHandler.setWxUserValue(wxUser,wxMpUser);
+			wxUser.setAppId(appId);
+			this.save(wxUser);
+		}
+		return wxUser;
+	}
+
+	@Override
+	public WxUser findWxUserByOpenid(String openId) {
+		return wxUserMapper.selectOne(Wrappers.<WxUser>lambdaQuery()
 				.eq(WxUser::getOpenId,openId));
 	}
+
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)

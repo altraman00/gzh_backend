@@ -3,6 +3,7 @@ package com.ruoyi.project.weixin.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.project.weixin.entity.WxUser;
 import me.chanjar.weixin.common.error.WxErrorException;
+import me.chanjar.weixin.mp.bean.result.WxMpUser;
 
 /**
  * 微信用户
@@ -33,5 +34,20 @@ public interface WxUserService extends IService<WxUser> {
 	 */
 	void tagging(String taggingType, Long tagId, String[] openIds, String appId) throws WxErrorException;
 
-	WxUser getByOpenIdAndAppId(String openId, String appId);
+	WxUser getByOpenId(String openId);
+
+	/**
+	 * 简单的创建一个只有openId的微信用户
+	 * @param appId
+	 * @param openId
+	 * @param parentOpenid
+	 * @return
+	 */
+	WxUser createSimpleWxUser(String appId,String openId,String parentOpenid);
+
+
+	WxUser createWxUser(WxMpUser wxMpUser, String appId);
+
+
+	WxUser findWxUserByOpenid(String openId);
 }

@@ -1,10 +1,10 @@
-package com.ruoyi.project.activities.diabetes;
+package com.ruoyi.project.activities.diabetes.testing;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.http.HttpClient;
-import com.ruoyi.project.weixin.constant.DiabetesConstant;
+import com.ruoyi.project.weixin.constant.diabetes.DiabetesConstant;
 import com.ruoyi.project.weixin.entity.WxMp;
 import com.ruoyi.project.weixin.entity.WxMpActivityTemplate;
 import com.ruoyi.project.weixin.entity.WxUser;
@@ -41,12 +41,6 @@ public class DiabetesTestingReportActivityServiceImpl implements ActivityService
 
     @Value("${sunlands.diabetes-testing.url}")
     private String sunlandsDiabetesUrl;
-
-    /**
-     * 用于微信带参二维码的活动标识
-     */
-    String SCENE_EVENT_KEY_DIABETES_TEST_H5 = "diabetes_test_h5";
-
 
     @Override
     public String getActivityServiceImplClassName() {

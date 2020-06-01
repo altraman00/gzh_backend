@@ -1,4 +1,4 @@
-package com.ruoyi.project.weixin.controller;
+package com.ruoyi.project.activities.help;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -12,7 +12,6 @@ import com.ruoyi.project.weixin.dto.HelpInfoDTO;
 import com.ruoyi.project.weixin.entity.*;
 import com.ruoyi.project.weixin.server.WxSendMsgServer;
 import com.ruoyi.project.weixin.service.*;
-import com.ruoyi.project.activities.help.HelpActivityServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -82,7 +81,7 @@ public class WxActivityTaskController extends BaseController {
     public AjaxResult getTaskInfo(@RequestParam(value = "openId") String openId,@RequestParam(value = "appId") String appId){
         WxMp wxMp = iWxMpService.getByAppId(appId);
         if(wxMp != null){
-            WxUser wxuser = wxUserService.getByOpenIdAndAppId(openId, appId);
+            WxUser wxuser = wxUserService.getByOpenId(openId);
             WxMpActivityTemplate wxMpActivityTemplate = IWxMpActivityTemplateService.findActivityTemplateByAppIdAndAlias(appId,HelpActivityConstant.SCENE_EVENT_KEY);
             String templateId = wxMpActivityTemplate.getTemplateId();
             String wxUserId = wxuser.getId();

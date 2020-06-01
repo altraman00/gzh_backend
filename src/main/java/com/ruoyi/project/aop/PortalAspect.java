@@ -62,6 +62,7 @@ public class PortalAspect {
             if(StringUtils.isNotEmpty(alias)){
                 log.info("【{}】({})执行指定别名模板：{}",appId,openId,alias);
                 WxMpActivityTemplate template = wxMpActivityTemplateService.findActivityTemplateByAppIdAndAlias(appId,alias);
+
                 doTemplate(appId, openId, inMessage, wxMp, template);
             }else{
                 //执行默认的活动模板
@@ -123,7 +124,7 @@ public class PortalAspect {
      * @param template
      */
     private void doTemplate(String appId, String openId, WxMpXmlMessage inMessage, WxMp wxMp, WxMpActivityTemplate template) {
-        if (null != template) {
+        if (null != template && template.isActivityEnable()) {
             log.info("【{}】({})开始执行模板:{}",appId,openId,template.getTemplateName());
             String templateClass = template.getTemplateClass();
 

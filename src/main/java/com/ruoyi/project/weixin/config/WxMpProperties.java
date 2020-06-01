@@ -1,6 +1,6 @@
 package com.ruoyi.project.weixin.config;
 
-import com.ruoyi.project.weixin.utils.JsonUtils;
+import com.ruoyi.project.weixin.utils.JSONUtils;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -41,6 +41,6 @@ public class WxMpProperties {
 
     @Override
     public String toString() {
-        return JsonUtils.toJson(this);
+        return JSONUtils.toJson(this);
     }
 }
