@@ -47,7 +47,7 @@ ADD PRIMARY KEY (`id`) USING BTREE;
 UPDATE wx_mp SET secret = '9239cce70b0e7028a2d29ae3e8247e74', token = 'smallprogram', aes_key = 'FR14R0SGgKUygrZ9pIrsarQoWuup8ujgzzrTt1Cqqwf' WHERE app_id = 'wx66fcb1f854cdab95';
 -- 设置角色可见公众号为空数组(超级管理员默认全部可见,不用特殊设置, 其他角色需要去后台手动配置公众号可见权限)
 UPDATE sys_role SET mp_scope = '[]';
--- 以上所有需要补充APPID字段的数据 默认都设置为现在生产正在使用的公众号(尚德在线学堂 APPID:wx66fcb1f854cdab95)
+-- 以上所有需要补充APPID字段的数据 默认都设置为现在生产正在使用的公众号(柠檬在线学堂 APPID:wx66fcb1f854cdab95)
 UPDATE wx_user SET app_id = 'wx66fcb1f854cdab95';
 UPDATE wx_menu SET app_id = 'wx66fcb1f854cdab95';
 UPDATE wx_msg SET app_id = 'wx66fcb1f854cdab95';

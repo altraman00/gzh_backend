@@ -120,7 +120,7 @@ CREATE TABLE `sys_dept` (
 /*Data for the table `sys_dept` */
 
 insert  into `sys_dept`(`dept_id`,`parent_id`,`ancestors`,`dept_name`,`order_num`,`leader`,`phone`,`email`,`status`,`del_flag`,`create_by`,`create_time`,`update_by`,`update_time`) values
-(100,0,'0','尚德机构',0,'尚德机构',null,null,'0','0','admin','2018-03-16 11:33:00',null,'2018-03-16 11:33:00');
+(100,0,'0','柠檬机构',0,'柠檬机构',null,null,'0','0','admin','2018-03-16 11:33:00',null,'2018-03-16 11:33:00');
 
 /*Table structure for table `sys_dict_data` */
 
@@ -1148,7 +1148,7 @@ INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `up
 INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_id`, `rep_type`, `rep_content`, `rep_media_id`, `rep_url`, `title`, `scene`, `avatar_coordinate`, `qrcode_coordinate`, `avatar_size`, `qrcode_size`, `schedule_cron`, `schedule_class`, `schedule_method`, `sort_no`) VALUES ('7', NULL, '2020-03-12 09:09:52', NULL, '2020-03-24 10:46:42', '当关注者的助力活动未完成时，定时提醒', '0', '1', 'schedule', '只差一点点，您的助力活动就可以完成啦。赶紧去邀请好友助力吧。<a href = \"https://open.weixin.qq.com/connect/oauth2/authorize?appid=&redirect_uri=http://act-fec.ministudy.com&response_type=code&scope=snsapi_userinfo#wechat_redirect\">查看任务详情</a>', NULL, '', '定时消息1——给关注人推送消息	', 'schedule_invite', NULL, NULL, NULL, NULL, '0 0 19 * * ? ', 'helpActivityTask', 'sendInviteMessage', 8);
 INSERT INTO `wx_activity_template_message`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `template_id`, `rep_type`, `rep_content`, `rep_media_id`, `rep_url`, `title`, `scene`, `avatar_coordinate`, `qrcode_coordinate`, `avatar_size`, `qrcode_size`, `schedule_cron`, `schedule_class`, `schedule_method`, `sort_no`) VALUES ('8', NULL, '2020-03-12 09:09:52', NULL, '2020-03-24 10:57:12', '此条信息发放给被推荐者', '0', '1', 'text', '助力人数已满，无法助力。', NULL, '', '关注消息1——给关注者推送任务完成消息', 'has_complete', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3);
 
-INSERT INTO `wx_mp`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `app_id`, `app_name`, `app_identify`, `template_id`, `activity_enable`) VALUES ('1', NULL, '2020-03-11 16:00:23', NULL, '2020-03-12 13:31:21', NULL, '0', 'wx66fcb1f854cdab95', '尚德在线学堂', 'online_study', NULL, NULL);
+INSERT INTO `wx_mp`(`id`, `create_id`, `create_time`, `update_id`, `update_time`, `remark`, `del_flag`, `app_id`, `app_name`, `app_identify`, `template_id`, `activity_enable`) VALUES ('1', NULL, '2020-03-11 16:00:23', NULL, '2020-03-12 13:31:21', NULL, '0', 'wx66fcb1f854cdab95', '柠檬在线学堂', 'online_study', NULL, NULL);
 
 INSERT INTO `sys_menu`(`menu_id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `is_frame`, `menu_type`, `visible`, `perms`, `icon`, `create_by`, `create_time`, `update_by`, `update_time`, `remark`) VALUES (2033, '运营活动配置', 4, 1000, 'wxsetting', 'wxmp/wxsetting/index', 1, 'C', '0', 'wxmp:wxsetting:index', 'dashboard', 'admin', '2020-03-12 13:56:44', 'admin', '2020-03-16 17:17:28', '');
 

@@ -69,7 +69,7 @@ spring:
 #              secret: 180ac29acee722e1f82862100eb85bcf
 #              token: smallprogram
 #              aesKey:
-# 尚德范儿
+# 柠檬范儿
 wx:
     mp:
         configs:

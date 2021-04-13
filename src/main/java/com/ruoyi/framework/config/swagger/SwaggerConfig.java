@@ -102,7 +102,7 @@ public class SwaggerConfig
         // 用ApiInfoBuilder进行定制
         return new ApiInfoBuilder()
                 // 设置标题
-                .title("尚德公众号管理系统_接口文档")
+                .title("柠檬公众号管理系统_接口文档")
                 // 描述
                 .description("用于公众号管理及相关活动管理的接口文档")
                 // 作者信息
