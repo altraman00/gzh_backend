@@ -51,7 +51,7 @@ MODIFY COLUMN `activity_enable` tinyint(4) NOT NULL DEFAULT 0 COMMENT '活动是
 
 
 
-rename table wx_mp_template_message to wx_mp_activity_template_message
+rename table wx_mp_template_message to wx_mp_activity_template_message;
 
 
 -- by tanchang 20200525
@@ -62,4 +62,4 @@ ALTER TABLE `wx_activity_template`
 ADD UNIQUE INDEX(`alias`);
 
 ALTER TABLE `wx_mp_activity_template`
-ADD COLUMN `master_template` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否是默认的主要活动模板' AFTER `update_id`
+ADD COLUMN `master_template` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否是默认的主要活动模板' AFTER `update_id`;
